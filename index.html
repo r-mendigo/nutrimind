@@ -1,0 +1,3174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta
+      name="description"
+      content="NutriMind – A personal AI-powered system for learning, productivity, and life management."
+    />
+    <title>NutriMind – Personal AI Brain System</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      :root {
+        --bg: #06101f;
+        --bg-deep: #030814;
+        --panel: rgba(10, 18, 37, 0.96);
+        --panel-soft: rgba(29, 40, 72, 0.96);
+        --card: rgba(22, 32, 60, 0.96);
+        --card-2: rgba(34, 45, 78, 0.96);
+        --text: #edf4ff;
+        --muted: #9eb1d3;
+        --line: rgba(255, 255, 255, 0.08);
+        --accent: #7fb6ff;
+        --accent-2: #6ee7d6;
+        --danger: #fb7185;
+        --success: #34d399;
+        --shadow: 0 16px 40px rgba(0, 0, 0, 0.32);
+        --gradient-btn: linear-gradient(135deg, #8ab6ff 0%, #6ee7d6 100%);
+        --gradient-card: linear-gradient(
+          180deg,
+          rgba(23, 35, 65, 0.98),
+          rgba(10, 18, 36, 0.98)
+        );
+        --gradient-bot: linear-gradient(
+          180deg,
+          rgba(42, 54, 90, 0.98),
+          rgba(28, 39, 69, 0.98)
+        );
+        --gradient-user: linear-gradient(135deg, #4f8df7 0%, #62dacc 100%);
+      }
+
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        font-family:
+          Inter,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(
+            circle at top left,
+            rgba(96, 165, 250, 0.08),
+            transparent 26%
+          ),
+          radial-gradient(
+            circle at 20% 85%,
+            rgba(110, 231, 214, 0.08),
+            transparent 24%
+          ),
+          linear-gradient(180deg, #030814 0%, #06101f 55%, #030814 100%);
+      }
+
+      button,
+      input,
+      textarea,
+      select {
+        font: inherit;
+      }
+
+      .app {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .sidebar {
+        background: linear-gradient(
+          180deg,
+          rgba(5, 11, 24, 0.98),
+          rgba(3, 8, 18, 0.98)
+        );
+        border-right: 1px solid var(--line);
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px 14px 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        min-width: 0;
+      }
+
+      .brand-icon {
+        width: 54px;
+        height: 54px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, #7fb6ff 0%, #6ee7d6 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.45rem;
+        box-shadow: 0 10px 28px rgba(110, 231, 214, 0.18);
+        flex: 0 0 auto;
+      }
+
+      .brand-text {
+        font-size: 1.7rem;
+        font-weight: 900;
+        letter-spacing: -0.04em;
+        line-height: 1.05;
+        min-width: 0;
+      }
+
+      .brand-text-synapse {
+        background:
+          radial-gradient(
+            circle at 18% 30%,
+            rgba(127, 182, 255, 0.95) 0 5px,
+            transparent 6px
+          ),
+          radial-gradient(
+            circle at 42% 74%,
+            rgba(110, 231, 214, 0.92) 0 4px,
+            transparent 5px
+          ),
+          radial-gradient(
+            circle at 76% 34%,
+            rgba(167, 139, 250, 0.9) 0 4px,
+            transparent 5px
+          ),
+          linear-gradient(135deg, #f8fbff 0%, #b7d3ff 45%, #7de4da 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        text-shadow: 0 0 16px rgba(127, 182, 255, 0.12);
+        position: relative;
+      }
+
+      .nav {
+        padding: 14px 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .nav-btn {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 22px 18px;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 24px;
+        color: var(--text);
+        cursor: pointer;
+        text-align: left;
+        font-size: 1.05rem;
+        transition: 0.2s ease;
+      }
+
+      .nav-btn:hover,
+      .nav-btn.active {
+        background: linear-gradient(
+          135deg,
+          rgba(127, 182, 255, 0.08),
+          rgba(110, 231, 214, 0.05)
+        );
+        border-color: rgba(127, 182, 255, 0.18);
+      }
+
+      .nav-emoji {
+        width: 24px;
+        text-align: center;
+        font-size: 1.4rem;
+      }
+      .badge {
+        margin-left: auto;
+        min-width: 30px;
+        height: 30px;
+        padding: 0 9px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #fb7185, #f43f5e);
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        font-weight: 800;
+      }
+
+      .sidebar-footer {
+        margin-top: auto;
+        padding: 18px 16px 22px;
+        color: #7f95bb;
+        font-size: 0.92rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .main {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        overflow: hidden;
+      }
+
+      .topbar {
+        height: 88px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 18px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        background: linear-gradient(
+          180deg,
+          rgba(7, 13, 28, 0.94),
+          rgba(7, 14, 28, 0.78)
+        );
+      }
+
+      .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+        overflow: hidden;
+      }
+
+      .page-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        background: linear-gradient(
+          180deg,
+          rgba(32, 49, 86, 0.95),
+          rgba(15, 27, 52, 0.95)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        flex: 0 0 auto;
+      }
+
+      .page-title {
+        font-size: 2.15rem;
+        font-weight: 900;
+        letter-spacing: -0.05em;
+        line-height: 1;
+        color: #f4f8ff;
+        white-space: nowrap;
+        flex: 0 1 auto;
+      }
+
+      .engine-status-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: var(--muted);
+        font-weight: 800;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        flex: 0 0 auto;
+        max-width: 320px;
+      }
+
+      .engine-status-light {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: #64748b;
+        box-shadow: 0 0 0 4px rgba(100, 116, 139, 0.1);
+        flex: 0 0 auto;
+      }
+
+      .engine-status-bar.status-llm .engine-status-light {
+        background: #34d399;
+        box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.12);
+      }
+
+      .engine-status-bar.status-fallback .engine-status-light {
+        background: #60a5fa;
+        box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.12);
+      }
+
+      .engine-status-bar.status-offline .engine-status-light {
+        background: #fb7185;
+        box-shadow: 0 0 0 4px rgba(251, 113, 133, 0.12);
+      }
+
+      .engine-status-reload {
+        border: none;
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        border-radius: 12px;
+        padding: 6px 10px;
+        cursor: pointer;
+        font-weight: 800;
+        font-size: 0.82rem;
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        flex: 0 0 auto;
+      }
+
+      .btn {
+        border: none;
+        border-radius: 20px;
+        padding: 14px 18px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: 0.2s ease;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .btn-primary {
+        background: var(--gradient-btn);
+        color: #07111d;
+        box-shadow: 0 10px 24px rgba(127, 182, 255, 0.16);
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .content {
+        flex: 1;
+        overflow: hidden;
+        padding: 18px;
+        min-height: 0;
+      }
+
+      .view {
+        display: none;
+        height: 100%;
+        min-height: 0;
+      }
+      .view.active {
+        display: block;
+      }
+
+      #view-manager,
+      #view-calendar {
+        height: 100%;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 4px;
+        padding-bottom: 18px;
+        box-sizing: border-box;
+      }
+
+      .chat-layout {
+        display: grid;
+        grid-template-columns: 240px minmax(0, 1fr);
+        gap: 14px;
+        height: 100%;
+        min-height: 0;
+      }
+
+      .panel {
+        background: var(--gradient-card);
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+        min-width: 0;
+        min-height: 0;
+      }
+
+      .left-panel {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .left-panel-scroll {
+        padding: 18px 14px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        min-height: 0;
+      }
+
+      .section-label {
+        color: #b6c8e7;
+        font-size: 0.92rem;
+        font-weight: 900;
+        letter-spacing: 0.16em;
+      }
+
+      .topic-btn {
+        width: 100%;
+        padding: 15px 16px;
+        background: transparent;
+        border: 1px solid transparent;
+        color: var(--text);
+        border-radius: 22px;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.98rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: 0.2s ease;
+      }
+
+      .topic-btn:hover,
+      .topic-btn.active {
+        background: rgba(92, 110, 180, 0.2);
+        border-color: rgba(127, 182, 255, 0.18);
+      }
+
+      .topic-spacer {
+        margin-top: auto;
+        padding-top: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .chat-panel {
+        display: flex;
+        flex-direction: column;
+        padding: 14px;
+        overflow: hidden;
+        gap: 14px;
+      }
+
+      .hero-card {
+        background: rgba(49, 60, 98, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        padding: 18px 20px;
+        flex: 0 0 auto;
+      }
+
+      .hero-card h3 {
+        margin: 0 0 12px;
+        color: #84abff;
+        font-size: 1.15rem;
+      }
+
+      .hero-card ul {
+        margin: 12px 0 0 22px;
+        line-height: 1.6;
+      }
+
+      .hero-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: var(--muted);
+        font-weight: 800;
+      }
+
+      .status-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #64748b;
+      }
+
+      .status-pill.ready .status-dot {
+        background: var(--success);
+      }
+      .status-pill.loading .status-dot {
+        background: var(--accent);
+      }
+      .status-pill.busy .status-dot {
+        background: #f59e0b;
+      }
+
+      .select,
+      .input,
+      .textarea {
+        width: 100%;
+        border-radius: 20px;
+        background: rgba(8, 18, 39, 0.98);
+        border: 1px solid rgba(127, 182, 255, 0.24);
+        color: var(--text);
+        padding: 16px 18px;
+        outline: none;
+      }
+
+      .select:focus,
+      .input:focus,
+      .textarea:focus {
+        border-color: rgba(127, 182, 255, 0.52);
+        box-shadow: 0 0 0 3px rgba(127, 182, 255, 0.1);
+      }
+
+      .inline-select {
+        min-width: 170px;
+        max-width: 170px;
+      }
+
+      .message-stream {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        padding-right: 6px;
+        padding-bottom: 6px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .message-card {
+        max-width: 96%;
+        padding: 18px 20px;
+        border-radius: 24px;
+        line-height: 1.6;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .message-card.user {
+        align-self: flex-end;
+        background: var(--gradient-user);
+        color: #08131d;
+        border-bottom-right-radius: 10px;
+        font-weight: 700;
+        margin-left: auto;
+      }
+
+      .message-card.bot {
+        align-self: flex-start;
+        background: var(--gradient-bot);
+        color: var(--text);
+        border-bottom-left-radius: 10px;
+        width: min(100%, 980px);
+      }
+
+      .message-content p {
+        margin: 0 0 10px;
+      }
+      .message-content p:last-child {
+        margin-bottom: 0;
+      }
+      .message-content ul,
+      .message-content ol {
+        margin: 8px 0 10px 22px;
+        padding: 0;
+      }
+      .message-content li + li {
+        margin-top: 4px;
+      }
+      .message-content strong {
+        color: #d7e6ff;
+      }
+      .message-content code {
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.95em;
+      }
+
+      .code-block {
+        margin: 12px 0;
+        background: rgba(2, 6, 23, 0.72);
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+
+      .code-label {
+        padding: 8px 12px;
+        font-size: 12px;
+        color: var(--muted);
+        border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .code-block pre {
+        margin: 0;
+        padding: 14px;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-size: 14px;
+        line-height: 1.55;
+        color: #eff6ff;
+      }
+
+      .typing-row {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        min-height: 20px;
+      }
+
+      .typing-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: #93c5fd;
+        opacity: 0.5;
+        animation: pulse 1s infinite ease-in-out;
+      }
+
+      .typing-dot:nth-child(2) {
+        animation-delay: 0.15s;
+      }
+      .typing-dot:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: translateY(0);
+          opacity: 0.35;
+        }
+        50% {
+          transform: translateY(-2px);
+          opacity: 1;
+        }
+      }
+
+      .chat-controls {
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding-top: 4px;
+        background: linear-gradient(
+          180deg,
+          rgba(8, 16, 31, 0.05),
+          rgba(8, 16, 31, 0.95)
+        );
+      }
+
+      .controls-row {
+        display: grid;
+        grid-template-columns: 170px 1fr auto auto;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .send-btn,
+      .quiz-btn {
+        height: 54px;
+        border-radius: 20px;
+        padding: 0 18px;
+      }
+
+      .send-btn {
+        min-width: 74px;
+        font-size: 1.35rem;
+      }
+
+      .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+        margin-bottom: 24px;
+      }
+
+      .mini-card,
+      .manager-card,
+      .calendar-card {
+        background: var(--gradient-card);
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+      }
+
+      .mini-card {
+        padding: 24px;
+      }
+      .mini-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .mini-value {
+        font-size: 2rem;
+        font-weight: 900;
+      }
+      .mini-label {
+        color: var(--muted);
+        font-weight: 700;
+      }
+      .mini-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(127, 182, 255, 0.1);
+        font-size: 1.5rem;
+      }
+
+      .manager-layout {
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 22px;
+        height: auto;
+        min-height: 0;
+      }
+
+      .manager-card,
+      .calendar-card {
+        padding: 22px;
+        min-height: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .card-title {
+        margin: 0 0 18px;
+        font-size: 1.35rem;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+      }
+
+      .stack {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        min-height: 0;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .textarea {
+        min-height: 140px;
+        resize: vertical;
+      }
+
+      .actions-wrap,
+      .event-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .calendar-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .calendar-actions-bottom {
+        margin-top: auto;
+        padding-top: 12px;
+      }
+
+      .calendar-actions .btn,
+      .calendar-actions label.btn {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+        padding: 8px 10px;
+        border-radius: 14px;
+        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        min-height: 38px;
+        font-size: 0.88rem;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .chip {
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: rgba(110, 231, 214, 0.1);
+        border: 1px solid rgba(110, 231, 214, 0.16);
+        color: #bcfff4;
+        font-weight: 800;
+        font-size: 0.92rem;
+      }
+
+      .brain-list,
+      .event-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        overflow-y: auto;
+        min-height: 0;
+        padding-right: 6px;
+        flex: 1 1 auto;
+      }
+
+      .brain-item,
+      .event-item {
+        padding: 18px;
+        border-radius: 20px;
+        background: rgba(18, 26, 46, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+      }
+
+      .brain-item-title,
+      .event-item-title {
+        font-weight: 900;
+        margin-bottom: 6px;
+      }
+      .brain-meta,
+      .event-meta {
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .calendar-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 330px;
+        gap: 18px;
+        height: auto;
+        min-height: 0;
+      }
+
+      .calendar-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+      }
+
+      .calendar-weekdays {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 12px;
+        color: #aac2e8;
+        font-weight: 800;
+        text-align: center;
+      }
+
+      .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(84px, 1fr));
+        gap: 10px;
+      }
+
+      .calendar-day {
+        min-height: 92px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        cursor: pointer;
+        position: relative;
+        transition: 0.2s ease;
+      }
+
+      .calendar-day:hover {
+        background: rgba(127, 182, 255, 0.08);
+        border-color: rgba(127, 182, 255, 0.2);
+      }
+
+      .calendar-day.selected {
+        background: linear-gradient(
+          180deg,
+          rgba(127, 182, 255, 0.16),
+          rgba(127, 182, 255, 0.08)
+        );
+        border-color: rgba(127, 182, 255, 0.45);
+      }
+
+      .calendar-day.muted {
+        opacity: 0.28;
+        pointer-events: none;
+      }
+
+      .calendar-day.has-event::after {
+        content: "";
+        position: absolute;
+        bottom: 10px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--success);
+        box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.14);
+      }
+
+      .small-btn {
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text);
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .empty {
+        padding: 18px;
+        border-radius: 18px;
+        border: 1px dashed rgba(255, 255, 255, 0.12);
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.78);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .modal-card {
+        width: min(560px, 100%);
+        background: var(--gradient-card);
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .toast-wrap {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 1200;
+      }
+
+      .toast {
+        background: rgba(10, 18, 35, 0.98);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        padding: 14px 16px;
+        border-radius: 16px;
+        min-width: 260px;
+        box-shadow: var(--shadow);
+        transition: 0.2s ease;
+      }
+
+      .mobile-menu {
+        display: none;
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 1100;
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+        background: var(--gradient-btn);
+        color: #07111d;
+        border: none;
+        box-shadow: 0 12px 28px rgba(127, 182, 255, 0.26);
+        font-size: 1.3rem;
+        font-weight: 900;
+      }
+
+      @media (max-width: 1500px) {
+        .app {
+          grid-template-columns: 230px 1fr;
+        }
+        .page-title {
+          font-size: 2rem;
+        }
+        .chat-layout {
+          grid-template-columns: 220px 1fr;
+        }
+      }
+
+      @media (max-width: 1180px) {
+        .chat-layout,
+        .manager-layout,
+        .calendar-layout,
+        .cards-grid {
+          grid-template-columns: 1fr;
+        }
+        .content {
+          overflow-y: auto;
+        }
+        .view {
+          height: auto;
+        }
+        .manager-layout {
+          height: auto;
+        }
+        #view-calendar {
+          overflow-y: auto;
+        }
+      }
+
+      @media (max-width: 920px) {
+        .app {
+          display: block;
+        }
+        .sidebar {
+          position: fixed;
+          inset: 0 auto 0 0;
+          width: 300px;
+          z-index: 1101;
+          transform: translateX(-100%);
+          transition: transform 0.22s ease;
+        }
+        .sidebar.open {
+          transform: translateX(0);
+        }
+        .mobile-menu {
+          display: block;
+        }
+        .topbar {
+          padding-right: 90px;
+        }
+        .page-title {
+          font-size: 1.6rem;
+        }
+        .controls-row {
+          grid-template-columns: 1fr;
+        }
+        .message-card {
+          max-width: 100%;
+        }
+        .calendar-grid {
+          grid-template-columns: repeat(7, minmax(48px, 1fr));
+        }
+        .calendar-day {
+          min-height: 62px;
+        }
+        .engine-status-bar {
+          display: none;
+        }
+      }
+      .quick-search {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 6px;
+        padding: 12px;
+        border-radius: 22px;
+        background: linear-gradient(
+          180deg,
+          rgba(18, 29, 55, 0.95),
+          rgba(10, 18, 36, 0.95)
+        );
+        border: 1px solid rgba(127, 182, 255, 0.14);
+      }
+
+      .quick-search-label {
+        font-size: 0.76rem;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        color: #9fb6dc;
+        text-transform: uppercase;
+      }
+
+      .quick-search-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .quick-search-input {
+        min-width: 0;
+        border-radius: 16px;
+        background: rgba(7, 15, 30, 0.98);
+        border: 1px solid rgba(127, 182, 255, 0.18);
+        color: var(--text);
+        padding: 11px 13px;
+        outline: none;
+        font-size: 0.92rem;
+      }
+
+      .quick-search-btn {
+        border: none;
+        border-radius: 16px;
+        padding: 11px 14px;
+        font-weight: 900;
+        cursor: pointer;
+        background: var(--gradient-btn);
+        color: #07111d;
+      }
+
+      .search-modal {
+        display: none;
+        position: fixed;
+        z-index: 1200;
+        top: 120px;
+        left: 16px;
+        width: min(460px, calc(100vw - 32px));
+        background: linear-gradient(
+          180deg,
+          rgba(12, 20, 38, 0.98),
+          rgba(7, 14, 28, 0.98)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+        overflow: hidden;
+      }
+      .search-modal.open {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .search-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px 18px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.03);
+        font-weight: 900;
+        font-size: 0.95rem;
+      }
+
+      .search-modal-body {
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .search-modal-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .search-results-frame {
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        padding: 14px;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        color: var(--muted);
+      }
+
+      .search-helper,
+      .search-muted {
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <button class="mobile-menu" onclick="toggleSidebar()">☰</button>
+
+    <div class="app">
+      <aside class="sidebar" id="sidebar">
+        <div class="brand">
+          <div class="brand-text brand-text-synapse">NutriMind</div>
+        </div>
+
+        <div class="nav">
+          <button class="nav-btn active" onclick="switchView('chat', this)">
+            <span class="nav-emoji">🧠</span><span>Mind Engine</span>
+          </button>
+          <button class="nav-btn" onclick="switchView('manager', this)">
+            <span class="nav-emoji">🗂️</span><span>Data Manager</span>
+          </button>
+          <button class="nav-btn" onclick="switchView('calendar', this)">
+            <span class="nav-emoji">🗓️</span><span>Calendar</span
+            ><span class="badge" id="sideEventBadge">0</span>
+          </button>
+
+          <form class="quick-search" onsubmit="return openSearchModal(event);">
+            <div class="quick-search-label">Quick Search</div>
+            <div class="quick-search-row">
+              <input
+                class="quick-search-input"
+                id="quickSearchInput"
+                type="text"
+                placeholder="Search outside Mind Engine"
+              />
+              <button class="quick-search-btn" type="submit">Go</button>
+            </div>
+          </form>
+
+          <div style="flex: 1 1 auto"></div>
+        </div>
+
+        <div class="sidebar-footer">v1.0 • Deep Focus System</div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div class="topbar-left">
+            <div class="page-icon" id="pageIcon">💭</div>
+            <div class="page-title" id="pageTitle">Mind Engine</div>
+            <div class="engine-status-bar status-offline" id="engineStatusBar">
+              <span class="engine-status-light"></span>
+              <span id="engineStatusText">Checking engine...</span>
+              <button
+                class="engine-status-reload"
+                id="engineStatusReload"
+                onclick="reloadMindEngine()"
+                style="display: none"
+              >
+                Reload
+              </button>
+            </div>
+          </div>
+          <div class="toolbar">
+            <button class="btn btn-primary" onclick="openEventModal()">
+              ＋ New Event
+            </button>
+            <button class="btn btn-secondary" onclick="exportAllData()">
+              Export All
+            </button>
+          </div>
+        </header>
+
+        <section class="content">
+          <div class="view active" id="view-chat">
+            <div class="chat-layout">
+              <div class="panel left-panel">
+                <div class="left-panel-scroll">
+                  <div class="section-label">CURRICULUM</div>
+                  <button
+                    class="topic-btn active"
+                    onclick="setTopic('SQL Mastery', this)"
+                  >
+                    🗄️ SQL Mastery
+                  </button>
+                  <button
+                    class="topic-btn"
+                    onclick="setTopic('Power BI', this)"
+                  >
+                    📈 Power BI
+                  </button>
+                  <button class="topic-btn" onclick="setTopic('Tableau', this)">
+                    🎨 Tableau
+                  </button>
+                  <button
+                    class="topic-btn"
+                    onclick="setTopic('Python Data', this)"
+                  >
+                    🐍 Python Data
+                  </button>
+                  <button
+                    class="topic-btn"
+                    onclick="setTopic('HTML/CSS', this)"
+                  >
+                    🧱 HTML/CSS
+                  </button>
+                  <button
+                    class="topic-btn"
+                    onclick="setTopic('JavaScript', this)"
+                  >
+                    ⚡ JavaScript
+                  </button>
+
+                  <div class="topic-spacer">
+                    <button
+                      class="btn btn-secondary"
+                      style="width: 100%"
+                      onclick="startQuiz()"
+                    >
+                      🎯 Quiz Me
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel chat-panel">
+                <div class="hero-card" id="heroCard">
+                  <h3>Welcome to NutriMind! 🧠</h3>
+                  NutriMind now uses a stable brain design:
+                  <ul>
+                    <li>
+                      Fallback is always available and should answer like a
+                      reliable tutor
+                    </li>
+                    <li>
+                      LLaMA is optional enhancement, not required for usefulness
+                    </li>
+                    <li>
+                      Live layer can handle time, date, weather, and configured
+                      headlines
+                    </li>
+                    <li>
+                      The status bar tells you what engine is actually active
+                    </li>
+                  </ul>
+                  <div style="margin-top: 12px; color: var(--muted)">
+                    Best results: ask one clear question, include the goal, and
+                    choose the topic first.
+                  </div>
+                  <div class="hero-meta">
+                    <div class="status-pill loading" id="modelStatus">
+                      <span class="status-dot"></span>
+                      <span id="modelStatusText">Mind engine loading...</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="message-stream" id="chatBox"></div>
+
+                <div class="chat-controls">
+                  <div class="controls-row">
+                    <select
+                      id="reasoningMode"
+                      class="select inline-select"
+                      onchange="setReasoningMode(this.value)"
+                    >
+                      <option value="Tutor">Tutor Mode</option>
+                      <option value="Analyst" selected>Analyst Mode</option>
+                      <option value="Strategist">Strategist Mode</option>
+                    </select>
+
+                    <input
+                      id="chatInput"
+                      class="input"
+                      placeholder="Ask a clear question. Example: Explain LEFT JOIN with a business example and one practice query."
+                      onkeydown="handleChatKey(event)"
+                    />
+
+                    <button
+                      class="btn btn-secondary quiz-btn"
+                      onclick="startQuiz()"
+                    >
+                      Quiz
+                    </button>
+                    <button
+                      class="btn btn-primary send-btn"
+                      onclick="sendMsg()"
+                    >
+                      ➤
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="view" id="view-manager">
+            <div class="cards-grid">
+              <div class="mini-card">
+                <div class="mini-top">
+                  <div>
+                    <div class="mini-value" id="brainCount">0</div>
+                    <div class="mini-label">Brains Available</div>
+                  </div>
+                  <div class="mini-icon">🧠</div>
+                </div>
+              </div>
+              <div class="mini-card">
+                <div class="mini-top">
+                  <div>
+                    <div class="mini-value" id="notesCount">0</div>
+                    <div class="mini-label">Saved Notes</div>
+                  </div>
+                  <div class="mini-icon">📝</div>
+                </div>
+              </div>
+              <div class="mini-card">
+                <div class="mini-top">
+                  <div>
+                    <div class="mini-value" id="eventCount">0</div>
+                    <div class="mini-label">Calendar Events</div>
+                  </div>
+                  <div class="mini-icon">🗓️</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="manager-layout">
+              <div class="manager-card">
+                <h3 class="card-title">Brain Manager</h3>
+                <div class="stack">
+                  <select id="brainSelect" class="select"></select>
+                  <div class="row">
+                    <input
+                      id="newBrain"
+                      class="input"
+                      placeholder="Add new topic"
+                    />
+                    <button class="btn btn-primary" onclick="addBrain()">
+                      Add Brain
+                    </button>
+                  </div>
+                  <textarea
+                    id="brainData"
+                    class="textarea"
+                    placeholder="Paste notes here and save them into the selected brain..."
+                  ></textarea>
+                  <div class="actions-wrap">
+                    <button class="btn btn-primary" onclick="saveBrainData()">
+                      Save to Brain
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportBrain()">
+                      Export Brains
+                    </button>
+                    <label
+                      class="btn btn-secondary"
+                      style="
+                        display: inline-flex;
+                        align-items: center;
+                        cursor: pointer;
+                      "
+                    >
+                      Import Brains
+                      <input
+                        type="file"
+                        id="importBrainFile"
+                        accept=".json"
+                        style="display: none"
+                        onchange="importBrain(event)"
+                      />
+                    </label>
+                  </div>
+                  <div class="chips" id="brainChips"></div>
+                </div>
+              </div>
+
+              <div class="manager-card">
+                <h3 class="card-title">Stored Topics</h3>
+                <div class="brain-list" id="brainList"></div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="view"
+            id="view-calendar"
+            style="height: 100%; min-height: 0; overflow: auto"
+          >
+            <div class="calendar-layout">
+              <div class="calendar-card">
+                <div class="calendar-head">
+                  <h3
+                    class="card-title"
+                    id="calendarMonthLabel"
+                    style="margin: 0"
+                  >
+                    Month Year
+                  </h3>
+                  <div class="actions-wrap">
+                    <button class="btn btn-secondary" onclick="changeMonth(-1)">
+                      ← Prev
+                    </button>
+                    <button class="btn btn-secondary" onclick="changeMonth(1)">
+                      Next →
+                    </button>
+                  </div>
+                </div>
+                <div class="calendar-weekdays" id="calendarWeekdays"></div>
+                <div class="calendar-grid" id="calendarGrid"></div>
+              </div>
+
+              <div class="calendar-card">
+                <h3 class="card-title" style="margin-bottom: 8px">Events</h3>
+                <div
+                  id="selectedDateLabel"
+                  style="color: var(--muted); margin-bottom: 14px"
+                >
+                  Future events
+                </div>
+                <div class="event-list" id="eventList"></div>
+                <div class="calendar-actions calendar-actions-bottom">
+                  <button class="btn btn-primary" onclick="openEventModal()">
+                    Add Event
+                  </button>
+                  <button class="btn btn-secondary" onclick="exportEvents()">
+                    Export
+                  </button>
+                  <label
+                    class="btn btn-secondary"
+                    style="
+                      display: inline-flex;
+                      align-items: center;
+                      justify-content: center;
+                      cursor: pointer;
+                    "
+                  >
+                    Import
+                    <input
+                      type="file"
+                      accept=".json,.ics"
+                      style="display: none"
+                      onchange="importEvents(event)"
+                    />
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="search-modal" id="searchModal">
+      <div class="search-modal-header">
+        <div class="search-modal-title">Quick Search</div>
+        <button
+          class="engine-status-reload"
+          type="button"
+          onclick="closeSearchModal()"
+        >
+          Close
+        </button>
+      </div>
+
+      <div class="search-modal-body">
+        <div class="search-helper">
+          Google does not reliably allow embedded search results inside custom
+          app panels. This quick launcher keeps your query ready and opens the
+          real Google results in a new tab.
+        </div>
+
+        <div class="search-modal-row">
+          <input
+            class="quick-search-input"
+            id="searchModalInput"
+            type="text"
+            placeholder="Type your search"
+          />
+          <button
+            class="quick-search-btn"
+            type="button"
+            onclick="runSearchModal()"
+          >
+            Search
+          </button>
+        </div>
+
+        <div class="search-results-frame" id="searchModalInfo">
+          Search preview will appear here. Press
+          <strong style="margin-left: 4px; margin-right: 4px">Search</strong>
+          to open Google in a new tab.
+        </div>
+
+        <div class="search-muted">
+          Tip: use this for topics outside Mind Engine’s scope.
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="eventModal">
+      <div class="modal-card">
+        <h3 class="card-title" style="margin-bottom: 0">New Event</h3>
+        <input type="date" id="modalEventDate" class="input" />
+        <input type="time" id="modalEventTime" class="input" />
+        <input
+          type="text"
+          id="modalEventText"
+          class="input"
+          placeholder="Event title"
+        />
+        <textarea
+          id="modalEventNote"
+          class="textarea"
+          placeholder="Optional note"
+        ></textarea>
+        <div class="actions-wrap">
+          <button class="btn btn-primary" onclick="addEventFromModal()">
+            Save Event
+          </button>
+          <button class="btn btn-secondary" onclick="closeEventModal()">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast-wrap" id="toastWrap"></div>
+
+    <script>
+      const HYBRID_CONFIG = {
+        NEWS_API_KEY: "",
+        NEWS_PROVIDER: "newsapi",
+      };
+
+      const TIMEZONE_MAP = {
+        spain: "Europe/Madrid",
+        madrid: "Europe/Madrid",
+        barcelona: "Europe/Madrid",
+        uae: "Asia/Dubai",
+        dubai: "Asia/Dubai",
+        "abu dhabi": "Asia/Dubai",
+        manila: "Asia/Manila",
+        philippines: "Asia/Manila",
+        london: "Europe/London",
+        uk: "Europe/London",
+        "new york": "America/New_York",
+        "los angeles": "America/Los_Angeles",
+        california: "America/Los_Angeles",
+        tokyo: "Asia/Tokyo",
+        singapore: "Asia/Singapore",
+        paris: "Europe/Paris",
+        berlin: "Europe/Berlin",
+        riyadh: "Asia/Riyadh",
+        saudi: "Asia/Riyadh",
+        india: "Asia/Kolkata",
+      };
+
+      const defaultBrains = {
+        "SQL Mastery": [],
+        "Power BI": [],
+        Tableau: [],
+        "Python Data": [],
+        "HTML/CSS": [],
+        JavaScript: [],
+      };
+
+      const builtInBrain = {
+        "SQL Mastery": {
+          intro:
+            "For SQL, think in this order: source data, question, filters, grouping, output.",
+          knowledge: [
+            "SELECT chooses columns to display.",
+            "FROM tells SQL which table to read from.",
+            "WHERE filters rows before grouping.",
+            "GROUP BY summarizes rows into groups.",
+            "HAVING filters grouped results after aggregation.",
+            "ORDER BY sorts the final result.",
+          ],
+        },
+        "Power BI": {
+          intro:
+            "For Power BI, start with the model first, then measures, then visuals.",
+          knowledge: [
+            "Measures respond to filter context. Calculated columns are stored row by row.",
+            "A star schema improves performance and reporting clarity.",
+            "Power Query is best for shaping data before it reaches the model.",
+          ],
+        },
+        Tableau: {
+          intro:
+            "Choose the visual only after you know the exact insight you want to show.",
+          knowledge: [
+            "Line chart for trends. Bar chart for comparisons. Scatter for relationships.",
+            "Reduce clutter so the conclusion is easy to see.",
+          ],
+        },
+        "Python Data": {
+          intro:
+            "A strong Python analytics flow is inspect, clean, transform, analyze, explain.",
+          knowledge: [
+            "Pandas is ideal for tabular analysis, joins, grouping, and cleaning.",
+            "Always check data types, missing values, and duplicates early.",
+          ],
+        },
+        "HTML/CSS": {
+          intro:
+            "For UI work, stabilize the structure first and polish second.",
+          knowledge: [
+            "Flexbox is best for one-dimensional alignment. Grid is best for two-dimensional layout.",
+            "Responsiveness comes from spacing, sizing, and layout rules working together.",
+          ],
+        },
+        JavaScript: {
+          intro:
+            "Think in trigger, condition, and action. That keeps logic easy to follow.",
+          knowledge: [
+            "Events handle user actions. Functions package reusable logic.",
+            "State problems often make apps feel broken or inconsistent.",
+          ],
+        },
+      };
+
+      const quizBank = {
+        "SQL Mastery": [
+          {
+            question:
+              "Which JOIN returns all rows from the left table and matching rows from the right table?",
+            choices: ["a. INNER JOIN", "b. LEFT JOIN", "c. RIGHT JOIN"],
+            correct: "b",
+            answer:
+              "LEFT JOIN returns all rows from the left table and matching rows from the right table.",
+          },
+          {
+            question: "Which clause filters rows before aggregation?",
+            choices: ["a. HAVING", "b. GROUP BY", "c. WHERE"],
+            correct: "c",
+            answer: "WHERE filters rows before aggregation.",
+          },
+          {
+            question:
+              "Which function is best for assigning row rankings within groups?",
+            choices: ["a. COUNT()", "b. ROW_NUMBER()", "c. AVG()"],
+            correct: "b",
+            answer:
+              "ROW_NUMBER() is commonly used for ranking rows within partitions.",
+          },
+        ],
+        "Power BI": [
+          {
+            question:
+              "What should you build first in Power BI before making visuals?",
+            choices: [
+              "a. A clean data model",
+              "b. A dashboard color theme",
+              "c. A screenshot",
+            ],
+            correct: "a",
+            answer: "A clean data model should come first.",
+          },
+          {
+            question: "Which responds to filter context in Power BI?",
+            choices: ["a. Measure", "b. Folder", "c. Report theme"],
+            correct: "a",
+            answer: "Measures respond to filter context.",
+          },
+          {
+            question: "Power Query is mainly used for what?",
+            choices: [
+              "a. Data shaping and transformation",
+              "b. Sending emails",
+              "c. Creating passwords",
+            ],
+            correct: "a",
+            answer: "Power Query is used for data shaping and transformation.",
+          },
+        ],
+        Tableau: [
+          {
+            question: "What should you decide first before building a chart?",
+            choices: [
+              "a. The business question",
+              "b. The dashboard background",
+              "c. The font size",
+            ],
+            correct: "a",
+            answer: "You should decide the business question first.",
+          },
+          {
+            question: "Which chart is usually best for trends over time?",
+            choices: ["a. Line chart", "b. Pie chart", "c. Map"],
+            correct: "a",
+            answer: "A line chart is usually best for trends over time.",
+          },
+        ],
+        "Python Data": [
+          {
+            question:
+              "Which library is commonly used for tabular data analysis?",
+            choices: ["a. Pandas", "b. Flask", "c. TensorFlow"],
+            correct: "a",
+            answer: "Pandas is commonly used for tabular data analysis.",
+          },
+          {
+            question:
+              "Which method combines tables by matching keys in pandas?",
+            choices: ["a. merge()", "b. print()", "c. dropna()"],
+            correct: "a",
+            answer: "merge() combines tables by matching keys.",
+          },
+        ],
+        "HTML/CSS": [
+          {
+            question: "What is the main difference between HTML and CSS?",
+            choices: [
+              "a. HTML provides structure, CSS handles presentation",
+              "b. HTML is for databases",
+              "c. CSS is a database tool",
+            ],
+            correct: "a",
+            answer: "HTML provides structure, while CSS controls presentation.",
+          },
+          {
+            question:
+              "Which layout system is best for two-dimensional layouts?",
+            choices: ["a. Grid", "b. Flexbox", "c. Inline styles only"],
+            correct: "a",
+            answer: "CSS Grid is best for two-dimensional layouts.",
+          },
+        ],
+        JavaScript: [
+          {
+            question: "What does JavaScript mainly add to a web page?",
+            choices: [
+              "a. Interactivity and logic",
+              "b. Font installation",
+              "c. Database storage only",
+            ],
+            correct: "a",
+            answer: "JavaScript mainly adds interactivity and dynamic logic.",
+          },
+          {
+            question: "Which event often handles button clicks?",
+            choices: ["a. onload", "b. click", "c. resize"],
+            correct: "b",
+            answer: "The click event is commonly used for button clicks.",
+          },
+        ],
+      };
+
+      let brains =
+        JSON.parse(localStorage.getItem("nutriMindBrains") || "null") ||
+        JSON.parse(JSON.stringify(defaultBrains));
+      let events = JSON.parse(localStorage.getItem("nutriMindEvents") || "[]");
+      let notifiedIds = JSON.parse(
+        localStorage.getItem("nutriMindNotifiedIds") || "[]",
+      );
+      let reasoningMode =
+        localStorage.getItem("nutriMindReasoningMode") || "Analyst";
+      let currentTopic = "SQL Mastery";
+      let currentQuiz = null;
+      let quizMode = false;
+      let heroDismissed = false;
+      let calendarDate = new Date();
+      let selectedCalendarDate = null;
+      let chatHistory = JSON.parse(
+        localStorage.getItem("nutriMindChatHistoryStable") || "[]",
+      );
+      const MAX_HISTORY_TURNS = 10;
+
+      let llmEngine = null;
+      let llmReady = false;
+      let llmLoading = false;
+      let isGenerating = false;
+      let fallbackReady = true;
+      let shouldStickToBottom = true;
+
+      function persist() {
+        localStorage.setItem("nutriMindBrains", JSON.stringify(brains));
+        localStorage.setItem("nutriMindEvents", JSON.stringify(events));
+        localStorage.setItem(
+          "nutriMindNotifiedIds",
+          JSON.stringify(notifiedIds),
+        );
+        localStorage.setItem("nutriMindReasoningMode", reasoningMode);
+      }
+
+      function persistChat() {
+        localStorage.setItem(
+          "nutriMindChatHistoryStable",
+          JSON.stringify(chatHistory.slice(-60)),
+        );
+      }
+
+      function escapeHtml(text) {
+        return String(text)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#39;");
+      }
+
+      function parseInline(text) {
+        return escapeHtml(text)
+          .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+          .replace(/`([^`]+)`/g, "<code>$1</code>");
+      }
+
+      function formatMessage(content) {
+        if (!content) return "";
+        const parts = String(content).split(/```/);
+        let html = "";
+
+        parts.forEach((part, index) => {
+          if (index % 2 === 1) {
+            const lines = part.split("\n");
+            let language = lines[0].trim();
+            let code = lines.slice(1).join("\n");
+            if (!code.trim()) {
+              code = lines.join("\n");
+              language = "code";
+            }
+            html += `
+            <div class="code-block">
+              <div class="code-label">${escapeHtml(language || "code")}</div>
+              <pre><code>${escapeHtml(code.trim())}</code></pre>
+            </div>
+          `;
+            return;
+          }
+
+          const blocks = part
+            .split(/\n\s*\n/)
+            .map((block) => block.trim())
+            .filter(Boolean);
+          blocks.forEach((block) => {
+            const lines = block
+              .split("\n")
+              .map((line) => line.trim())
+              .filter(Boolean);
+            const isBulletList = lines.every((line) => /^[-*]\s+/.test(line));
+            const isNumberList = lines.every((line) =>
+              /^\d+[.)]\s+/.test(line),
+            );
+
+            if (isBulletList) {
+              html += `<ul>${lines.map((line) => `<li>${parseInline(line.replace(/^[-*]\s+/, ""))}</li>`).join("")}</ul>`;
+            } else if (isNumberList) {
+              html += `<ol>${lines.map((line) => `<li>${parseInline(line.replace(/^\d+[.)]\s+/, ""))}</li>`).join("")}</ol>`;
+            } else {
+              html += `<p>${parseInline(lines.join("<br>"))}</p>`;
+            }
+          });
+        });
+
+        return html;
+      }
+
+      function isNearBottom(el, threshold = 120) {
+        return el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+      }
+
+      function attachChatScrollWatcher() {
+        const box = document.getElementById("chatBox");
+        if (!box) return;
+        box.addEventListener("scroll", () => {
+          shouldStickToBottom = isNearBottom(box);
+        });
+      }
+
+      function addMessage(text, type) {
+        const box = document.getElementById("chatBox");
+        const msg = document.createElement("div");
+        msg.className = "message-card " + type;
+
+        const wrap = document.createElement("div");
+        wrap.className = "message-content";
+        if (type === "user") wrap.textContent = text;
+        else
+          wrap.innerHTML = formatMessage(String(text).replaceAll("<br>", "\n"));
+
+        msg.appendChild(wrap);
+        box.appendChild(msg);
+        if (shouldStickToBottom) box.scrollTop = box.scrollHeight;
+        return msg;
+      }
+
+      function addTypingBubble() {
+        const box = document.getElementById("chatBox");
+        const msg = document.createElement("div");
+        msg.className = "message-card bot";
+        msg.style.minWidth = "140px";
+        msg.innerHTML = `
+        <div class="message-content">
+          <div class="typing-row" aria-label="NutriMind is thinking">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+      `;
+        box.appendChild(msg);
+        if (shouldStickToBottom) box.scrollTop = box.scrollHeight;
+        return msg;
+      }
+
+      function setBubbleContent(bubble, text) {
+        const wrap = bubble.querySelector(".message-content");
+        if (!wrap) return;
+        wrap.innerHTML = formatMessage(String(text).replaceAll("<br>", "\n"));
+        const chatBox = document.getElementById("chatBox");
+        if (shouldStickToBottom) chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+      function toast(message, type = "info") {
+        const wrap = document.getElementById("toastWrap");
+        const el = document.createElement("div");
+        el.className = "toast";
+        if (type === "success") el.style.borderLeft = "4px solid #34d399";
+        if (type === "error") el.style.borderLeft = "4px solid #fb7185";
+        if (type === "info") el.style.borderLeft = "4px solid #60a5fa";
+        el.textContent = message;
+        wrap.appendChild(el);
+        setTimeout(() => {
+          el.style.opacity = "0";
+          el.style.transform = "translateY(8px)";
+          setTimeout(() => el.remove(), 220);
+        }, 2400);
+      }
+
+      function updateModelStatus(state, text) {
+        const pill = document.getElementById("modelStatus");
+        const label = document.getElementById("modelStatusText");
+        if (pill && label) {
+          pill.classList.remove("ready", "loading", "busy");
+          pill.classList.add(state);
+          label.textContent = text;
+        }
+      }
+
+      function updateEngineBanner(mode, text, showReload = false) {
+        const bar = document.getElementById("engineStatusBar");
+        const label = document.getElementById("engineStatusText");
+        const reloadBtn = document.getElementById("engineStatusReload");
+        if (!bar || !label || !reloadBtn) return;
+
+        bar.classList.remove("status-llm", "status-fallback", "status-offline");
+        if (mode === "llm") bar.classList.add("status-llm");
+        else if (mode === "fallback") bar.classList.add("status-fallback");
+        else bar.classList.add("status-offline");
+
+        label.textContent = text;
+        reloadBtn.style.display = showReload ? "inline-flex" : "none";
+      }
+
+      async function reloadMindEngine() {
+        llmReady = false;
+        llmEngine = null;
+        await initLLM(true);
+      }
+
+      function detectLiveIntent(text) {
+        const lower = text.toLowerCase();
+        return {
+          wantsTime:
+            /what(?:'s| is)?\s+the\s+time|current time|time in|time now|what time/i.test(
+              lower,
+            ),
+          wantsDate: /current date|date today|today's date|what date/i.test(
+            lower,
+          ),
+          wantsWeather: /weather|temperature|forecast|rain|humid/i.test(lower),
+          wantsNews:
+            /news|headlines|current events|latest events|latest news|what(?:'s| is) happening/i.test(
+              lower,
+            ),
+        };
+      }
+
+      function detectLocation(text) {
+        const lower = text.toLowerCase();
+        const keys = Object.keys(TIMEZONE_MAP).sort(
+          (a, b) => b.length - a.length,
+        );
+        for (const key of keys) if (lower.includes(key)) return key;
+        return "";
+      }
+
+      async function fetchCurrentTime(text) {
+        const found = detectLocation(text);
+        const timezone = found ? TIMEZONE_MAP[found] : "Etc/UTC";
+        const res = await fetch(
+          `https://worldtimeapi.org/api/timezone/${timezone}`,
+        );
+        if (!res.ok) throw new Error("Time service unavailable");
+        const data = await res.json();
+        const dt = new Date(data.datetime);
+        return [
+          `Current time${found ? ` in ${found}` : ""}: **${dt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" })}**`,
+          `Date: **${dt.toLocaleDateString(undefined, { weekday: "long", year: "numeric", month: "long", day: "numeric" })}**`,
+          `Timezone: \`${timezone}\``,
+        ].join("\n");
+      }
+
+      async function geocodeLocation(name) {
+        const query = encodeURIComponent(name || "Dubai");
+        const res = await fetch(
+          `https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=1&language=en&format=json`,
+        );
+        if (!res.ok) throw new Error("Location search failed");
+        const data = await res.json();
+        if (!data.results || !data.results.length)
+          throw new Error("Location not found");
+        return data.results[0];
+      }
+
+      async function fetchWeather(text) {
+        const loc = detectLocation(text) || "Dubai";
+        const geo = await geocodeLocation(loc);
+        const res = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${geo.latitude}&longitude=${geo.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m&timezone=auto`,
+        );
+        if (!res.ok) throw new Error("Weather service unavailable");
+        const data = await res.json();
+        const cur = data.current;
+        return [
+          `Current weather in **${geo.name}**:`,
+          `- Temperature: **${cur.temperature_2m}°C**`,
+          `- Feels like: **${cur.apparent_temperature}°C**`,
+          `- Humidity: **${cur.relative_humidity_2m}%**`,
+          `- Wind: **${cur.wind_speed_10m} km/h**`,
+        ].join("\n");
+      }
+
+      async function fetchNews(text) {
+        if (!HYBRID_CONFIG.NEWS_API_KEY) {
+          return "Live news is not configured yet.\n\nTo enable current headlines in NutriMind, add your API key inside `HYBRID_CONFIG.NEWS_API_KEY` near the top of the script.";
+        }
+
+        let country = "us";
+        const lower = text.toLowerCase();
+        if (
+          lower.includes("uae") ||
+          lower.includes("dubai") ||
+          lower.includes("abu dhabi")
+        )
+          country = "ae";
+        if (lower.includes("spain")) country = "es";
+        if (lower.includes("uk") || lower.includes("london")) country = "gb";
+
+        let url = "";
+        if (HYBRID_CONFIG.NEWS_PROVIDER === "gnews") {
+          url = `https://gnews.io/api/v4/top-headlines?lang=en&country=${country}&max=5&apikey=${HYBRID_CONFIG.NEWS_API_KEY}`;
+        } else {
+          url = `https://newsapi.org/v2/top-headlines?country=${country}&pageSize=5&apiKey=${HYBRID_CONFIG.NEWS_API_KEY}`;
+        }
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("News service unavailable");
+        const data = await res.json();
+        const articles = data.articles || [];
+        if (!articles.length)
+          return "I couldn't find fresh headlines right now.";
+
+        return [
+          `Latest headlines (${country.toUpperCase()}):`,
+          ...articles.slice(0, 5).map((a, i) => `${i + 1}. ${a.title}`),
+        ].join("\n");
+      }
+
+      async function handleLiveQuery(text) {
+        const intent = detectLiveIntent(text);
+        if (intent.wantsTime || intent.wantsDate)
+          return await fetchCurrentTime(text);
+        if (intent.wantsWeather) return await fetchWeather(text);
+        if (intent.wantsNews) return await fetchNews(text);
+        return null;
+      }
+
+      async function initLLM(forceReload = false) {
+        if ((llmReady && !forceReload) || llmLoading) return;
+        llmLoading = true;
+        updateModelStatus("loading", "Mind engine loading...");
+        updateEngineBanner(
+          "fallback",
+          "Loading LLaMA / fallback check...",
+          false,
+        );
+
+        try {
+          const mod = await import("https://esm.run/@mlc-ai/web-llm");
+          llmEngine = await mod.CreateMLCEngine(
+            "Llama-3.2-3B-Instruct-q4f16_1-MLC",
+            {
+              initProgressCallback: (report) => {
+                const pct = Math.round(report.progress || 0);
+                updateModelStatus("loading", `Mind engine loading... ${pct}%`);
+                updateEngineBanner(
+                  "fallback",
+                  `Loading LLaMA... ${pct}%`,
+                  false,
+                );
+              },
+            },
+          );
+          llmReady = true;
+          updateModelStatus("ready", "Mind engine ready");
+          updateEngineBanner("llm", "LLaMA connected", false);
+          toast("Mind engine is ready.", "success");
+        } catch (error) {
+          console.error("LLM load error:", error);
+          updateModelStatus("busy", "LLM unavailable — smart fallback active");
+          updateEngineBanner("fallback", "Fallback active", true);
+        } finally {
+          llmLoading = false;
+        }
+      }
+
+      function buildSystemPrompt() {
+        const roleMap = {
+          Tutor:
+            "You are NutriMind, a focused AI tutor. Teach for a learner. Use simple language, step-by-step explanation, and one short example.",
+          Analyst:
+            "You are NutriMind, a focused analytical assistant. Break the question into parts, explain why, compare when relevant, and highlight the key takeaway.",
+          Strategist:
+            "You are NutriMind, a strategic thinking assistant. Focus on decisions, tradeoffs, priority order, and the best next move.",
+        };
+
+        return `${roleMap[reasoningMode]}
+
+Rules:
+- Do not use romantic language.
+- Do not use pet names.
+- Keep a calm, professional tone.
+- Stay concise but still useful.
+- Tutor mode: teach in steps.
+- Analyst mode: explain the logic and the conclusion.
+- Strategist mode: give recommendation and next action.
+- Use short sections if the answer benefits from structure.
+- Put syntax or code in fenced code blocks.
+- Base the reply on the current topic and any relevant saved notes.`;
+      }
+
+      function getRelevantSavedNotes(topic, userText) {
+        const notes = brains[topic] || [];
+        if (!notes.length) return [];
+        const words = userText
+          .toLowerCase()
+          .split(/\s+/)
+          .map((w) => w.replace(/[^a-z0-9_]/g, ""))
+          .filter((w) => w.length > 2);
+
+        return notes
+          .map((note) => {
+            const text = String(note.text || "");
+            const lower = text.toLowerCase();
+            let score = 0;
+            for (const word of words) if (lower.includes(word)) score += 1;
+            if (lower.includes(userText.toLowerCase())) score += 4;
+            return { text, score };
+          })
+          .filter((x) => x.score > 0)
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 3);
+      }
+
+      function buildKnowledgeContext(topic, userText) {
+        const built = builtInBrain[topic];
+        const noteMatches = getRelevantSavedNotes(topic, userText);
+
+        const parts = [
+          `Current topic: ${topic}`,
+          built ? `Topic guidance: ${built.intro}` : "",
+          built && built.knowledge
+            ? `Built-in knowledge:\n- ${built.knowledge.join("\n- ")}`
+            : "",
+          noteMatches.length
+            ? `Relevant saved notes:\n${noteMatches.map((n, i) => `Note ${i + 1}:\n${truncateText(n.text, 900)}`).join("\n\n")}`
+            : "",
+        ].filter(Boolean);
+
+        return parts.join("\n\n");
+      }
+
+      function buildMessagesForLLM(userText) {
+        const recent = chatHistory.slice(-MAX_HISTORY_TURNS * 2);
+        return [
+          {
+            role: "system",
+            content:
+              buildSystemPrompt() +
+              "\n\n" +
+              buildKnowledgeContext(currentTopic, userText),
+          },
+          ...recent,
+          { role: "user", content: userText },
+        ];
+      }
+
+      function truncateText(text, maxLength) {
+        const clean = String(text || "").trim();
+        if (clean.length <= maxLength) return clean;
+        return clean.slice(0, maxLength).trim() + "...";
+      }
+
+      function makeStructuredFallback(topic, question) {
+        const lower = question.toLowerCase();
+
+        if (topic === "SQL Mastery") {
+          if (lower.includes("what is select") || lower.startsWith("select")) {
+            return [
+              "**Meaning:** `SELECT` tells SQL which column or columns you want to display.",
+              "",
+              "**Short example:**",
+              "```sql",
+              "SELECT customer_id, purchase_amount",
+              "FROM orders;",
+              "```",
+              "",
+              "**What it does:**",
+              "- gets `customer_id`",
+              "- gets `purchase_amount`",
+              "- reads them from `orders`",
+            ].join("\n");
+          }
+
+          if (lower.includes("select from where group by having order by")) {
+            return [
+              "**Example scenario:** show customers whose total purchase is above 1000, sorted from highest to lowest.",
+              "",
+              "```sql",
+              "SELECT customer_id, SUM(purchase_amount) AS total_purchase",
+              "FROM orders",
+              "WHERE purchase_amount > 0",
+              "GROUP BY customer_id",
+              "HAVING SUM(purchase_amount) > 1000",
+              "ORDER BY total_purchase DESC;",
+              "```",
+              "",
+              "**Flow:**",
+              "- `SELECT` chooses what to display",
+              "- `FROM` picks the table",
+              "- `WHERE` filters rows first",
+              "- `GROUP BY` groups by customer",
+              "- `HAVING` filters grouped totals",
+              "- `ORDER BY` sorts the result",
+            ].join("\n");
+          }
+
+          if (lower.includes("highest") && lower.includes("customer")) {
+            return [
+              "**Solution:** return the customer with the highest total purchase.",
+              "",
+              "```sql",
+              "WITH customer_purchases AS (",
+              "  SELECT customer_id, SUM(purchase_amount) AS total_purchase",
+              "  FROM orders",
+              "  GROUP BY customer_id",
+              "), ranked AS (",
+              "  SELECT customer_id, total_purchase,",
+              "         ROW_NUMBER() OVER (ORDER BY total_purchase DESC) AS rn",
+              "  FROM customer_purchases",
+              ")",
+              "SELECT customer_id, total_purchase",
+              "FROM ranked",
+              "WHERE rn = 1;",
+              "```",
+              "",
+              "**Why it works:**",
+              "- summarize purchases per customer",
+              "- rank the totals",
+              "- keep only rank 1",
+            ].join("\n");
+          }
+
+          if (
+            lower.includes("create table") ||
+            lower.includes("table in sql") ||
+            lower == "table"
+          ) {
+            return [
+              "**Basic pattern:**",
+              "",
+              "```sql",
+              "CREATE TABLE customers (",
+              "  customer_id INT PRIMARY KEY,",
+              "  name VARCHAR(100),",
+              "  city VARCHAR(50),",
+              "  signup_date DATE",
+              ");",
+              "```",
+              "",
+              "**Why it works:**",
+              "- `CREATE TABLE` starts the table definition",
+              "- `PRIMARY KEY` identifies each row uniquely",
+              "- `VARCHAR` stores text",
+              "- `DATE` stores dates",
+            ].join("\n");
+          }
+
+          if (lower.includes("join")) {
+            return [
+              "**JOIN meaning:** combine related data from two tables.",
+              "",
+              "- **INNER JOIN** returns only matched rows",
+              "- **LEFT JOIN** returns all rows from the left table plus matches from the right",
+              "",
+              "```sql",
+              "SELECT c.name, o.total_amount",
+              "FROM customers c",
+              "LEFT JOIN orders o",
+              "  ON c.customer_id = o.customer_id;",
+              "```",
+            ].join("\n");
+          }
+
+          return [
+            "**Try this clearer prompt:**",
+            "- Explain SELECT briefly",
+            "- Show SELECT FROM WHERE GROUP BY HAVING ORDER BY in one example",
+            "- Give me a LEFT JOIN business example",
+            "- Show a ROW_NUMBER query",
+          ].join("\n");
+        }
+
+        if (topic === "Power BI") {
+          if (
+            lower.includes("measure") &&
+            lower.includes("calculated column")
+          ) {
+            return [
+              "**Difference:**",
+              "- **Measure** is calculated at query time and reacts to filters",
+              "- **Calculated column** is stored row by row in the model",
+              "",
+              "**Rule of thumb:** use a measure for KPIs and totals in visuals.",
+            ].join("\n");
+          }
+          return [
+            "**Best next focus in Power BI:**",
+            "1. data model",
+            "2. relationships",
+            "3. DAX measures",
+            "4. visuals",
+            "",
+            "Ask one focused Power BI question and I’ll break it down.",
+          ].join("\n");
+        }
+
+        if (topic === "Tableau") {
+          return [
+            "**Best Tableau starting point:**",
+            "- define the business question",
+            "- choose the right chart",
+            "- reduce clutter",
+            "",
+            "Ask me about filters, parameters, or dashboard layout.",
+          ].join("\n");
+        }
+
+        if (topic === "Python Data") {
+          return [
+            "**Python Data path:**",
+            "- inspect the data",
+            "- clean it",
+            "- transform it",
+            "- analyze it",
+            "- explain the result",
+            "",
+            "Ask about pandas, merge, groupby, or missing values.",
+          ].join("\n");
+        }
+
+        if (topic === "HTML/CSS") {
+          return [
+            "**HTML/CSS rule:** structure first, polish second.",
+            "",
+            "Ask about Flexbox, Grid, responsiveness, or overflow fixes.",
+          ].join("\n");
+        }
+
+        if (topic === "JavaScript") {
+          return [
+            "**JavaScript rule:** think in trigger → condition → action.",
+            "",
+            "Ask about event listeners, functions, DOM updates, or state.",
+          ].join("\n");
+        }
+
+        return "Ask one clear question and include the goal and what part feels confusing.";
+      }
+
+      function stableFallbackReply(topic, userText) {
+        const notesReply = replyFromSavedBrain(userText.toLowerCase(), topic);
+        if (notesReply) return notesReply;
+        return makeStructuredFallback(topic, userText);
+      }
+
+      function replyFromSavedBrain(lower, topic) {
+        const notes = brains[topic] || [];
+        if (!notes.length) return "";
+        const words = lower.split(/\s+/).filter((word) => word.length > 3);
+
+        const matched = notes.find((item) => {
+          const noteText = String(item.text || "").toLowerCase();
+          return (
+            words.some((word) => noteText.includes(word)) ||
+            noteText.includes(lower)
+          );
+        });
+
+        if (!matched) return "";
+        return `I found a relevant saved note from your ${topic} library:\n\n${truncateText(matched.text, 700)}\n\nAsk me to explain it, simplify it, or turn it into practice exercises.`;
+      }
+
+      async function sendMsg() {
+        const input = document.getElementById("chatInput");
+        const text = input.value.trim();
+        if (!text || isGenerating) return;
+
+        hideHeroCard();
+        addMessage(text, "user");
+        chatHistory.push({ role: "user", content: text });
+        persistChat();
+        input.value = "";
+
+        if (quizMode && currentQuiz) {
+          const reply = handleQuizAnswer(text);
+          addMessage(reply, "bot");
+          chatHistory.push({ role: "assistant", content: reply });
+          persistChat();
+          return;
+        }
+
+        isGenerating = true;
+        updateModelStatus("busy", "Thinking...");
+        const bubble = addTypingBubble();
+        let reply = "";
+
+        try {
+          const liveReply = await handleLiveQuery(text);
+          if (liveReply) {
+            reply = liveReply;
+          } else if (llmReady && llmEngine) {
+            const stream = await llmEngine.chat.completions.create({
+              messages: buildMessagesForLLM(text),
+              temperature: 0.35,
+              top_p: 0.9,
+              max_tokens: 520,
+              stream: true,
+            });
+
+            let lastRender = 0;
+            for await (const chunk of stream) {
+              const delta =
+                chunk.choices && chunk.choices[0] && chunk.choices[0].delta
+                  ? chunk.choices[0].delta.content || ""
+                  : "";
+              if (!delta) continue;
+              reply += delta;
+              const now = performance.now();
+              if (now - lastRender > 180 || /[\n.!?`]$/.test(delta)) {
+                setBubbleContent(bubble, reply);
+                lastRender = now;
+              }
+            }
+            reply = reply.trim() || stableFallbackReply(currentTopic, text);
+          } else {
+            reply = stableFallbackReply(currentTopic, text);
+          }
+        } catch (error) {
+          console.error("Send error:", error);
+          reply = stableFallbackReply(currentTopic, text);
+        } finally {
+          if (!reply || !reply.trim()) {
+            reply = stableFallbackReply(currentTopic, text);
+          }
+          setBubbleContent(bubble, reply);
+          chatHistory.push({ role: "assistant", content: reply });
+          persistChat();
+          updateModelStatus(
+            llmReady ? "ready" : "busy",
+            llmReady ? "Mind engine ready" : "Smart fallback active",
+          );
+          updateEngineBanner(
+            llmReady ? "llm" : "fallback",
+            llmReady ? "LLaMA connected" : "Fallback active",
+            !llmReady,
+          );
+          isGenerating = false;
+        }
+      }
+
+      function handleQuizAnswer(text) {
+        const answer = text.toLowerCase().trim().replace(".", "");
+        const correct = currentQuiz.correct.toLowerCase();
+        quizMode = false;
+
+        if (answer === correct) {
+          return `Correct.\n\n${currentQuiz.answer}\n\n${builtInBrain[currentTopic].intro}`;
+        }
+        return `Not quite. The correct answer is ${correct.toUpperCase()}.\n\n${currentQuiz.answer}\n\n${builtInBrain[currentTopic].intro}`;
+      }
+
+      function startQuiz() {
+        hideHeroCard();
+        const bank = quizBank[currentTopic] || [];
+        if (!bank.length) {
+          addMessage("No quiz is available for this topic yet.", "bot");
+          return;
+        }
+        let nextQuiz = bank[Math.floor(Math.random() * bank.length)];
+        if (window.__lastQuizQuestion && bank.length > 1) {
+          let safety = 0;
+          while (
+            nextQuiz.question === window.__lastQuizQuestion &&
+            safety < 10
+          ) {
+            nextQuiz = bank[Math.floor(Math.random() * bank.length)];
+            safety += 1;
+          }
+        }
+        currentQuiz = nextQuiz;
+        window.__lastQuizQuestion = currentQuiz.question;
+        quizMode = true;
+
+        addMessage(
+          [
+            "🎯 Quiz Time — " + currentTopic,
+            "",
+            currentQuiz.question,
+            "",
+            "- " + currentQuiz.choices.join("\n- "),
+            "",
+            "Reply with: a, b, or c.",
+          ].join("\n"),
+          "bot",
+        );
+      }
+
+      function setReasoningMode(value) {
+        reasoningMode = value;
+        persist();
+        toast("Mode changed to " + value, "info");
+      }
+
+      function setTopic(topic, btn) {
+        currentTopic = topic;
+        document
+          .querySelectorAll(".topic-btn")
+          .forEach((el) => el.classList.remove("active"));
+        if (btn) btn.classList.add("active");
+        hideHeroCard();
+        addMessage(
+          `Topic set to ${topic}.\n\n${builtInBrain[topic].intro}`,
+          "bot",
+        );
+      }
+
+      function hideHeroCard() {
+        if (heroDismissed) return;
+        const hero = document.getElementById("heroCard");
+        if (hero) hero.style.display = "none";
+        heroDismissed = true;
+      }
+
+      function handleChatKey(event) {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          sendMsg();
+        }
+      }
+
+      function switchView(name, el) {
+        document
+          .querySelectorAll(".view")
+          .forEach((v) => v.classList.remove("active"));
+        const target = document.getElementById("view-" + name);
+        if (target) target.classList.add("active");
+        document
+          .querySelectorAll(".nav-btn")
+          .forEach((btn) => btn.classList.remove("active"));
+        if (el) el.classList.add("active");
+
+        const map = {
+          chat: "Mind Engine",
+          manager: "Data Manager",
+          calendar: "Calendar",
+        };
+        const titleEl = document.getElementById("pageTitle");
+        if (titleEl) titleEl.textContent = map[name] || "Mind Engine";
+
+        if (window.innerWidth <= 920)
+          document.getElementById("sidebar").classList.remove("open");
+      }
+
+      function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("open");
+      }
+
+      function refreshBrains() {
+        const select = document.getElementById("brainSelect");
+        select.innerHTML = "";
+        Object.keys(brains).forEach((name) => {
+          const option = document.createElement("option");
+          option.value = name;
+          option.textContent = name;
+          select.appendChild(option);
+        });
+
+        const chips = document.getElementById("brainChips");
+        chips.innerHTML = "";
+        Object.keys(brains).forEach((name) => {
+          const chip = document.createElement("div");
+          chip.className = "chip";
+          chip.textContent = name;
+          chips.appendChild(chip);
+        });
+
+        renderBrainList();
+        updateCounts();
+      }
+
+      function addBrain() {
+        const input = document.getElementById("newBrain");
+        const name = input.value.trim();
+        if (!name) return toast("Type a topic name first.", "error");
+        if (brains[name]) return toast("That brain already exists.", "error");
+        brains[name] = [];
+        input.value = "";
+        persist();
+        refreshBrains();
+        toast("New brain added: " + name, "success");
+      }
+
+      function saveBrainData() {
+        const selected = document.getElementById("brainSelect").value;
+        const text = document.getElementById("brainData").value.trim();
+        if (!selected) return toast("Select a brain first.", "error");
+        if (!text) return toast("Paste some notes first.", "error");
+        brains[selected].push({ text, savedAt: new Date().toISOString() });
+        document.getElementById("brainData").value = "";
+        persist();
+        refreshBrains();
+        toast("Saved to " + selected, "success");
+      }
+
+      function renderBrainList() {
+        const list = document.getElementById("brainList");
+        list.innerHTML = "";
+        const keys = Object.keys(brains);
+        if (!keys.length) {
+          list.innerHTML = '<div class="empty">No brains yet.</div>';
+          return;
+        }
+
+        keys.forEach((name) => {
+          const items = brains[name] || [];
+          const div = document.createElement("div");
+          div.className = "brain-item";
+          div.innerHTML = `
+          <div class="brain-item-title">${escapeHtml(name)}</div>
+          <div class="brain-meta">
+            ${items.length} saved note${items.length === 1 ? "" : "s"}<br>
+            ${items.length ? "Latest: " + formatDateTime(items[items.length - 1].savedAt) : "No notes saved yet"}
+          </div>
+        `;
+          list.appendChild(div);
+        });
+      }
+
+      function exportBrain() {
+        downloadJson("nutrimind-brains.json", brains);
+        toast("Brains exported.", "success");
+      }
+
+      function importBrain(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const parsed = JSON.parse(reader.result);
+            if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
+              throw new Error();
+            brains = parsed;
+            persist();
+            refreshBrains();
+            toast("Brains imported successfully.", "success");
+          } catch {
+            toast("That brain file is not valid JSON.", "error");
+          }
+          event.target.value = "";
+        };
+        reader.readAsText(file);
+      }
+
+      function updateCounts() {
+        const brainNames = Object.keys(brains);
+        const totalNotes = brainNames.reduce(
+          (sum, name) => sum + (brains[name] ? brains[name].length : 0),
+          0,
+        );
+        document.getElementById("brainCount").textContent = brainNames.length;
+        document.getElementById("notesCount").textContent = totalNotes;
+        document.getElementById("eventCount").textContent = events.length;
+        document.getElementById("sideEventBadge").textContent = events.length;
+      }
+
+      function openEventModal() {
+        document.getElementById("modalEventDate").value =
+          selectedCalendarDate || new Date().toISOString().slice(0, 10);
+        document.getElementById("modalEventTime").value = "";
+        document.getElementById("modalEventText").value = "";
+        document.getElementById("modalEventNote").value = "";
+        document.getElementById("eventModal").style.display = "flex";
+      }
+
+      function closeEventModal() {
+        document.getElementById("eventModal").style.display = "none";
+      }
+
+      function addEventFromModal() {
+        const date = document.getElementById("modalEventDate").value;
+        const time = document.getElementById("modalEventTime").value;
+        const title = document.getElementById("modalEventText").value.trim();
+        const note = document.getElementById("modalEventNote").value.trim();
+        if (!date || !title)
+          return toast("Event date and title are required.", "error");
+
+        const id = crypto.randomUUID
+          ? crypto.randomUUID()
+          : String(Date.now() + Math.random());
+        events.push({
+          id,
+          date,
+          time,
+          title,
+          note,
+          createdAt: new Date().toISOString(),
+        });
+
+        events.sort((a, b) => {
+          const da = new Date(
+            (a.date || "") + "T" + (a.time || "00:00"),
+          ).getTime();
+          const db = new Date(
+            (b.date || "") + "T" + (b.time || "00:00"),
+          ).getTime();
+          return da - db;
+        });
+
+        persist();
+        renderCalendar();
+        renderEvents(selectedCalendarDate || null);
+        closeEventModal();
+        toast("Event added.", "success");
+      }
+
+      function deleteEvent(id) {
+        events = events.filter((evt) => evt.id !== id);
+        notifiedIds = notifiedIds.filter((nid) => nid !== id);
+        persist();
+        renderCalendar();
+        renderEvents(selectedCalendarDate || null);
+        toast("Event deleted.", "info");
+      }
+
+      function renderCalendar() {
+        const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const weekdaysWrap = document.getElementById("calendarWeekdays");
+        const grid = document.getElementById("calendarGrid");
+        const monthLabel = document.getElementById("calendarMonthLabel");
+
+        weekdaysWrap.innerHTML = weekdays
+          .map((day) => `<div>${day}</div>`)
+          .join("");
+        grid.innerHTML = "";
+
+        const year = calendarDate.getFullYear();
+        const month = calendarDate.getMonth();
+        monthLabel.textContent = calendarDate.toLocaleString("default", {
+          month: "long",
+          year: "numeric",
+        });
+
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const startWeekday = firstDay.getDay();
+        const totalDays = lastDay.getDate();
+
+        for (let i = 0; i < startWeekday; i++) {
+          const blank = document.createElement("div");
+          blank.className = "calendar-day muted";
+          grid.appendChild(blank);
+        }
+
+        for (let day = 1; day <= totalDays; day++) {
+          const yyyy = year;
+          const mm = String(month + 1).padStart(2, "0");
+          const dd = String(day).padStart(2, "0");
+          const fullDate = `${yyyy}-${mm}-${dd}`;
+
+          const cell = document.createElement("div");
+          cell.className = "calendar-day";
+          cell.textContent = day;
+
+          if (events.some((evt) => evt.date === fullDate))
+            cell.classList.add("has-event");
+          if (selectedCalendarDate === fullDate) cell.classList.add("selected");
+
+          cell.onclick = () => selectCalendarDate(fullDate);
+          grid.appendChild(cell);
+        }
+      }
+
+      function changeMonth(step) {
+        calendarDate.setMonth(calendarDate.getMonth() + step);
+        clearSelectedCalendarDate();
+      }
+
+      function selectCalendarDate(dateStr) {
+        selectedCalendarDate = dateStr;
+        const niceDate = new Date(dateStr + "T00:00").toLocaleDateString(
+          undefined,
+          {
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+          },
+        );
+        document.getElementById("selectedDateLabel").textContent = niceDate;
+        renderCalendar();
+        renderEvents(dateStr);
+      }
+
+      function clearSelectedCalendarDate() {
+        selectedCalendarDate = null;
+        document.getElementById("selectedDateLabel").textContent =
+          "Future events";
+        renderCalendar();
+        renderEvents();
+      }
+
+      function renderEvents(selectedDate = null) {
+        const list = document.getElementById("eventList");
+        list.innerHTML = "";
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        let filtered = [...events];
+        if (selectedDate) {
+          filtered = filtered.filter((evt) => evt.date === selectedDate);
+        } else {
+          filtered = filtered.filter((evt) => {
+            if (!evt.date) return false;
+            const dt = new Date(evt.date + "T00:00");
+            return dt >= today;
+          });
+        }
+
+        filtered.sort((a, b) => {
+          const da = new Date(
+            (a.date || "") + "T" + (a.time || "00:00"),
+          ).getTime();
+          const db = new Date(
+            (b.date || "") + "T" + (b.time || "00:00"),
+          ).getTime();
+          return da - db;
+        });
+
+        if (!filtered.length) {
+          list.innerHTML = `<div class="empty">${selectedDate ? "No events for this day." : "No future events."}</div>`;
+          updateCounts();
+          return;
+        }
+
+        filtered.forEach((evt) => {
+          const div = document.createElement("div");
+          div.className = "event-item";
+          div.innerHTML = `
+          <div class="event-item-title">${escapeHtml(evt.title)}</div>
+          <div class="event-meta">${formatEvent(evt)}${evt.note ? "<br>" + escapeHtml(evt.note) : ""}</div>
+          <div class="event-actions" style="margin-top:12px;">
+            <button class="small-btn" onclick="deleteEvent('${evt.id}')">Delete</button>
+          </div>
+        `;
+          list.appendChild(div);
+        });
+
+        updateCounts();
+      }
+
+      function exportEvents() {
+        downloadJson("nutrimind-events.json", events);
+        toast("Events exported.", "success");
+      }
+
+      function importEvents(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const fileName = file.name.toLowerCase();
+            if (fileName.endsWith(".json")) {
+              const parsed = JSON.parse(reader.result);
+              if (!Array.isArray(parsed)) throw new Error("Invalid JSON");
+              events = parsed;
+            } else if (fileName.endsWith(".ics")) {
+              events = parseICS(reader.result);
+            } else {
+              throw new Error("Unsupported file");
+            }
+
+            persist();
+            renderCalendar();
+            renderEvents(selectedCalendarDate || null);
+            toast("Events imported successfully.", "success");
+          } catch (error) {
+            console.error(error);
+            toast("That file is not a valid JSON or ICS file.", "error");
+          }
+          event.target.value = "";
+        };
+        reader.readAsText(file);
+      }
+
+      function parseICS(text) {
+        const lines = text.split(/\r?\n/);
+        const parsedEvents = [];
+        let current = null;
+
+        for (let line of lines) {
+          line = line.trim();
+          if (line === "BEGIN:VEVENT") current = {};
+          else if (line === "END:VEVENT") {
+            if (current) {
+              parsedEvents.push({
+                id: crypto.randomUUID
+                  ? crypto.randomUUID()
+                  : String(Date.now() + Math.random()),
+                date: current.date || "",
+                time: current.time || "",
+                title: current.title || "Untitled Event",
+                note: current.note || "",
+                createdAt: new Date().toISOString(),
+              });
+            }
+            current = null;
+          } else if (current) {
+            if (line.startsWith("SUMMARY:"))
+              current.title = line.replace("SUMMARY:", "").trim();
+            if (line.startsWith("DESCRIPTION:"))
+              current.note = line.replace("DESCRIPTION:", "").trim();
+            if (line.startsWith("DTSTART")) {
+              const value = line.split(":")[1] || "";
+              if (value.length >= 8)
+                current.date = `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}`;
+              if (value.includes("T") && value.length >= 13)
+                current.time = `${value.slice(9, 11)}:${value.slice(11, 13)}`;
+            }
+          }
+        }
+        return parsedEvents;
+      }
+
+      function exportAllData() {
+        downloadJson("nutrimind-all-data.json", {
+          brains,
+          events,
+          reasoningMode,
+        });
+        toast("All NutriMind data exported.", "success");
+      }
+
+      function downloadJson(filename, data) {
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+          type: "application/json",
+        });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+
+      function formatDateTime(value) {
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) return "Unknown date";
+        return d.toLocaleString();
+      }
+
+      function formatEvent(evt) {
+        const datePart = evt.date
+          ? new Date(evt.date + "T00:00").toLocaleDateString()
+          : "No date";
+        const timePart = evt.time ? evt.time : "No time";
+        return `${datePart} • ${timePart}`;
+      }
+
+      function restoreChatHistory() {
+        if (!chatHistory.length) return;
+        const recentHistory = chatHistory.slice(-30);
+        recentHistory.forEach((msg) =>
+          addMessage(msg.content, msg.role === "user" ? "user" : "bot"),
+        );
+        heroDismissed = true;
+        const hero = document.getElementById("heroCard");
+        if (hero) hero.style.display = "none";
+      }
+
+      function openSearchModal(event) {
+        if (event) event.preventDefault();
+
+        const input = document.getElementById("quickSearchInput");
+        const modalInput = document.getElementById("searchModalInput");
+        const modal = document.getElementById("searchModal");
+        const info = document.getElementById("searchModalInfo");
+
+        if (!input || !modalInput || !modal || !info) {
+          console.error("Search modal elements not found");
+          return false;
+        }
+
+        const value = input.value.trim();
+        modalInput.value = value;
+
+        info.innerHTML = value
+          ? `Ready to search:<br><strong>${escapeHtml(value)}</strong><br><br>Press <strong>Search</strong> to open Google`
+          : `Type something then press <strong>Search</strong>`;
+
+        modal.classList.add("open");
+        return false;
+      }
+
+      function closeSearchModal() {
+        const modal = document.getElementById("searchModal");
+        if (modal) modal.classList.remove("open");
+      }
+
+      function runSearchModal() {
+        const input = document.getElementById("searchModalInput");
+        if (!input) return;
+
+        const value = input.value.trim();
+        if (!value) return;
+
+        const url =
+          "https://www.google.com/search?q=" + encodeURIComponent(value);
+        window.open(url, "_blank");
+      }
+
+      document.getElementById("reasoningMode").value = reasoningMode;
+      updateEngineBanner("fallback", "Fallback ready", true);
+      refreshBrains();
+      renderCalendar();
+      renderEvents();
+      restoreChatHistory();
+      attachChatScrollWatcher();
+      initLLM();
+
+      window.addEventListener("click", (event) => {
+        if (event.target === document.getElementById("eventModal"))
+          closeEventModal();
+      });
+
+      window.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeSearchModal();
+          closeEventModal();
+        }
+      });
+    </script>
+  </body>
+</html>
