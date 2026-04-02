@@ -1,0 +1,21 @@
+{
+  "name": "NutriMind",
+  "short_name": "NutriMind",
+  "description": "A personal AI-powered system for learning, productivity, and life management.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#06101f",
+  "theme_color": "#06101f",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
