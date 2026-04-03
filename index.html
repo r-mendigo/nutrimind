@@ -444,6 +444,93 @@
         border-color: rgba(127, 182, 255, 0.18);
       }
 
+      .topic-group-label {
+        color: #8ea7d1;
+        font-size: 0.76rem;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin-top: 4px;
+      }
+
+      .dynamic-topic-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .topic-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .topic-row .topic-btn {
+        min-width: 0;
+      }
+
+      .topic-delete-btn {
+        width: 38px;
+        height: 38px;
+        border: 1px solid rgba(251, 113, 133, 0.28);
+        background: rgba(251, 113, 133, 0.08);
+        color: #ffb4c0;
+        border-radius: 14px;
+        cursor: pointer;
+        font-weight: 900;
+        flex: 0 0 auto;
+      }
+
+      .topic-delete-btn:hover {
+        background: rgba(251, 113, 133, 0.16);
+      }
+
+      .brain-item-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 6px;
+      }
+
+      .brain-item-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .mini-btn {
+        padding: 8px 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .mini-btn.danger {
+        border-color: rgba(251, 113, 133, 0.28);
+        background: rgba(251, 113, 133, 0.08);
+        color: #ffb4c0;
+      }
+
+      .brain-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: rgba(127, 182, 255, 0.1);
+        border: 1px solid rgba(127, 182, 255, 0.18);
+        color: #cfe0ff;
+        font-size: 0.76rem;
+        font-weight: 900;
+        white-space: nowrap;
+      }
+
       .topic-spacer {
         margin-top: auto;
         padding-top: 16px;
@@ -1219,7 +1306,11 @@
         </div>
 
         <div class="nav">
-          <button class="nav-btn active" onclick="switchView('chat', this)">
+          <button
+            id="mindEngineNavBtn"
+            class="nav-btn active"
+            onclick="switchView('chat', this)"
+          >
             <span class="nav-emoji">🧠</span><span>Mind Engine</span>
           </button>
           <button class="nav-btn" onclick="switchView('manager', this)">
@@ -1285,37 +1376,51 @@
                   <div class="section-label">CURRICULUM</div>
                   <button
                     class="topic-btn active"
+                    data-topic="SQL Mastery"
                     onclick="setTopic('SQL Mastery', this)"
                   >
                     🗄️ SQL Mastery
                   </button>
                   <button
                     class="topic-btn"
+                    data-topic="Power BI"
                     onclick="setTopic('Power BI', this)"
                   >
                     📈 Power BI
                   </button>
-                  <button class="topic-btn" onclick="setTopic('Tableau', this)">
+                  <button
+                    class="topic-btn"
+                    data-topic="Tableau"
+                    onclick="setTopic('Tableau', this)"
+                  >
                     🎨 Tableau
                   </button>
                   <button
                     class="topic-btn"
+                    data-topic="Python Data"
                     onclick="setTopic('Python Data', this)"
                   >
                     🐍 Python Data
                   </button>
                   <button
                     class="topic-btn"
+                    data-topic="HTML/CSS"
                     onclick="setTopic('HTML/CSS', this)"
                   >
                     🧱 HTML/CSS
                   </button>
                   <button
                     class="topic-btn"
+                    data-topic="JavaScript"
                     onclick="setTopic('JavaScript', this)"
                   >
                     ⚡ JavaScript
                   </button>
+
+                  <div id="customTopicsWrap" style="display: none">
+                    <div class="topic-group-label">Stored Topics</div>
+                    <div class="dynamic-topic-list" id="customTopicList"></div>
+                  </div>
 
                   <div class="topic-spacer">
                     <button
@@ -1726,6 +1831,24 @@
         },
       };
 
+      const BUILT_IN_TOPIC_ORDER = [
+        "SQL Mastery",
+        "Power BI",
+        "Tableau",
+        "Python Data",
+        "HTML/CSS",
+        "JavaScript",
+      ];
+
+      const TOPIC_EMOJIS = {
+        "SQL Mastery": "🗄️",
+        "Power BI": "📈",
+        Tableau: "🎨",
+        "Python Data": "🐍",
+        "HTML/CSS": "🧱",
+        JavaScript: "⚡",
+      };
+
       const quizBank = {
         "SQL Mastery": [
           {
@@ -1853,9 +1976,9 @@
         ],
       };
 
-      let brains =
-        JSON.parse(localStorage.getItem("nutriMindBrains") || "null") ||
-        JSON.parse(JSON.stringify(defaultBrains));
+      let brains = normalizeBrainsMap(
+        JSON.parse(localStorage.getItem("nutriMindBrains") || "null"),
+      );
       let events = JSON.parse(localStorage.getItem("nutriMindEvents") || "[]");
       let notifiedIds = JSON.parse(
         localStorage.getItem("nutriMindNotifiedIds") || "[]",
@@ -1879,6 +2002,96 @@
       let isGenerating = false;
       let fallbackReady = true;
       let shouldStickToBottom = true;
+
+      function normalizeBrainsMap(source) {
+        const base = JSON.parse(JSON.stringify(defaultBrains));
+        const incoming =
+          source && typeof source === "object" && !Array.isArray(source)
+            ? source
+            : {};
+
+        Object.keys(incoming).forEach((name) => {
+          const raw = incoming[name];
+          base[name] = Array.isArray(raw) ? raw : [];
+        });
+
+        return base;
+      }
+
+      function isBuiltInTopic(topic) {
+        return Object.prototype.hasOwnProperty.call(builtInBrain, topic);
+      }
+
+      function getTopicEmoji(topic) {
+        return TOPIC_EMOJIS[topic] || "🧠";
+      }
+
+      function getTopicIntro(topic) {
+        if (builtInBrain[topic] && builtInBrain[topic].intro) {
+          return builtInBrain[topic].intro;
+        }
+
+        const items = brains[topic] || [];
+        if (items.length) {
+          return `This stored topic has ${items.length} saved note${items.length === 1 ? "" : "s"}. Open the notes below or ask a focused question inside this topic.`;
+        }
+
+        return "This is a custom stored topic. Save notes into it from Data Manager, then ask a focused question here.";
+      }
+
+      function getCustomTopicNames() {
+        return Object.keys(brains)
+          .filter((name) => !isBuiltInTopic(name))
+          .sort((a, b) => a.localeCompare(b));
+      }
+
+      function getTopicButton(topic) {
+        return document.querySelector(
+          `.topic-btn[data-topic="${CSS.escape(topic)}"]`,
+        );
+      }
+
+      function renderCurriculumTopics() {
+        const wrap = document.getElementById("customTopicsWrap");
+        const list = document.getElementById("customTopicList");
+        if (!wrap || !list) return;
+
+        const customTopics = getCustomTopicNames();
+        list.innerHTML = "";
+
+        if (!customTopics.length) {
+          wrap.style.display = "none";
+          return;
+        }
+
+        wrap.style.display = "block";
+
+        customTopics.forEach((topic) => {
+          const row = document.createElement("div");
+          row.className = "topic-row";
+
+          const btn = document.createElement("button");
+          btn.className =
+            "topic-btn" + (currentTopic === topic ? " active" : "");
+          btn.setAttribute("data-topic", topic);
+          btn.innerHTML = `${getTopicEmoji(topic)} ${escapeHtml(topic)}`;
+          btn.onclick = () => setTopic(topic, btn);
+
+          const del = document.createElement("button");
+          del.className = "topic-delete-btn";
+          del.type = "button";
+          del.title = `Delete ${topic}`;
+          del.textContent = "✕";
+          del.onclick = (event) => {
+            event.stopPropagation();
+            deleteBrain(topic);
+          };
+
+          row.appendChild(btn);
+          row.appendChild(del);
+          list.appendChild(row);
+        });
+      }
 
       function persist() {
         localStorage.setItem("nutriMindBrains", JSON.stringify(brains));
@@ -2705,9 +2918,19 @@ Rules:
       }
 
       function refreshBrains() {
+        brains = normalizeBrainsMap(brains);
+
         const select = document.getElementById("brainSelect");
+        const previousValue = select.value || currentTopic || "SQL Mastery";
+        const orderedNames = [
+          ...BUILT_IN_TOPIC_ORDER.filter((name) =>
+            Object.prototype.hasOwnProperty.call(brains, name),
+          ),
+          ...getCustomTopicNames(),
+        ];
+
         select.innerHTML = "";
-        Object.keys(brains).forEach((name) => {
+        orderedNames.forEach((name) => {
           const option = document.createElement("option");
           option.value = name;
           option.textContent = name;
@@ -2716,15 +2939,23 @@ Rules:
 
         const chips = document.getElementById("brainChips");
         chips.innerHTML = "";
-        Object.keys(brains).forEach((name) => {
+        orderedNames.forEach((name) => {
           const chip = document.createElement("div");
           chip.className = "chip";
-          chip.textContent = name;
+          chip.textContent = `${getTopicEmoji(name)} ${name}`;
           chips.appendChild(chip);
         });
 
+        renderCurriculumTopics();
         renderBrainList();
         updateCounts();
+
+        const nextValue = orderedNames.includes(previousValue)
+          ? previousValue
+          : "SQL Mastery";
+        if (nextValue && orderedNames.includes(nextValue)) {
+          select.value = nextValue;
+        }
       }
 
       function addBrain() {
@@ -2732,11 +2963,43 @@ Rules:
         const name = input.value.trim();
         if (!name) return toast("Type a topic name first.", "error");
         if (brains[name]) return toast("That brain already exists.", "error");
+
         brains[name] = [];
         input.value = "";
         persist();
         refreshBrains();
-        toast("New brain added: " + name, "success");
+
+        const select = document.getElementById("brainSelect");
+        if (select) select.value = name;
+
+        setTopic(name);
+        toast("New topic added: " + name, "success");
+      }
+
+      function deleteBrain(name) {
+        if (!brains[name]) return;
+        if (isBuiltInTopic(name)) {
+          toast("Built-in topics cannot be deleted.", "error");
+          return;
+        }
+
+        if (
+          !confirm(
+            `Delete "${name}" permanently? This removes its saved notes too.`,
+          )
+        ) {
+          return;
+        }
+
+        delete brains[name];
+        persist();
+        refreshBrains();
+
+        if (currentTopic === name) {
+          setTopic("SQL Mastery");
+        }
+
+        toast("Topic deleted: " + name, "success");
       }
 
       function saveBrainData() {
@@ -2744,17 +3007,26 @@ Rules:
         const text = document.getElementById("brainData").value.trim();
         if (!selected) return toast("Select a brain first.", "error");
         if (!text) return toast("Paste some notes first.", "error");
+        if (!brains[selected]) brains[selected] = [];
         brains[selected].push({ text, savedAt: new Date().toISOString() });
         document.getElementById("brainData").value = "";
         persist();
         refreshBrains();
+        const select = document.getElementById("brainSelect");
+        if (select) select.value = selected;
         toast("Saved to " + selected, "success");
       }
 
       function renderBrainList() {
         const list = document.getElementById("brainList");
         list.innerHTML = "";
-        const keys = Object.keys(brains);
+        const keys = [
+          ...BUILT_IN_TOPIC_ORDER.filter((name) =>
+            Object.prototype.hasOwnProperty.call(brains, name),
+          ),
+          ...getCustomTopicNames(),
+        ];
+
         if (!keys.length) {
           list.innerHTML = '<div class="empty">No brains yet.</div>';
           return;
@@ -2764,15 +3036,52 @@ Rules:
           const items = brains[name] || [];
           const div = document.createElement("div");
           div.className = "brain-item";
-          div.innerHTML = `
-          <div class="brain-item-title">${escapeHtml(name)}</div>
-          <div class="brain-meta">
-            ${items.length} saved note${items.length === 1 ? "" : "s"}<br>
-            ${items.length ? "Latest: " + formatDateTime(items[items.length - 1].savedAt) : "No notes saved yet"}
-          </div>
-        `;
+
+          const top = document.createElement("div");
+          top.className = "brain-item-top";
+
+          const title = document.createElement("div");
+          title.className = "brain-item-title";
+          title.textContent = `${getTopicEmoji(name)} ${name}`;
+
+          const badge = document.createElement("span");
+          badge.className = "brain-badge";
+          badge.textContent = isBuiltInTopic(name) ? "Built-in" : "Custom";
+
+          top.appendChild(title);
+          top.appendChild(badge);
+
+          const meta = document.createElement("div");
+          meta.className = "brain-meta";
+          meta.innerHTML = `${items.length} saved note${items.length === 1 ? "" : "s"}<br>${items.length ? "Latest: " + escapeHtml(formatDateTime(items[items.length - 1].savedAt)) : "No notes saved yet"}`;
+
+          const actions = document.createElement("div");
+          actions.className = "brain-item-actions";
+
+          const openBtn = document.createElement("button");
+          openBtn.className = "mini-btn";
+          openBtn.textContent = "Open";
+          openBtn.onclick = () => openBrainTopic(name);
+          actions.appendChild(openBtn);
+
+          if (!isBuiltInTopic(name)) {
+            const deleteBtn = document.createElement("button");
+            deleteBtn.className = "mini-btn danger";
+            deleteBtn.textContent = "Delete";
+            deleteBtn.onclick = () => deleteBrain(name);
+            actions.appendChild(deleteBtn);
+          }
+
+          div.appendChild(top);
+          div.appendChild(meta);
+          div.appendChild(actions);
           list.appendChild(div);
         });
+      }
+
+      function openBrainTopic(name) {
+        switchView("chat", document.getElementById("mindEngineNavBtn"));
+        setTopic(name);
       }
 
       function exportBrain() {
@@ -2789,7 +3098,7 @@ Rules:
             const parsed = JSON.parse(reader.result);
             if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
               throw new Error();
-            brains = parsed;
+            brains = normalizeBrainsMap(parsed);
             persist();
             refreshBrains();
             toast("Brains imported successfully.", "success");
