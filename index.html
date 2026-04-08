@@ -769,6 +769,20 @@
         align-items: center;
       }
 
+      .llm-recovery-notice {
+        display: none;
+        margin-top: -2px;
+        margin-bottom: 4px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: rgba(251, 191, 36, 0.1);
+        border: 1px solid rgba(251, 191, 36, 0.28);
+        color: #fde68a;
+        font-size: 0.92rem;
+        font-weight: 700;
+        line-height: 1.45;
+      }
+
       .send-btn,
       .quiz-btn {
         height: 54px;
@@ -1359,8 +1373,8 @@
             </div>
           </div>
           <div class="toolbar">
-            <button class="btn btn-primary" onclick="openEventModal()">
-              ＋ New Event
+            <button class="btn btn-primary" onclick="reloadMindEngine()">
+              ⟳ Reload
             </button>
             <button class="btn btn-secondary" onclick="exportAllData()">
               Export All
@@ -1374,6 +1388,10 @@
               <div class="panel left-panel">
                 <div class="left-panel-scroll">
                   <div class="section-label">CURRICULUM</div>
+                  <button class="topic-btn" onclick="setTopic('Explore', this)">
+                    <span>🌐</span>
+                    <span>Explore</span>
+                  </button>
                   <button
                     class="topic-btn active"
                     data-topic="SQL Mastery"
@@ -1468,6 +1486,15 @@
 
                 <div class="message-stream" id="chatBox"></div>
 
+                <div
+                  id="llmRecoveryNotice"
+                  class="llm-recovery-notice"
+                  aria-live="polite"
+                >
+                  LLaMA was interrupted. Reload the engine or refresh NutriMind
+                  before sending again.
+                </div>
+
                 <div class="chat-controls">
                   <div class="controls-row">
                     <select
@@ -1489,13 +1516,14 @@
 
                     <button
                       class="btn btn-secondary quiz-btn"
-                      onclick="startQuiz()"
+                      onclick="clearMindEngineChat()"
                     >
-                      Quiz
+                      Clear
                     </button>
                     <button
+                      id="sendBtn"
                       class="btn btn-primary send-btn"
-                      onclick="sendMsg()"
+                      onclick="handleSendButtonClick()"
                     >
                       ➤
                     </button>
@@ -2000,8 +2028,15 @@
       let llmReady = false;
       let llmLoading = false;
       let isGenerating = false;
+      let stopGenerationRequested = false;
+      let canContinueGeneration = false;
+      let lastStoppedUserPrompt = "";
+      let lastStoppedAssistantText = "";
+      let activeResponseBubble = null;
       let fallbackReady = true;
       let shouldStickToBottom = true;
+      let continueVisualArmed = false;
+      let recoveryNoticeTimer = null;
 
       function normalizeBrainsMap(source) {
         const base = JSON.parse(JSON.stringify(defaultBrains));
@@ -2027,16 +2062,63 @@
       }
 
       function getTopicIntro(topic) {
-        if (builtInBrain[topic] && builtInBrain[topic].intro) {
-          return builtInBrain[topic].intro;
+        if (topic === "Explore") {
+          return [
+            "Explore mode is active.",
+            "",
+            "Ask freely outside your saved curriculum topics.",
+            "Use this for business ideas, strategy, general knowledge, or open thinking.",
+          ].join("\n");
+        }
+
+        const built = builtInBrain[topic];
+        if (built && built.intro) {
+          return built.intro;
         }
 
         const items = brains[topic] || [];
+
         if (items.length) {
-          return `This stored topic has ${items.length} saved note${items.length === 1 ? "" : "s"}. Open the notes below or ask a focused question inside this topic.`;
+          return [
+            `This stored topic has ${items.length} saved note${items.length > 1 ? "s" : ""}.`,
+            "Ask a focused question inside this topic.",
+          ].join("\n");
         }
 
-        return "This is a custom stored topic. Save notes into it from Data Manager, then ask a focused question here.";
+        return [
+          "This is a custom stored topic.",
+          "Save notes into it from Data Manager, then ask a focused question here.",
+        ].join("\n");
+      }
+      function getTopicPromptSuggestions(topic) {
+        if (topic === "Explore") {
+          return [
+            "Try asking:",
+            "- compare two options",
+            "- build a plan",
+            "- explain a business idea",
+            "- challenge my thinking",
+          ].join("\n");
+        }
+
+        const items = brains[topic] || [];
+
+        if (items.length) {
+          return [
+            "You can ask:",
+            "- summarize this topic",
+            "- explain the basics",
+            "- turn this into steps",
+            "- quiz me on this topic",
+          ].join("\n");
+        }
+
+        return [
+          "You can still ask:",
+          "- what is this topic about",
+          "- explain the basics",
+          "- give me a simple overview",
+        ].join("\n");
       }
 
       function getCustomTopicNames() {
@@ -2127,50 +2209,79 @@
 
       function formatMessage(content) {
         if (!content) return "";
-        const parts = String(content).split(/```/);
+
+        let text = String(content);
+
+        // First, normalize any <br> tags to newlines
+        text = text.replace(/<br\s*\/?>/gi, "\n");
+        text = text.replace(/&lt;br\s*\/?&gt;/gi, "\n");
+
+        // Split into code blocks and normal text
+        const parts = text.split(/```/);
         let html = "";
 
-        parts.forEach((part, index) => {
-          if (index % 2 === 1) {
+        for (let i = 0; i < parts.length; i++) {
+          const part = parts[i];
+
+          if (i % 2 === 1) {
+            // This is a code block
             const lines = part.split("\n");
             let language = lines[0].trim();
             let code = lines.slice(1).join("\n");
+
             if (!code.trim()) {
               code = lines.join("\n");
               language = "code";
             }
+
             html += `
-            <div class="code-block">
-              <div class="code-label">${escapeHtml(language || "code")}</div>
-              <pre><code>${escapeHtml(code.trim())}</code></pre>
-            </div>
-          `;
-            return;
+        <div class="code-block">
+          <div class="code-label">${escapeHtml(language || "code")}</div>
+          <pre><code>${escapeHtml(code.trim())}</code></pre>
+        </div>`;
+            continue;
           }
 
+          // Normal text block - convert newlines properly
           const blocks = part
             .split(/\n\s*\n/)
-            .map((block) => block.trim())
+            .map((b) => b.trim())
             .filter(Boolean);
+
           blocks.forEach((block) => {
             const lines = block
               .split("\n")
-              .map((line) => line.trim())
+              .map((l) => l.trim())
               .filter(Boolean);
+
             const isBulletList = lines.every((line) => /^[-*]\s+/.test(line));
             const isNumberList = lines.every((line) =>
               /^\d+[.)]\s+/.test(line),
             );
 
             if (isBulletList) {
-              html += `<ul>${lines.map((line) => `<li>${parseInline(line.replace(/^[-*]\s+/, ""))}</li>`).join("")}</ul>`;
+              html += `<ul>${lines
+                .map(
+                  (line) =>
+                    `<li>${parseInline(line.replace(/^[-*]\s+/, ""))}</li>`,
+                )
+                .join("")}</ul>`;
             } else if (isNumberList) {
-              html += `<ol>${lines.map((line) => `<li>${parseInline(line.replace(/^\d+[.)]\s+/, ""))}</li>`).join("")}</ol>`;
+              html += `<ol>${lines
+                .map(
+                  (line) =>
+                    `<li>${parseInline(line.replace(/^\d+[.)]\s+/, ""))}</li>`,
+                )
+                .join("")}</ol>`;
             } else {
-              html += `<p>${parseInline(lines.join("<br>"))}</p>`;
+              // Normal paragraphs - replace \n with <br>
+              const paragraph = lines
+                .map((line) => parseInline(line))
+                .join("<br>");
+              html += `<p>${paragraph}</p>`;
             }
           });
-        });
+        }
 
         return html;
       }
@@ -2457,9 +2568,10 @@ Rules:
 - Strategist mode: give recommendation and next action.
 - Use short sections if the answer benefits from structure.
 - Put syntax or code in fenced code blocks.
-- Base the reply on the current topic and any relevant saved notes.`;
+- If the current topic is Explore, answer using general knowledge, reasoning, and broad practical thinking.
+- If the current topic is not Explore, use the current topic and its saved notes as the primary guide.
+- When the user says things like "summarize this topic", "explain this topic", "turn this into steps", or "quiz me on this topic", prioritize the saved notes of the current topic.`;
       }
-
       function getRelevantSavedNotes(topic, userText) {
         const notes = brains[topic] || [];
         if (!notes.length) return [];
@@ -2483,9 +2595,47 @@ Rules:
           .slice(0, 3);
       }
 
+      function isGenericTopicCommand(text) {
+        const lower = String(text || "")
+          .toLowerCase()
+          .trim();
+
+        return [
+          "summarize this topic",
+          "summarise this topic",
+          "explain this topic",
+          "explain the basics",
+          "turn this into steps",
+          "quiz me on this topic",
+          "what is this topic about",
+          "give me a simple overview",
+        ].some((phrase) => lower.includes(phrase));
+      }
+
       function buildKnowledgeContext(topic, userText) {
+        if (topic === "Explore") {
+          return [
+            "Current topic: Explore",
+            "Mode: Open-topic exploration",
+            "Instruction: Do not restrict the answer to stored curriculum notes.",
+            "Use broad general knowledge, practical reasoning, and clear explanation.",
+          ].join("\n\n");
+        }
+
         const built = builtInBrain[topic];
-        const noteMatches = getRelevantSavedNotes(topic, userText);
+        const allNotes = brains[topic] || [];
+        const genericTopicCommand = isGenericTopicCommand(userText);
+
+        let noteMatches = [];
+
+        if (genericTopicCommand) {
+          noteMatches = allNotes.slice(0, 3).map((note) => ({
+            text: String(note.text || ""),
+            score: 999,
+          }));
+        } else {
+          noteMatches = getRelevantSavedNotes(topic, userText);
+        }
 
         const parts = [
           `Current topic: ${topic}`,
@@ -2493,9 +2643,14 @@ Rules:
           built && built.knowledge
             ? `Built-in knowledge:\n- ${built.knowledge.join("\n- ")}`
             : "",
+          allNotes.length
+            ? `Saved notes available: ${allNotes.length}`
+            : "Saved notes available: 0",
           noteMatches.length
-            ? `Relevant saved notes:\n${noteMatches.map((n, i) => `Note ${i + 1}:\n${truncateText(n.text, 900)}`).join("\n\n")}`
-            : "",
+            ? `Relevant saved notes:\n${noteMatches
+                .map((n, i) => `Note ${i + 1}:\n${truncateText(n.text, 1200)}`)
+                .join("\n\n")}`
+            : "If no note is directly relevant, still answer clearly using the selected topic as the guide.",
         ].filter(Boolean);
 
         return parts.join("\n\n");
@@ -2737,7 +2892,21 @@ Rules:
         const text = input.value.trim();
         if (!text || isGenerating) return;
 
+        // === RESET RECOVERY / CONTINUE STATE ===
+        hideRecoveryNotice();
+
+        if (recoveryNoticeTimer) {
+          clearTimeout(recoveryNoticeTimer);
+          recoveryNoticeTimer = null;
+        }
+
+        continueVisualArmed = false;
+        canContinueGeneration = false;
+        setSendButtonIdle();
+
         hideHeroCard();
+
+        // Add user message
         addMessage(text, "user");
         chatHistory.push({ role: "user", content: text });
         persistChat();
@@ -2751,13 +2920,25 @@ Rules:
           return;
         }
 
+        // === START OF GENERATION ===
         isGenerating = true;
+        stopGenerationRequested = false;
+        canContinueGeneration = false;
+
+        lastStoppedUserPrompt = text;
+        lastStoppedAssistantText = "";
+
+        setSendButtonBusy();
         updateModelStatus("busy", "Thinking...");
+
         const bubble = addTypingBubble();
+        activeResponseBubble = bubble;
+
         let reply = "";
 
         try {
           const liveReply = await handleLiveQuery(text);
+
           if (liveReply) {
             reply = liveReply;
           } else if (llmReady && llmEngine) {
@@ -2765,24 +2946,27 @@ Rules:
               messages: buildMessagesForLLM(text),
               temperature: 0.35,
               top_p: 0.9,
-              max_tokens: 520,
+              max_tokens: 2048,
               stream: true,
             });
 
             let lastRender = 0;
+
             for await (const chunk of stream) {
-              const delta =
-                chunk.choices && chunk.choices[0] && chunk.choices[0].delta
-                  ? chunk.choices[0].delta.content || ""
-                  : "";
+              if (stopGenerationRequested) break;
+
+              const delta = chunk.choices?.[0]?.delta?.content || "";
               if (!delta) continue;
+
               reply += delta;
+
               const now = performance.now();
               if (now - lastRender > 180 || /[\n.!?`]$/.test(delta)) {
                 setBubbleContent(bubble, reply);
                 lastRender = now;
               }
             }
+
             reply = reply.trim() || stableFallbackReply(currentTopic, text);
           } else {
             reply = stableFallbackReply(currentTopic, text);
@@ -2791,22 +2975,53 @@ Rules:
           console.error("Send error:", error);
           reply = stableFallbackReply(currentTopic, text);
         } finally {
-          if (!reply || !reply.trim()) {
+          reply = (reply || "").trim();
+
+          if (!reply) {
             reply = stableFallbackReply(currentTopic, text);
           }
-          setBubbleContent(bubble, reply);
-          chatHistory.push({ role: "assistant", content: reply });
-          persistChat();
-          updateModelStatus(
-            llmReady ? "ready" : "busy",
-            llmReady ? "Mind engine ready" : "Smart fallback active",
-          );
-          updateEngineBanner(
-            llmReady ? "llm" : "fallback",
-            llmReady ? "LLaMA connected" : "Fallback active",
-            !llmReady,
-          );
+
+          lastStoppedAssistantText = reply;
+
+          if (stopGenerationRequested) {
+            setBubbleContent(
+              bubble,
+              lastStoppedAssistantText || "Response stopped.",
+            );
+
+            activeResponseBubble = bubble;
+
+            canContinueGeneration = true;
+            continueVisualArmed = true;
+
+            setSendButtonContinue();
+
+            updateModelStatus(
+              "busy",
+              "Stopped. Tap Continue for instructions.",
+            );
+          } else {
+            setBubbleContent(bubble, lastStoppedAssistantText);
+
+            chatHistory.push({
+              role: "assistant",
+              content: lastStoppedAssistantText,
+            });
+            persistChat();
+
+            activeResponseBubble = null;
+            canContinueGeneration = false;
+
+            setSendButtonIdle();
+
+            updateModelStatus(
+              llmReady ? "ready" : "busy",
+              llmReady ? "Mind engine ready" : "Smart fallback active",
+            );
+          }
+
           isGenerating = false;
+          stopGenerationRequested = false;
         }
       }
 
@@ -2815,10 +3030,13 @@ Rules:
         const correct = currentQuiz.correct.toLowerCase();
         quizMode = false;
 
+        const intro = getTopicIntro(currentTopic);
+
         if (answer === correct) {
-          return `Correct.\n\n${currentQuiz.answer}\n\n${builtInBrain[currentTopic].intro}`;
+          return `Correct.\n\n${currentQuiz.answer}\n\n${intro}`;
         }
-        return `Not quite. The correct answer is ${correct.toUpperCase()}.\n\n${currentQuiz.answer}\n\n${builtInBrain[currentTopic].intro}`;
+
+        return `Not quite. The correct answer is ${correct.toUpperCase()}.\n\n${currentQuiz.answer}\n\n${intro}`;
       }
 
       function startQuiz() {
@@ -2865,17 +3083,31 @@ Rules:
 
       function setTopic(topic, btn) {
         currentTopic = topic;
+
         document
           .querySelectorAll(".topic-btn")
           .forEach((el) => el.classList.remove("active"));
+
         if (btn) btn.classList.add("active");
+
         hideHeroCard();
+
+        const input = document.getElementById("chatInput");
+        if (input) {
+          input.placeholder =
+            topic === "Explore"
+              ? "Ask anything. Example: How do I establish a lucrative SME in Dubai?"
+              : `Ask a focused question about ${topic}...`;
+        }
+
+        const intro = getTopicIntro(topic);
+        const suggestions = getTopicPromptSuggestions(topic);
+
         addMessage(
-          `Topic set to ${topic}.\n\n${builtInBrain[topic].intro}`,
+          `Topic set to ${topic}.\n\n${intro}\n\n${suggestions}`,
           "bot",
         );
       }
-
       function hideHeroCard() {
         if (heroDismissed) return;
         const hero = document.getElementById("heroCard");
@@ -2883,6 +3115,262 @@ Rules:
         heroDismissed = true;
       }
 
+      function setSendButtonIdle() {
+        const btn = document.getElementById("sendBtn");
+        if (!btn) return;
+        btn.textContent = "➤";
+        btn.classList.remove("btn-secondary");
+        btn.classList.add("btn-primary");
+        btn.title = "Send";
+      }
+
+      function setSendButtonBusy() {
+        const btn = document.getElementById("sendBtn");
+        if (!btn) return;
+        btn.textContent = "Stop";
+        btn.classList.remove("btn-primary");
+        btn.classList.add("btn-secondary");
+        btn.title = "Stop generation";
+      }
+
+      function setSendButtonContinue() {
+        const btn = document.getElementById("sendBtn");
+        if (!btn) return;
+        btn.textContent = "Continue";
+        btn.classList.remove("btn-primary");
+        btn.classList.add("btn-secondary");
+        btn.title = "Continue from stopped response";
+      }
+
+      function handleSendButtonClick() {
+        if (isGenerating) {
+          stopGenerationRequested = true;
+          updateModelStatus("busy", "Stopping.");
+          return;
+        }
+
+        if (continueVisualArmed || canContinueGeneration) {
+          showRecoveryNotice(
+            "LLaMA was interrupted. Continue is not available yet after Stop. Please reload the engine or refresh NutriMind before sending again.",
+          );
+          updateModelStatus("busy", "Reload needed after interruption.");
+          scheduleRecoveryNoticeReset();
+          return;
+        }
+
+        hideRecoveryNotice();
+        sendMsg();
+      }
+
+      function reloadMindEngine() {
+        updateModelStatus("busy", "Reloading engine...");
+
+        llmEngine = null;
+        llmReady = false;
+        llmLoading = false;
+
+        continueVisualArmed = false;
+        canContinueGeneration = false;
+        stopGenerationRequested = false;
+        isGenerating = false;
+
+        hideRecoveryNotice();
+
+        if (recoveryNoticeTimer) {
+          clearTimeout(recoveryNoticeTimer);
+          recoveryNoticeTimer = null;
+        }
+
+        setSendButtonIdle();
+
+        initLLM(true); // force reload
+      }
+
+      function clearMindEngineChat() {
+        const chatBox = document.getElementById("chatBox");
+        if (chatBox) chatBox.innerHTML = "";
+
+        hideRecoveryNotice();
+
+        if (recoveryNoticeTimer) {
+          clearTimeout(recoveryNoticeTimer);
+          recoveryNoticeTimer = null;
+        }
+
+        activeResponseBubble = null;
+        lastStoppedUserPrompt = "";
+        lastStoppedAssistantText = "";
+        continueVisualArmed = false;
+        canContinueGeneration = false;
+        stopGenerationRequested = false;
+        isGenerating = false;
+
+        setSendButtonIdle();
+        updateModelStatus("ready", "Mind engine ready");
+      }
+
+      function showRecoveryNotice(
+        message = "LLaMA was interrupted. Reload the engine or refresh NutriMind before sending again.",
+      ) {
+        const note = document.getElementById("llmRecoveryNotice");
+        if (!note) return;
+
+        note.textContent = message;
+        note.style.display = "block";
+      }
+
+      function hideRecoveryNotice() {
+        const note = document.getElementById("llmRecoveryNotice");
+        if (!note) return;
+        note.style.display = "none";
+      }
+
+      function scheduleRecoveryNoticeReset() {
+        if (recoveryNoticeTimer) {
+          clearTimeout(recoveryNoticeTimer);
+        }
+
+        recoveryNoticeTimer = setTimeout(() => {
+          hideRecoveryNotice();
+          continueVisualArmed = false;
+          canContinueGeneration = false;
+          setSendButtonIdle();
+        }, 7000);
+      }
+
+      async function continueLastResponse() {
+        console.log("=== CONTINUE DEBUG STARTED ===");
+
+        if (!lastStoppedUserPrompt || !activeResponseBubble) {
+          console.warn("Missing prompt or bubble");
+          setSendButtonIdle();
+          canContinueGeneration = false;
+          isGenerating = false;
+          return;
+        }
+
+        // Use existing engine - do not recreate
+        canContinueGeneration = false;
+        isGenerating = true;
+        stopGenerationRequested = false;
+
+        setSendButtonBusy();
+        updateModelStatus("busy", "Generating next part...");
+
+        // Store the partial response we already have
+        const partialResponse = lastStoppedAssistantText || "";
+
+        try {
+          if (!llmReady || !llmEngine) {
+            throw new Error("LLM not ready");
+          }
+
+          console.log("→ Generating continuation...");
+
+          // CRITICAL FIX: Instead of including partial response as assistant content,
+          // we send a new prompt asking for the NEXT part only
+          // This avoids re-processing all previous tokens
+          const continuePrompt = `Continue the following response. Do not repeat what was already said. Pick up exactly where this leaves off and provide the next part:
+
+---
+${partialResponse.slice(-500)} // Only include last 500 chars for context
+---
+
+Continue from here:`;
+
+          const messages = [
+            {
+              role: "system",
+              content:
+                buildSystemPrompt() +
+                "\n\n" +
+                buildKnowledgeContext(currentTopic, lastStoppedUserPrompt),
+            },
+            { role: "user", content: lastStoppedUserPrompt },
+            { role: "assistant", content: partialResponse },
+            {
+              role: "user",
+              content:
+                "Continue from where you left off. Do not repeat previous content.",
+            },
+          ];
+
+          const stream = await llmEngine.chat.completions.create({
+            messages,
+            temperature: 0.35,
+            top_p: 0.9,
+            max_tokens: 1024,
+            stream: true,
+          });
+
+          let newContent = "";
+          let lastRender = 0;
+          let receivedAnyText = false;
+
+          for await (const chunk of stream) {
+            if (stopGenerationRequested) break;
+
+            const delta = chunk.choices?.[0]?.delta?.content || "";
+            if (!delta) continue;
+
+            receivedAnyText = true;
+            newContent += delta;
+
+            // Update the bubble with combined content
+            const combinedResponse = partialResponse + newContent;
+            setBubbleContent(activeResponseBubble, combinedResponse);
+
+            const now = performance.now();
+            if (now - lastRender > 180 || /[\n.!?`]$/.test(delta)) {
+              lastRender = now;
+            }
+          }
+
+          if (!receivedAnyText && !stopGenerationRequested) {
+            throw new Error("Empty continuation response");
+          }
+
+          // Final combined response
+          lastStoppedAssistantText = partialResponse + newContent;
+          setBubbleContent(activeResponseBubble, lastStoppedAssistantText);
+
+          console.log("→ Continuation successful");
+        } catch (e) {
+          console.error("=== CONTINUE ERROR ===", e);
+
+          toast("Could not continue. Try again.", "error");
+
+          // Keep partial response and allow retry
+          canContinueGeneration = true;
+          continueVisualArmed = true;
+          setSendButtonContinue();
+          updateModelStatus("busy", "Stopped. Tap Continue for instructions.");
+          isGenerating = false;
+          stopGenerationRequested = false;
+          return;
+        }
+
+        if (stopGenerationRequested) {
+          canContinueGeneration = true;
+          setSendButtonContinue();
+          updateModelStatus("busy", "Stopped. Tap Continue.");
+        } else {
+          // Success - save to history
+          chatHistory.push({
+            role: "assistant",
+            content: lastStoppedAssistantText,
+          });
+          persistChat();
+
+          activeResponseBubble = null;
+          canContinueGeneration = false;
+          setSendButtonIdle();
+          updateModelStatus("ready", "Mind engine ready");
+        }
+
+        isGenerating = false;
+        stopGenerationRequested = false;
+      }
       function handleChatKey(event) {
         if (event.key === "Enter" && !event.shiftKey) {
           event.preventDefault();
