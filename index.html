@@ -6125,19 +6125,6 @@
             ><span class="badge" id="sideEventBadge">0</span>
           </button>
 
-          <form class="quick-search" onsubmit="return openSearchModal(event);">
-            <div class="quick-search-label">Quick Search</div>
-            <div class="quick-search-row">
-              <input
-                class="quick-search-input"
-                id="quickSearchInput"
-                type="text"
-                placeholder="Search outside Mind Engine"
-              />
-              <button class="quick-search-btn" type="submit">Go</button>
-            </div>
-          </form>
-
           <div class="sidebar-dashboard" id="sidebarDashboard">
             <div class="side-dash-card side-focus-card">
               <div class="side-dash-label">TODAY FOCUS</div>
@@ -7734,6 +7721,7 @@
           JSON.stringify(notifiedIds),
         );
         localStorage.setItem("nutriMindReasoningMode", reasoningMode);
+        queueNutriMindCloudSave();
       }
 
       function persistChat() {
@@ -7923,7 +7911,7 @@
         if (shouldStickToBottom) chatBox.scrollTop = chatBox.scrollHeight;
       }
 
-            function showNutriMindAuthGate(message = "Login to continue.") {
+      function showNutriMindAuthGate(message = "Login to continue.") {
         const gate = document.getElementById("nutriMindAuthGate");
         const status = document.getElementById("nutriMindAuthStatus");
 
@@ -7955,8 +7943,12 @@
       }
 
       async function signInNutriMind() {
-        const email = document.getElementById("nutriMindAuthEmail")?.value.trim();
-        const password = document.getElementById("nutriMindAuthPassword")?.value;
+        const email = document
+          .getElementById("nutriMindAuthEmail")
+          ?.value.trim();
+        const password = document.getElementById(
+          "nutriMindAuthPassword",
+        )?.value;
         const status = document.getElementById("nutriMindAuthStatus");
 
         if (!email || !password) {
@@ -7980,8 +7972,12 @@
       }
 
       async function signUpNutriMind() {
-        const email = document.getElementById("nutriMindAuthEmail")?.value.trim();
-        const password = document.getElementById("nutriMindAuthPassword")?.value;
+        const email = document
+          .getElementById("nutriMindAuthEmail")
+          ?.value.trim();
+        const password = document.getElementById(
+          "nutriMindAuthPassword",
+        )?.value;
         const status = document.getElementById("nutriMindAuthStatus");
 
         if (!email || !password) {
@@ -8018,6 +8014,83 @@
         currentNutriMindUser = null;
         updateNutriMindUserStatus();
         location.reload();
+      }
+      let nutriMindCloudSaveTimer = null;
+
+      async function saveNutriMindStateToCloud() {
+        if (!currentNutriMindUser) return;
+
+        try {
+          const { error } = await nutrimindSupabase
+            .from("nutrimind_state")
+            .upsert(
+              {
+                user_id: currentNutriMindUser.id,
+                brains,
+                events,
+                updated_at: new Date().toISOString(),
+              },
+              { onConflict: "user_id" },
+            );
+
+          if (error)
+            console.log("NutriMind cloud state save failed:", error.message);
+          else console.log("NutriMind cloud state saved.");
+        } catch (err) {
+          console.log("NutriMind cloud state save skipped:", err);
+        }
+      }
+
+      function queueNutriMindCloudSave() {
+        if (!currentNutriMindUser) return;
+
+        if (nutriMindCloudSaveTimer) clearTimeout(nutriMindCloudSaveTimer);
+
+        nutriMindCloudSaveTimer = setTimeout(() => {
+          saveNutriMindStateToCloud();
+          nutriMindCloudSaveTimer = null;
+        }, 900);
+      }
+
+      async function loadNutriMindStateFromCloud() {
+        if (!currentNutriMindUser) return false;
+
+        try {
+          const { data, error } = await nutrimindSupabase
+            .from("nutrimind_state")
+            .select("brains, events")
+            .eq("user_id", currentNutriMindUser.id)
+            .maybeSingle();
+
+          if (error) {
+            console.log("NutriMind cloud state load failed:", error.message);
+            return false;
+          }
+
+          if (!data) {
+            await saveNutriMindStateToCloud();
+            return false;
+          }
+
+          if (data.brains && typeof data.brains === "object") {
+            brains = normalizeBrainsMap(data.brains);
+            localStorage.setItem(
+              "nutriMindBrainsStable",
+              JSON.stringify(brains),
+            );
+          }
+
+          if (Array.isArray(data.events)) {
+            events = data.events;
+            localStorage.setItem("nutriMindEvents", JSON.stringify(events));
+          }
+
+          console.log("NutriMind cloud state loaded.");
+          return true;
+        } catch (err) {
+          console.log("NutriMind cloud state load skipped:", err);
+          return false;
+        }
       }
 
       function toast(message, type = "info") {
@@ -12667,6 +12740,8 @@ ${userText}`;
         const authOk = await initNutriMindCloudAuth();
         if (!authOk) return;
 
+        await loadNutriMindStateFromCloud();
+
         refreshBrains();
         renderCalendar();
         renderEvents();
@@ -12674,7 +12749,9 @@ ${userText}`;
         attachChatScrollWatcher();
         forceChatToBottom();
         runFreudBridgeAutoImport("startup");
-        initLLM();
+
+        updateModelStatus("ready", "Mind engine ready");
+        updateEngineBanner("fallback", "Groq / fallback ready", true);
       })();
 
       const chatInput = document.getElementById("chatInput");
