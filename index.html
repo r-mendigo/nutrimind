@@ -8233,7 +8233,7 @@
           }
 
           if (Array.isArray(data.events)) {
-            events = data.events;
+            events = normalizeNutriMindEvents(data.events);
             localStorage.setItem("nutriMindEvents", JSON.stringify(events));
           }
 
@@ -12691,7 +12691,7 @@
             if (fileName.endsWith(".json")) {
               const parsed = JSON.parse(reader.result);
               if (!Array.isArray(parsed)) throw new Error("Invalid JSON");
-              events = parsed;
+              events = normalizeNutriMindEvents(parsed);
             } else if (fileName.endsWith(".ics")) {
               events = parseICS(reader.result);
             } else {
@@ -12776,7 +12776,61 @@
         if (Number.isNaN(d.getTime())) return "Unknown date";
         return d.toLocaleString();
       }
+      function normalizeNutriMindEvent(evt) {
+        if (!evt || typeof evt !== "object") return null;
 
+        const id =
+          evt.id ||
+          (crypto.randomUUID
+            ? crypto.randomUUID()
+            : String(Date.now() + Math.random()));
+
+        const date = String(evt.date || evt.day || evt.eventDate || "").trim();
+        const time = String(evt.time || evt.eventTime || "").trim();
+
+        const title = String(
+          evt.title ||
+            evt.text ||
+            evt.name ||
+            evt.summary ||
+            evt.eventTitle ||
+            "Untitled event",
+        ).trim();
+
+        const note = String(
+          evt.note || evt.notes || evt.description || evt.details || "",
+        ).trim();
+
+        if (!date) return null;
+
+        return {
+          ...evt,
+          id,
+          date,
+          time,
+          title: title || "Untitled event",
+          note,
+          createdAt:
+            evt.createdAt || evt.created_at || new Date().toISOString(),
+        };
+      }
+
+      function normalizeNutriMindEvents(list) {
+        if (!Array.isArray(list)) return [];
+
+        return list
+          .map(normalizeNutriMindEvent)
+          .filter(Boolean)
+          .sort((a, b) => {
+            const da = new Date(
+              `${a.date || ""}T${a.time || "00:00"}`,
+            ).getTime();
+            const db = new Date(
+              `${b.date || ""}T${b.time || "00:00"}`,
+            ).getTime();
+            return da - db;
+          });
+      }
       function formatEvent(evt) {
         const datePart = evt.date
           ? new Date(evt.date + "T00:00").toLocaleDateString()
