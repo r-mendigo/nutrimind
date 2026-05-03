@@ -8089,6 +8089,45 @@
         lastNutriMindLocalChangedAt = Date.now();
       }
 
+      function mergeNutriMindEvents(localList, cloudList) {
+        const merged = new Map();
+
+        [
+          ...(Array.isArray(cloudList) ? cloudList : []),
+          ...(Array.isArray(localList) ? localList : []),
+        ].forEach((evt) => {
+          if (!evt || typeof evt !== "object") return;
+
+          const id =
+            evt.id ||
+            `${evt.date || ""}|${evt.time || ""}|${evt.title || evt.text || ""}|${evt.note || ""}`;
+
+          if (!id || id === "|||") return;
+
+          merged.set(id, {
+            ...evt,
+            id,
+            date: evt.date || evt.day || evt.eventDate || "",
+            time: evt.time || evt.eventTime || "",
+            title:
+              evt.title ||
+              evt.text ||
+              evt.name ||
+              evt.summary ||
+              "Untitled event",
+            note: evt.note || evt.notes || evt.description || "",
+            createdAt:
+              evt.createdAt || evt.created_at || new Date().toISOString(),
+          });
+        });
+
+        return Array.from(merged.values()).sort((a, b) => {
+          const da = new Date(`${a.date || ""}T${a.time || "00:00"}`).getTime();
+          const db = new Date(`${b.date || ""}T${b.time || "00:00"}`).getTime();
+          return da - db;
+        });
+      }
+
       async function saveNutriMindStateToCloud() {
         if (!currentNutriMindUser) {
           setNutriMindSyncStatus("paused", "☁️ Sync paused");
@@ -8128,19 +8167,24 @@
             return false;
           }
 
+          const { data: remoteState } = await nutrimindSupabase
+            .from("nutrimind_state")
+            .select("events")
+            .eq("user_id", currentNutriMindUser.id)
+            .maybeSingle();
+
+          events = mergeNutriMindEvents(events, remoteState?.events || []);
+
           const savedAt = new Date().toISOString();
 
           const { error } = await nutrimindSupabase
             .from("nutrimind_state")
-            .upsert(
-              {
-                user_id: currentNutriMindUser.id,
-                brains,
-                events,
-                updated_at: savedAt,
-              },
-              { onConflict: "user_id" },
-            );
+            .upsert({
+              user_id: currentNutriMindUser.id,
+              brains,
+              events,
+              updated_at: savedAt,
+            });
 
           if (error) {
             console.log("NutriMind cloud state save failed:", error.message);
@@ -8233,7 +8277,7 @@
           }
 
           if (Array.isArray(data.events)) {
-            events = normalizeNutriMindEvents(data.events);
+            events = mergeNutriMindEvents(events, data.events);
             localStorage.setItem("nutriMindEvents", JSON.stringify(events));
           }
 
