@@ -8168,7 +8168,14 @@
         }
 
         markNutriMindLocalChange();
-        setNutriMindSyncStatus("syncing", "☁️ Syncing...");
+        setNutriMindSyncStatus("syncing", "☁️ Syncing.");
+
+        if (nutriMindCloudSaveTimer) clearTimeout(nutriMindCloudSaveTimer);
+
+        nutriMindCloudSaveTimer = setTimeout(async () => {
+          await saveNutriMindStateToCloud();
+          nutriMindCloudSaveTimer = null;
+        }, 900);
       }
 
       async function loadNutriMindStateFromCloud() {
