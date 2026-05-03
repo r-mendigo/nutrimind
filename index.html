@@ -13051,13 +13051,31 @@ ${userText}`;
         }, 250);
       }
 
+      async function refreshNutriMindFromCloud(reason = "resume") {
+        if (!currentNutriMindUser) {
+          setNutriMindSyncStatus("paused", "☁️ Sync paused");
+          return;
+        }
+
+        const loaded = await loadNutriMindStateFromCloud();
+
+        if (loaded) {
+          refreshBrains();
+          renderCalendar();
+          renderEvents();
+          refreshSidebarDashboard(reason);
+        }
+      }
+
       window.addEventListener("focus", () => {
         runFreudBridgeAutoImport("window-focus");
+        refreshNutriMindFromCloud("window-focus");
       });
 
       document.addEventListener("visibilitychange", () => {
         if (!document.hidden) {
           runFreudBridgeAutoImport("visibility-return");
+          refreshNutriMindFromCloud("visibility-return");
         }
       });
 
