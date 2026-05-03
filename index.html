@@ -8194,7 +8194,7 @@
             renderCalendar();
             renderEvents();
           }
-        }, 3000);
+        }, 1500);
       }
 
       function toast(message, type = "info") {
@@ -9119,8 +9119,10 @@ ${userText}`;
               Authorization: "Bearer " + groqApiKey,
             },
             body: JSON.stringify({
-              model: "llama-3.3-70b-versatile",
-              temperature: 0.4,
+              model: "llama-3.1-8b-instant",
+              temperature: 0.3,
+              max_tokens: 900,
+              top_p: 0.9,
               messages: [
                 {
                   role: "user",
@@ -9217,7 +9219,10 @@ ${userText}`;
         lastStoppedAssistantText = "";
 
         setSendButtonBusy();
-        updateModelStatus("busy", "Thinking...");
+        updateModelStatus(
+          "busy",
+          useGroqBrain ? "Groq thinking..." : "Thinking...",
+        );
 
         const bubble = addTypingBubble();
         activeResponseBubble = bubble;
@@ -9241,8 +9246,8 @@ ${userText}`;
             liveReply = await handleLiveQuery(finalPromptForEngine);
           }
 
-          if (liveReply) {
-            reply = liveReply;
+          if (liveReply && liveReply.trim()) {
+            reply = liveReply.trim();
           } else if (llmReady && llmEngine) {
             const stream = await llmEngine.chat.completions.create({
               messages: buildMessagesForLLM(finalPromptForEngine),
