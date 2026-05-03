@@ -7431,22 +7431,22 @@
                 : "Unknown date";
 
               return `
-          <div class="trash-manager-item">
-            <div>
-              <div class="trash-manager-title">[${type}] ${escapeHtml(title)}</div>
-              <div class="trash-manager-meta">Deleted ${escapeHtml(deletedAt)}</div>
-            </div>
+                <div class="trash-manager-item">
+                  <div>
+                    <div class="trash-manager-title">[${type}] ${escapeHtml(title)}</div>
+                    <div class="trash-manager-meta">Deleted ${escapeHtml(deletedAt)}</div>
+                  </div>
 
-            <div class="trash-manager-actions">
-              <button class="trash-manager-btn restore" onclick="restoreTrashFromModal(${index})">
-                Restore
-              </button>
-              <button class="trash-manager-btn delete" onclick="deleteTrashFromModal(${index})">
-                Delete Forever
-              </button>
-            </div>
-          </div>
-        `;
+                  <div class="trash-manager-actions">
+                    <button class="trash-manager-btn restore" onclick="restoreTrashFromModal(${index})">
+                      Restore
+                    </button>
+                    <button class="trash-manager-btn delete" onclick="deleteTrashFromModal(${index})">
+                      Delete Forever
+                    </button>
+                  </div>
+                </div>
+              `;
             })
             .join("");
         }
@@ -7823,10 +7823,10 @@
             }
 
             html += `
-              <div class="code-block">
-                <div class="code-label">${escapeHtml(language || "code")}</div>
-                <pre><code>${escapeHtml(code.trim())}</code></pre>
-              </div>`;
+                    <div class="code-block">
+                      <div class="code-label">${escapeHtml(language || "code")}</div>
+                      <pre><code>${escapeHtml(code.trim())}</code></pre>
+                    </div>`;
             continue;
           }
 
@@ -7926,18 +7926,18 @@
         msg.className = "message-card bot";
         msg.style.minWidth = "140px";
         msg.innerHTML = `
-          <div class="message-content">
-            <div class="typing-row" aria-label="NutriMind is thinking">
-              <div class="mind-orb-wrap">
-                <span class="mind-orb-core"></span>
-                <span class="mind-orb-ring"></span>
-              </div>
-              <span id="thinkingLabel" class="thinking-label">
-                Understanding context...
-              </span>
-            </div>
-          </div>
-        `;
+                <div class="message-content">
+                  <div class="typing-row" aria-label="NutriMind is thinking">
+                    <div class="mind-orb-wrap">
+                      <span class="mind-orb-core"></span>
+                      <span class="mind-orb-ring"></span>
+                    </div>
+                    <span id="thinkingLabel" class="thinking-label">
+                      Understanding context...
+                    </span>
+                  </div>
+                </div>
+              `;
         box.appendChild(msg);
         if (shouldStickToBottom) box.scrollTop = box.scrollHeight;
 
@@ -8079,6 +8079,12 @@
       }
       let nutriMindCloudSaveTimer = null;
       let nutriMindCloudWatchTimer = null;
+      let lastNutriMindCloudUpdatedAt = 0;
+      let lastNutriMindLocalChangedAt = 0;
+
+      function markNutriMindLocalChange() {
+        lastNutriMindLocalChangedAt = Date.now();
+      }
 
       async function saveNutriMindStateToCloud() {
         if (!currentNutriMindUser) {
@@ -8089,6 +8095,38 @@
         setNutriMindSyncStatus("syncing", "☁️ Syncing...");
 
         try {
+          const { data: existing, error: readError } = await nutrimindSupabase
+            .from("nutrimind_state")
+            .select("updated_at")
+            .eq("user_id", currentNutriMindUser.id)
+            .maybeSingle();
+
+          if (readError) {
+            console.log(
+              "NutriMind cloud timestamp check failed:",
+              readError.message,
+            );
+            setNutriMindSyncStatus("paused", "☁️ Sync paused");
+            return false;
+          }
+
+          const remoteTime = existing?.updated_at
+            ? new Date(existing.updated_at).getTime()
+            : 0;
+
+          if (
+            remoteTime &&
+            lastNutriMindLocalChangedAt &&
+            remoteTime > lastNutriMindLocalChangedAt
+          ) {
+            console.warn("Skipped stale local save. Cloud is newer.");
+            lastNutriMindCloudUpdatedAt = remoteTime;
+            setNutriMindSyncStatus("synced", "☁️ Synced just now");
+            return false;
+          }
+
+          const savedAt = new Date().toISOString();
+
           const { error } = await nutrimindSupabase
             .from("nutrimind_state")
             .upsert(
@@ -8096,7 +8134,7 @@
                 user_id: currentNutriMindUser.id,
                 brains,
                 events,
-                updated_at: new Date().toISOString(),
+                updated_at: savedAt,
               },
               { onConflict: "user_id" },
             );
@@ -8106,6 +8144,9 @@
             setNutriMindSyncStatus("paused", "☁️ Sync paused");
             return false;
           }
+
+          lastNutriMindCloudUpdatedAt = new Date(savedAt).getTime();
+          lastNutriMindLocalChangedAt = lastNutriMindCloudUpdatedAt;
 
           console.log("NutriMind cloud state saved.");
           setNutriMindSyncStatus("synced", "☁️ Synced just now");
@@ -8123,14 +8164,8 @@
           return;
         }
 
+        markNutriMindLocalChange();
         setNutriMindSyncStatus("syncing", "☁️ Syncing...");
-
-        if (nutriMindCloudSaveTimer) clearTimeout(nutriMindCloudSaveTimer);
-
-        nutriMindCloudSaveTimer = setTimeout(async () => {
-          await saveNutriMindStateToCloud();
-          nutriMindCloudSaveTimer = null;
-        }, 900);
       }
 
       async function loadNutriMindStateFromCloud() {
@@ -8144,7 +8179,7 @@
         try {
           const { data, error } = await nutrimindSupabase
             .from("nutrimind_state")
-            .select("brains, events")
+            .select("brains, events, updated_at")
             .eq("user_id", currentNutriMindUser.id)
             .maybeSingle();
 
@@ -8155,7 +8190,30 @@
           }
 
           if (!data) {
-            await saveNutriMindStateToCloud();
+            setNutriMindSyncStatus("synced", "☁️ Synced just now");
+            return false;
+          }
+
+          const cloudTime = data.updated_at
+            ? new Date(data.updated_at).getTime()
+            : 0;
+
+          if (
+            cloudTime &&
+            lastNutriMindLocalChangedAt &&
+            lastNutriMindLocalChangedAt > cloudTime
+          ) {
+            console.warn("Skipped cloud load. Local changes are newer.");
+            setNutriMindSyncStatus("synced", "☁️ Synced just now");
+            return false;
+          }
+
+          if (
+            cloudTime &&
+            lastNutriMindCloudUpdatedAt &&
+            cloudTime <= lastNutriMindCloudUpdatedAt
+          ) {
+            setNutriMindSyncStatus("synced", "☁️ Synced just now");
             return false;
           }
 
@@ -8169,6 +8227,9 @@
             localStorage.setItem("nutriMindEvents", JSON.stringify(events));
           }
 
+          lastNutriMindCloudUpdatedAt = cloudTime || Date.now();
+          lastNutriMindLocalChangedAt = lastNutriMindCloudUpdatedAt;
+
           console.log("NutriMind cloud state loaded.");
           setNutriMindSyncStatus("synced", "☁️ Synced just now");
           return true;
@@ -8178,6 +8239,7 @@
           return false;
         }
       }
+
       function startNutriMindCloudWatcher() {
         if (nutriMindCloudWatchTimer) clearInterval(nutriMindCloudWatchTimer);
 
@@ -8377,103 +8439,103 @@
         const roleMap = {
           Tutor: `You are NutriMind in Tutor Mode.
 
-Your role is to teach clearly, patiently, and intelligently.
-You turn confusion into understanding.
-You simplify difficult ideas without making them shallow.
-You explain step-by-step, use examples, analogies, and practical exercises when useful.
-Adapt to the user's level: beginner, intermediate, or advanced.
-Prioritize learning clarity over showing off intelligence.
+      Your role is to teach clearly, patiently, and intelligently.
+      You turn confusion into understanding.
+      You simplify difficult ideas without making them shallow.
+      You explain step-by-step, use examples, analogies, and practical exercises when useful.
+      Adapt to the user's level: beginner, intermediate, or advanced.
+      Prioritize learning clarity over showing off intelligence.
 
-Tutor response style:
-1. Direct answer first
-2. Simple explanation
-3. Example when useful
-4. Quick recap when helpful`,
+      Tutor response style:
+      1. Direct answer first
+      2. Simple explanation
+      3. Example when useful
+      4. Quick recap when helpful`,
 
           Analyst: `You are NutriMind in Analyst Mode.
 
-Your role is to examine what already exists and turn raw information into useful insight.
-You inspect patterns, compare options, detect problems, identify waste, test assumptions, and optimize systems.
-You eliminate noise and focus on what matters.
-You think logically, objectively, and with evidence.
+      Your role is to examine what already exists and turn raw information into useful insight.
+      You inspect patterns, compare options, detect problems, identify waste, test assumptions, and optimize systems.
+      You eliminate noise and focus on what matters.
+      You think logically, objectively, and with evidence.
 
-Analyst response style:
-1. Current reality
-2. Key findings
-3. Root causes
-4. Opportunities
-5. Recommended improvements
-6. Optional tests or metrics`,
+      Analyst response style:
+      1. Current reality
+      2. Key findings
+      3. Root causes
+      4. Opportunities
+      5. Recommended improvements
+      6. Optional tests or metrics`,
 
           Strategist: `You are NutriMind in Strategist Mode.
 
-Your role is to build winning direction from imperfect reality.
+      Your role is to build winning direction from imperfect reality.
 
-You organize raw pieces, remove what does not belong, prioritize leverage, and create plans that work in the real world.
+      You organize raw pieces, remove what does not belong, prioritize leverage, and create plans that work in the real world.
 
-You focus on positioning, timing, execution, trade-offs, obstacles, and advantage.
+      You focus on positioning, timing, execution, trade-offs, obstacles, and advantage.
 
-You do not give generic advice.
-You do not simply list options.
-You do not motivate without direction.
+      You do not give generic advice.
+      You do not simply list options.
+      You do not motivate without direction.
 
-You seek the smartest path, not the busiest path.
+      You seek the smartest path, not the busiest path.
 
-Strategist thinking rules:
-- Start with the real situation, not fantasy.
-- Identify the highest-leverage move.
-- Separate urgent action from long-term positioning.
-- Explain what to avoid.
-- Think in trade-offs, timing, and advantage.
-- If competition exists, explain how to stand out without looking desperate or political.
-- If uncertainty exists, give a resilient plan.
-- If the user shows builder traits, systems thinking, or self-directed learning, recognize that as strategic leverage.
+      Strategist thinking rules:
+      - Start with the real situation, not fantasy.
+      - Identify the highest-leverage move.
+      - Separate urgent action from long-term positioning.
+      - Explain what to avoid.
+      - Think in trade-offs, timing, and advantage.
+      - If competition exists, explain how to stand out without looking desperate or political.
+      - If uncertainty exists, give a resilient plan.
+      - If the user shows builder traits, systems thinking, or self-directed learning, recognize that as strategic leverage.
 
-Strategist response style:
-1. Reality check
-2. Best move now
-3. Why this gives leverage
-4. Risks or traps
-5. Next 3 actions
-6. Longer-term play`,
+      Strategist response style:
+      1. Reality check
+      2. Best move now
+      3. Why this gives leverage
+      4. Risks or traps
+      5. Next 3 actions
+      6. Longer-term play`,
         };
 
         return `${roleMap[reasoningMode] || roleMap.Analyst}
 
-Global Rules:
-- Do not use romantic language.
-- Do not use pet names.
-- Keep a calm, professional tone.
-- Answer the direct question first.
-- Stay concise, but make the answer genuinely useful.
-- Avoid bland generic summaries.
-- Avoid repeating the user's wording unless necessary.
-- Use short sections when structure helps.
-- Use bullets only when they improve clarity.
-- Put syntax or code in fenced code blocks.
+      Global Rules:
+      - Do not use romantic language.
+      - Do not use pet names.
+      - Keep a calm, professional tone.
+      - Answer the direct question first.
+      - Stay concise, but make the answer genuinely useful.
+      - Avoid bland generic summaries.
+      - Avoid repeating the user's wording unless necessary.
+      - Use short sections when structure helps.
+      - Use bullets only when they improve clarity.
+      - Put syntax or code in fenced code blocks.
 
-Topic Rules:
-- Topic controls WHAT the response is about.
-- Mode controls HOW NutriMind thinks.
-- If the current topic is Explore, answer using general knowledge, reasoning, and broad practical thinking.
-- If the current topic is not Explore, use the current topic and its saved notes as the primary guide.
-- If saved notes are available, prioritize them over generic knowledge.
-- If saved notes do not contain the answer, say that clearly, then provide the best general answer.
-- When the user asks about their notes, do not invent details that are not in the saved notes.
+      Topic Rules:
+      - Topic controls WHAT the response is about.
+      - Mode controls HOW NutriMind thinks.
+      - If the current topic is Explore, answer using general knowledge, reasoning, and broad practical thinking.
+      - If the current topic is not Explore, use the current topic and its saved notes as the primary guide.
+      - If saved notes are available, prioritize them over generic knowledge.
+      - If saved notes do not contain the answer, say that clearly, then provide the best general answer.
+      - When the user asks about their notes, do not invent details that are not in the saved notes.
 
-Saved Notes Summary Format:
-Core Idea
-Key Lessons
-Action Steps
-What Matters Most
+      Saved Notes Summary Format:
+      Core Idea
+      Key Lessons
+      Action Steps
+      What Matters Most
 
-Quality Rules:
-- When explaining, make it simple first, then add depth.
-- When analyzing, diagnose what exists before suggesting improvements.
-- When giving strategy, include priority order and next action.
-- When creating quiz questions, focus on active recall, not trivia.
-- When the user shows builder traits, systems thinking, resilience, or self-directed learning, recognize their hidden leverage naturally without exaggeration.
-- Do not treat a builder, creator, or self-taught app developer like an average advice seeker.`;
+      Quality Rules:
+      - When explaining, make it simple first, then add depth.
+      - When analyzing, diagnose what exists before suggesting improvements.
+      - When giving strategy, include priority order and next action.
+      - When creating quiz questions, focus on active recall, not trivia.
+      - When the user shows builder traits, systems thinking, resilience, or self-directed learning, recognize their hidden leverage naturally without exaggeration.
+      - Do not treat a builder, creator, or self-taught app developer like an average advice seeker.`;
       }
       function getRelevantSavedNotes(topic, userText) {
         const notes = brains[topic] || [];
@@ -8563,31 +8625,31 @@ Quality Rules:
         const modeInstructions = {
           Tutor: `Answer this in Tutor Mode.
 
-Teach the concept clearly.
-Explain step-by-step.
-Use simple language first, then add depth.
-Include an example if useful.
-Avoid generic career-advice lists unless the user asks for a list.`,
+      Teach the concept clearly.
+      Explain step-by-step.
+      Use simple language first, then add depth.
+      Include an example if useful.
+      Avoid generic career-advice lists unless the user asks for a list.`,
 
           Analyst: `Answer this in Analyst Mode.
 
-Do not give a generic advice list.
-Analyze what already exists.
-Break down the situation into factors, patterns, causes, risks, and measurable signals.
-Identify what matters most and what should be tested or improved.`,
+      Do not give a generic advice list.
+      Analyze what already exists.
+      Break down the situation into factors, patterns, causes, risks, and measurable signals.
+      Identify what matters most and what should be tested or improved.`,
 
           Strategist: `Answer this in Strategist Mode.
 
-Do not give a generic advice list.
-Build the smartest practical path.
-Prioritize leverage, timing, positioning, trade-offs, risks, and next actions.
-Focus on what would increase the chance of winning in real conditions.`,
+      Do not give a generic advice list.
+      Build the smartest practical path.
+      Prioritize leverage, timing, positioning, trade-offs, risks, and next actions.
+      Focus on what would increase the chance of winning in real conditions.`,
         };
 
         return `${modeInstructions[reasoningMode] || modeInstructions.Analyst}
 
-User question:
-${userText}`;
+      User question:
+      ${userText}`;
       }
 
       function buildMessagesForLLM(userText) {
@@ -8981,9 +9043,9 @@ ${userText}`;
         indicator.id = "streamPauseIndicator";
         indicator.className = "stream-pause-indicator";
         indicator.innerHTML = `
-    <span class="stream-pause-dot"></span>
-    <span id="streamPauseText">Still thinking...</span>
-  `;
+          <span class="stream-pause-dot"></span>
+          <span id="streamPauseText">Still thinking...</span>
+        `;
 
         document.body.appendChild(indicator);
         return indicator;
@@ -9457,35 +9519,35 @@ ${userText}`;
         panel.id = "bingSearchPanel";
         panel.className = "bing-search-panel";
         panel.innerHTML = `
-          <div class="bing-search-bar">
-            <input
-              type="text"
-              id="bingSearchInput"
-              class="bing-search-input"
-              placeholder="Search Bing..."
-              value="${bingLastQuery.replace(/"/g, "&quot;")}"
-            />
-            <button
-              type="button"
-              class="bing-search-btn"
-              onclick="submitBingSearch()"
-            >
-              Search
-            </button>
-          </div>
+                <div class="bing-search-bar">
+                  <input
+                    type="text"
+                    id="bingSearchInput"
+                    class="bing-search-input"
+                    placeholder="Search Bing..."
+                    value="${bingLastQuery.replace(/"/g, "&quot;")}"
+                  />
+                  <button
+                    type="button"
+                    class="bing-search-btn"
+                    onclick="submitBingSearch()"
+                  >
+                    Search
+                  </button>
+                </div>
 
-          <div id="bingSearchEmpty" class="bing-search-empty">
-            Search Bing for outside information beside your Study Reader.
-          </div>
+                <div id="bingSearchEmpty" class="bing-search-empty">
+                  Search Bing for outside information beside your Study Reader.
+                </div>
 
-          <iframe
-            id="bingSearchFrame"
-            class="bing-search-frame"
-            style="display: none"
-            title="Bing Search"
-            referrerpolicy="no-referrer"
-          ></iframe>
-        `;
+                <iframe
+                  id="bingSearchFrame"
+                  class="bing-search-frame"
+                  style="display: none"
+                  title="Bing Search"
+                  referrerpolicy="no-referrer"
+                ></iframe>
+              `;
 
         chatBox.parentNode.insertBefore(panel, chatBox);
 
@@ -9509,12 +9571,12 @@ ${userText}`;
         input.focus();
 
         const html = `
-    <div class="study-callout">
-      <strong>💡 Key Insight</strong>
-      <p>Write your important idea here...</p>
-    </div>
-    <p><br></p>
-  `;
+          <div class="study-callout">
+            <strong>💡 Key Insight</strong>
+            <p>Write your important idea here...</p>
+          </div>
+          <p><br></p>
+        `;
 
         document.execCommand("insertHTML", false, html);
 
@@ -9752,11 +9814,11 @@ ${userText}`;
           // This avoids re-processing all previous tokens
           const continuePrompt = `Continue the following response. Do not repeat what was already said. Pick up exactly where this leaves off and provide the next part:
 
-      ---
-      ${partialResponse.slice(-500)} // Only include last 500 chars for context
-      ---
+            ---
+            ${partialResponse.slice(-500)} // Only include last 500 chars for context
+            ---
 
-      Continue from here:`;
+            Continue from here:`;
 
           const messages = [
             {
@@ -12093,9 +12155,9 @@ ${userText}`;
             btn.type = "button";
             btn.className = "study-folder-item";
             btn.innerHTML = `
-        <span>📁 ${escapeHtml(topic)}</span>
-        <span class="study-folder-count">${count} note${count === 1 ? "" : "s"}</span>
-      `;
+              <span>📁 ${escapeHtml(topic)}</span>
+              <span class="study-folder-count">${count} note${count === 1 ? "" : "s"}</span>
+            `;
 
             btn.onclick = () => {
               closeStudyFolderModal();
@@ -12554,10 +12616,10 @@ ${userText}`;
 
         if (!filtered.length) {
           list.innerHTML = `
-            <div class="empty">
-              ${selectedDate ? "No events for this day." : "No events for this month."}
-            </div>
-          `;
+                  <div class="empty">
+                    ${selectedDate ? "No events for this day." : "No events for this month."}
+                  </div>
+                `;
           updateCounts();
           return;
         }
@@ -12567,35 +12629,35 @@ ${userText}`;
           div.className = "event-item";
 
           div.innerHTML = `
-            <div class="event-item-title">${escapeHtml(evt.title)}</div>
+                  <div class="event-item-title">${escapeHtml(evt.title)}</div>
 
-            <div class="event-meta">
-              ${formatEvent(evt)}
-              ${evt.note ? `<br>${escapeHtml(evt.note)}` : ""}
-            </div>
+                  <div class="event-meta">
+                    ${formatEvent(evt)}
+                    ${evt.note ? `<br>${escapeHtml(evt.note)}` : ""}
+                  </div>
 
-            <div class="event-actions calendar-event-actions" style="margin-top:12px;">
-              <button
-                class="small-btn event-action-icon"
-                type="button"
-                title="Edit event"
-                aria-label="Edit event"
-                onclick="openEventModalForEdit('${evt.id}')"
-              >
-                ✏️
-              </button>
+                  <div class="event-actions calendar-event-actions" style="margin-top:12px;">
+                    <button
+                      class="small-btn event-action-icon"
+                      type="button"
+                      title="Edit event"
+                      aria-label="Edit event"
+                      onclick="openEventModalForEdit('${evt.id}')"
+                    >
+                      ✏️
+                    </button>
 
-              <button
-                class="small-btn event-action-icon danger"
-                type="button"
-                title="Delete event"
-                aria-label="Delete event"
-                onclick="deleteEvent('${evt.id}')"
-              >
-                🗑️
-              </button>
-            </div>
-          `;
+                    <button
+                      class="small-btn event-action-icon danger"
+                      type="button"
+                      title="Delete event"
+                      aria-label="Delete event"
+                      onclick="deleteEvent('${evt.id}')"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                `;
 
           list.appendChild(div);
         });
@@ -12922,12 +12984,12 @@ ${userText}`;
 
           if (upcoming) {
             todayEventsEl.innerHTML = `
-      <div class="side-event-line side-event-shortcut" title="Open Calendar">
-        <span class="side-event-time">${upcoming.time || "Anytime"}</span>
-        ${escapeHtml(upcoming.title || "Untitled event")}
-        <div class="side-event-countdown">${getEventCountdownText(upcoming.time)}</div>
-      </div>
-    `;
+            <div class="side-event-line side-event-shortcut" title="Open Calendar">
+              <span class="side-event-time">${upcoming.time || "Anytime"}</span>
+              ${escapeHtml(upcoming.title || "Untitled event")}
+              <div class="side-event-countdown">${getEventCountdownText(upcoming.time)}</div>
+            </div>
+          `;
 
             todayEventsEl.onclick = () => {
               const calendarBtn = [
@@ -12938,10 +13000,10 @@ ${userText}`;
             };
           } else {
             todayEventsEl.innerHTML = `
-      <div class="side-event-line side-event-shortcut" title="Open Calendar">
-        No events today.
-      </div>
-    `;
+            <div class="side-event-line side-event-shortcut" title="Open Calendar">
+              No events today.
+            </div>
+          `;
 
             todayEventsEl.onclick = () => {
               const calendarBtn = [
