@@ -29,6 +29,7 @@
     />
     <link rel="apple-touch-icon" href="icons/icon-192.png" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
       * {
@@ -5956,9 +5957,150 @@
       .events-sidebar {
         scroll-behavior: smooth;
       }
+      .nutrimind-auth-gate {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background:
+          radial-gradient(
+            circle at top left,
+            rgba(34, 179, 95, 0.08),
+            transparent 28%
+          ),
+          radial-gradient(
+            circle at top right,
+            rgba(216, 170, 39, 0.12),
+            transparent 26%
+          ),
+          linear-gradient(180deg, #eef4ef 0%, #e9f0ea 100%);
+      }
+
+      .nutrimind-auth-gate.open {
+        display: flex;
+      }
+
+      .nutrimind-auth-card {
+        width: min(420px, 100%);
+        padding: 28px;
+        border-radius: 28px;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(189, 206, 194, 0.82);
+        box-shadow: 0 28px 70px rgba(57, 86, 70, 0.16);
+      }
+
+      .nutrimind-auth-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 18px;
+        background: linear-gradient(135deg, #22b35f 0%, #d8aa27 100%);
+      }
+
+      .nutrimind-auth-card h2 {
+        margin: 0 0 6px;
+        font-size: 1.75rem;
+        line-height: 1.05;
+        letter-spacing: -0.05em;
+        color: #173c2d;
+      }
+
+      .nutrimind-auth-card p {
+        margin: 0 0 22px;
+        color: #6c8276;
+        font-weight: 800;
+      }
+
+      .nutrimind-auth-card input {
+        width: 100%;
+        height: 48px;
+        margin-bottom: 12px;
+        padding: 0 16px;
+        border-radius: 16px;
+        border: 1px solid rgba(189, 206, 194, 0.86);
+        background: rgba(255, 255, 255, 0.96);
+        outline: none;
+        font-weight: 800;
+        color: #173c2d;
+      }
+
+      .nutrimind-auth-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 8px;
+      }
+
+      .nutrimind-auth-actions button {
+        height: 48px;
+        border-radius: 16px;
+        border: 1px solid rgba(189, 206, 194, 0.78);
+        font-weight: 900;
+        cursor: pointer;
+      }
+
+      .nutrimind-auth-login {
+        background: linear-gradient(135deg, #22b35f, #1f9b54);
+        color: #fff;
+        border: none !important;
+      }
+
+      .nutrimind-auth-create {
+        background: rgba(255, 255, 255, 0.9);
+        color: #173c2d;
+      }
+
+      .nutrimind-auth-status {
+        margin-top: 16px;
+        color: #6c8276;
+        font-weight: 800;
+        font-size: 0.9rem;
+      }
     </style>
   </head>
   <body>
+    <div id="nutriMindAuthGate" class="nutrimind-auth-gate">
+      <div class="nutrimind-auth-card">
+        <div class="nutrimind-auth-icon">🧠</div>
+
+        <h2>Welcome to NutriMind</h2>
+        <p>Sync your mind across desktop and iPad.</p>
+
+        <input id="nutriMindAuthEmail" type="email" placeholder="Email" />
+        <input
+          id="nutriMindAuthPassword"
+          type="password"
+          placeholder="Password"
+        />
+
+        <div class="nutrimind-auth-actions">
+          <button
+            class="nutrimind-auth-login"
+            type="button"
+            onclick="signInNutriMind()"
+          >
+            Login
+          </button>
+          <button
+            class="nutrimind-auth-create"
+            type="button"
+            onclick="signUpNutriMind()"
+          >
+            Create Account
+          </button>
+        </div>
+
+        <div id="nutriMindAuthStatus" class="nutrimind-auth-status">
+          Login to continue.
+        </div>
+      </div>
+    </div>
     <button class="mobile-menu" onclick="toggleSidebar()">☰</button>
 
     <div class="app" id="appShell">
@@ -6024,7 +6166,19 @@
           </div>
         </div>
 
-        <div class="sidebar-footer">v1.0 • Deep Focus System</div>
+        <div class="sidebar-footer">
+          <div>v1.0 • Deep Focus System</div>
+          <div id="nutriMindUserStatus" style="margin-top: 8px">
+            Not signed in
+          </div>
+          <button
+            class="small-btn"
+            style="margin-top: 8px; width: 100%"
+            onclick="signOutNutriMind()"
+          >
+            Logout
+          </button>
+        </div>
       </aside>
 
       <main class="main">
@@ -7376,6 +7530,21 @@
       let leftPanelMode = "chat";
       let bingLastQuery = "";
 
+      const NM_SB_URL = "https://yskshgrjoaksngfdmbnz.supabase.co";
+      const NM_SB_ANON = "sb_publishable_fjUQf3Pd3ksu3GFbjNBiMQ_v8vK-6dr";
+
+      const nutrimindSupabase = window.supabase.createClient(
+        NM_SB_URL,
+        NM_SB_ANON,
+        {
+          auth: {
+            storageKey: "nutrimind-ipad-auth-v1",
+          },
+        },
+      );
+
+      let currentNutriMindUser = null;
+
       let groqApiKey = localStorage.getItem("NUTRIMIND_GROQ_KEY") || "";
 
       function ensureGroqKey() {
@@ -7752,6 +7921,103 @@
 
         const chatBox = document.getElementById("chatBox");
         if (shouldStickToBottom) chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+            function showNutriMindAuthGate(message = "Login to continue.") {
+        const gate = document.getElementById("nutriMindAuthGate");
+        const status = document.getElementById("nutriMindAuthStatus");
+
+        if (gate) gate.classList.add("open");
+        if (status) status.textContent = message;
+      }
+
+      function hideNutriMindAuthGate() {
+        const gate = document.getElementById("nutriMindAuthGate");
+        if (gate) gate.classList.remove("open");
+      }
+
+      async function initNutriMindCloudAuth() {
+        const {
+          data: { session },
+        } = await nutrimindSupabase.auth.getSession();
+
+        currentNutriMindUser = session?.user || null;
+
+        if (!currentNutriMindUser) {
+          updateNutriMindUserStatus();
+          showNutriMindAuthGate("Login to continue.");
+          return false;
+        }
+
+        hideNutriMindAuthGate();
+        updateNutriMindUserStatus();
+        return true;
+      }
+
+      async function signInNutriMind() {
+        const email = document.getElementById("nutriMindAuthEmail")?.value.trim();
+        const password = document.getElementById("nutriMindAuthPassword")?.value;
+        const status = document.getElementById("nutriMindAuthStatus");
+
+        if (!email || !password) {
+          if (status) status.textContent = "Enter email and password.";
+          return;
+        }
+
+        if (status) status.textContent = "Signing in...";
+
+        const { error } = await nutrimindSupabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) {
+          if (status) status.textContent = error.message;
+          return;
+        }
+
+        location.reload();
+      }
+
+      async function signUpNutriMind() {
+        const email = document.getElementById("nutriMindAuthEmail")?.value.trim();
+        const password = document.getElementById("nutriMindAuthPassword")?.value;
+        const status = document.getElementById("nutriMindAuthStatus");
+
+        if (!email || !password) {
+          if (status) status.textContent = "Enter email and password.";
+          return;
+        }
+
+        if (status) status.textContent = "Creating account...";
+
+        const { error } = await nutrimindSupabase.auth.signUp({
+          email,
+          password,
+        });
+
+        if (error) {
+          if (status) status.textContent = error.message;
+          return;
+        }
+
+        if (status) status.textContent = "Account created. Login now.";
+      }
+
+      function updateNutriMindUserStatus() {
+        const el = document.getElementById("nutriMindUserStatus");
+        if (!el) return;
+
+        el.innerHTML = currentNutriMindUser?.email
+          ? `Logged in as<br><strong>${currentNutriMindUser.email}</strong>`
+          : "Not signed in";
+      }
+
+      async function signOutNutriMind() {
+        await nutrimindSupabase.auth.signOut();
+        currentNutriMindUser = null;
+        updateNutriMindUserStatus();
+        location.reload();
       }
 
       function toast(message, type = "info") {
@@ -10045,13 +10311,47 @@ ${userText}`;
         setStudySaveState("saved");
       }
 
+      async function syncCurrentStudyToCloud() {
+        try {
+          if (!currentNutriMindUser) return;
+
+          const input = document.getElementById("studyReaderInput");
+          if (!input) return;
+
+          const titleEl = document.getElementById("studyReaderTitle");
+
+          const noteTitle = (titleEl?.textContent || "Study Note").trim();
+
+          const noteContent = input.innerHTML || "";
+
+          await nutrimindSupabase.from("nutrimind_notes").upsert(
+            {
+              user_id: currentNutriMindUser.id,
+              note_title: noteTitle,
+              note_content: noteContent,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: "user_id" },
+          );
+        } catch (err) {
+          console.log("Cloud sync skipped:", err);
+        }
+      }
+
       function queueStudyAutoSave() {
         setStudySaveState("saving");
 
         if (studyAutoSaveTimer) clearTimeout(studyAutoSaveTimer);
 
-        studyAutoSaveTimer = setTimeout(() => {
+        studyAutoSaveTimer = setTimeout(async () => {
           runStudyAutoSave();
+
+          try {
+            await syncCurrentStudyToCloud();
+          } catch (error) {
+            console.log("Study cloud sync skipped:", error);
+          }
+
           studyAutoSaveTimer = null;
         }, 700);
       }
@@ -12362,14 +12662,20 @@ ${userText}`;
       }
 
       updateEngineBanner("fallback", "Fallback ready", true);
-      refreshBrains();
-      renderCalendar();
-      renderEvents();
-      restoreChatHistory();
-      attachChatScrollWatcher();
-      forceChatToBottom();
-      runFreudBridgeAutoImport("startup");
-      initLLM();
+
+      (async () => {
+        const authOk = await initNutriMindCloudAuth();
+        if (!authOk) return;
+
+        refreshBrains();
+        renderCalendar();
+        renderEvents();
+        restoreChatHistory();
+        attachChatScrollWatcher();
+        forceChatToBottom();
+        runFreudBridgeAutoImport("startup");
+        initLLM();
+      })();
 
       const chatInput = document.getElementById("chatInput");
       if (chatInput) {
