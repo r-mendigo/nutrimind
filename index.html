@@ -8269,81 +8269,14 @@
       }
 
       async function initLLM(forceReload = false) {
-        if ((llmReady && !forceReload) || llmLoading) return;
+        llmReady = false;
+        llmLoading = false;
+        llmEngine = null;
 
-        llmLoading = true;
+        updateModelStatus("ready", "Mind engine ready");
+        updateEngineBanner("fallback", "Groq / fallback ready", false);
 
-        console.log("initLLM() started", {
-          forceReload,
-          llmReady,
-          llmLoading,
-          time: new Date().toLocaleTimeString(),
-        });
-
-        updateModelStatus("loading", "Mind engine loading...");
-        updateEngineBanner(
-          "fallback",
-          "Loading LLaMA / fallback check...",
-          false,
-        );
-
-        try {
-          console.log("Importing @mlc-ai/web-llm module...");
-
-          const mod = await import("https://esm.run/@mlc-ai/web-llm");
-
-          console.log("Module import successful.");
-
-          llmEngine = await mod.CreateMLCEngine(
-            "Llama-3.2-3B-Instruct-q4f16_1-MLC",
-            {
-              initProgressCallback: (report) => {
-                const pct = Math.round(report.progress || 0);
-
-                console.log("LLM loading progress:", pct + "%");
-
-                updateModelStatus("loading", `Mind engine loading... ${pct}%`);
-
-                updateEngineBanner(
-                  "fallback",
-                  `Loading LLaMA... ${pct}%`,
-                  false,
-                );
-              },
-            },
-          );
-
-          console.log("LLM engine created successfully.");
-
-          llmReady = true;
-
-          updateModelStatus("ready", "Mind engine ready");
-          updateEngineBanner("llm", "LLaMA connected", false);
-
-          toast("Mind engine is ready.", "success");
-
-          console.log("initLLM() completed successfully.");
-        } catch (error) {
-          console.error("LLM load error:", error);
-
-          llmReady = false;
-          llmEngine = null;
-
-          updateModelStatus("busy", "LLM unavailable — smart fallback active");
-
-          updateEngineBanner("fallback", "Fallback active", true);
-
-          console.log("Fallback mode activated.");
-        } finally {
-          llmLoading = false;
-
-          console.log("initLLM() finished cleanup", {
-            llmReady,
-            llmLoading,
-            engineExists: !!llmEngine,
-            time: new Date().toLocaleTimeString(),
-          });
-        }
+        console.log("Local LLaMA disabled. Using Groq / fallback only.");
       }
 
       function buildSystemPrompt() {
@@ -9611,8 +9544,6 @@ ${userText}`;
       }
 
       function reloadMindEngine() {
-        updateModelStatus("busy", "Reloading engine...");
-
         llmEngine = null;
         llmReady = false;
         llmLoading = false;
@@ -9630,8 +9561,8 @@ ${userText}`;
         }
 
         setSendButtonIdle();
-
-        initLLM(true); // force reload
+        updateModelStatus("ready", "Mind engine ready");
+        updateEngineBanner("fallback", "Groq / fallback ready", false);
       }
 
       function clearMindEngineChat() {
