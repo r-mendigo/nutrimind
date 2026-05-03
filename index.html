@@ -7714,13 +7714,27 @@
       }
 
       function persist() {
-        localStorage.setItem("nutriMindBrains", JSON.stringify(brains));
-        localStorage.setItem("nutriMindEvents", JSON.stringify(events));
-        localStorage.setItem(
-          "nutriMindNotifiedIds",
-          JSON.stringify(notifiedIds),
-        );
-        localStorage.setItem("nutriMindReasoningMode", reasoningMode);
+        try {
+          localStorage.setItem("nutriMindEvents", JSON.stringify(events));
+        } catch (err) {
+          console.log("Local events save skipped:", err);
+        }
+
+        try {
+          localStorage.setItem(
+            "nutriMindNotifiedIds",
+            JSON.stringify(notifiedIds),
+          );
+        } catch (err) {
+          console.log("Local notified ids save skipped:", err);
+        }
+
+        try {
+          localStorage.setItem("nutriMindReasoningMode", reasoningMode);
+        } catch (err) {
+          console.log("Local reasoning mode save skipped:", err);
+        }
+
         queueNutriMindCloudSave();
       }
 
@@ -8074,10 +8088,6 @@
 
           if (data.brains && typeof data.brains === "object") {
             brains = normalizeBrainsMap(data.brains);
-            localStorage.setItem(
-              "nutriMindBrainsStable",
-              JSON.stringify(brains),
-            );
           }
 
           if (Array.isArray(data.events)) {
