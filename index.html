@@ -8366,8 +8366,11 @@
 
         setNutriMindSyncStatus("syncing", "☁️ Syncing...");
 
-        await saveNutriMindStateToCloud();
-        await loadNutriMindStateFromCloud();
+        const loaded = await loadNutriMindStateFromCloud();
+
+        if (!loaded) {
+          await saveNutriMindStateToCloud();
+        }
 
         refreshBrains();
         renderCalendar();
