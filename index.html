@@ -8314,6 +8314,36 @@
         }
       }
 
+      async function manualNutriMindSync() {
+        const btn = document.getElementById("nmManualSyncBtn");
+
+        if (!currentNutriMindUser) {
+          setNutriMindSyncStatus("paused", "☁️ Sync paused");
+          return;
+        }
+
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "⏳";
+        }
+
+        setNutriMindSyncStatus("syncing", "☁️ Syncing...");
+
+        await saveNutriMindStateToCloud();
+        await loadNutriMindStateFromCloud();
+
+        refreshBrains();
+        renderCalendar();
+        renderEvents();
+
+        setNutriMindSyncStatus("synced", "☁️ Synced just now");
+
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "☁️";
+        }
+      }
+
       function startNutriMindCloudWatcher() {
         if (nutriMindCloudWatchTimer) clearInterval(nutriMindCloudWatchTimer);
 
@@ -12966,12 +12996,18 @@
 
       updateEngineBanner("fallback", "Fallback ready", true);
 
+      const nmManualSyncBtn = document.getElementById("nmManualSyncBtn");
+      if (nmManualSyncBtn) {
+        nmManualSyncBtn.addEventListener("click", manualNutriMindSync);
+      }
+
       (async () => {
         const authOk = await initNutriMindCloudAuth();
         if (!authOk) return;
 
         await loadNutriMindStateFromCloud();
-        startNutriMindCloudWatcher();
+        // Manual sync mode: watcher disabled to protect Supabase quota.
+        // startNutriMindCloudWatcher();
 
         refreshBrains();
         renderCalendar();
