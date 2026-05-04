@@ -404,7 +404,12 @@
       .topbar-sync {
         display: flex;
         align-items: center;
+        gap: 8px;
         margin-left: auto;
+      }
+
+      .nm-backup-input {
+        display: none;
       }
 
       .nm-sync-btn {
@@ -6288,6 +6293,32 @@
 
           <div class="topbar-sync">
             <button
+              id="nmTopExportBtn"
+              class="nm-sync-btn"
+              title="Export local backup"
+              aria-label="Export local backup"
+              type="button"
+              onclick="exportNutriMindLocalBackup()"
+            >
+              📤
+            </button>
+
+            <label
+              class="nm-sync-btn"
+              title="Import local backup"
+              aria-label="Import local backup"
+            >
+              📥
+              <input
+                id="nmTopImportFile"
+                class="nm-backup-input"
+                type="file"
+                accept=".json,application/json"
+                onchange="importNutriMindLocalBackup(event)"
+              />
+            </label>
+
+            <button
               id="nmManualSyncBtn"
               class="nm-sync-btn"
               title="Manual Sync"
@@ -7817,6 +7848,12 @@
       }
 
       function persist() {
+        try {
+          localStorage.setItem("nutriMindBrains", JSON.stringify(brains));
+        } catch (err) {
+          console.log("Local brains save skipped:", err);
+        }
+
         try {
           localStorage.setItem("nutriMindEvents", JSON.stringify(events));
         } catch (err) {
@@ -12885,13 +12922,94 @@
         return parsedEvents;
       }
 
-      function exportAllData() {
-        downloadJson("nutrimind-all-data.json", {
+      function exportNutriMindLocalBackup() {
+        const backup = {
+          app: "NutriMind",
+          version: 1,
+          exportedAt: new Date().toISOString(),
           brains,
           events,
           reasoningMode,
-        });
-        toast("All NutriMind data exported.", "success");
+          chatHistory: Array.isArray(chatHistory) ? chatHistory.slice(-60) : [],
+          trashItems:
+            typeof getTrashItems === "function" ? getTrashItems() : [],
+        };
+
+        downloadJson(`nutrimind-local-backup-${getLocalDateKey()}.json`, backup);
+        toast("Local backup exported.", "success");
+      }
+
+      function importNutriMindLocalBackup(event) {
+        const file = event?.target?.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const parsed = JSON.parse(reader.result);
+            if (!parsed || typeof parsed !== "object") throw new Error();
+
+            const incomingBrains =
+              parsed.brains && typeof parsed.brains === "object"
+                ? parsed.brains
+                : parsed;
+
+            if (!incomingBrains || typeof incomingBrains !== "object") {
+              throw new Error();
+            }
+
+            if (
+              !confirm(
+                "Import this NutriMind backup? This will replace the current local brains/events on this device.",
+              )
+            ) {
+              event.target.value = "";
+              return;
+            }
+
+            brains = normalizeBrainsMap(incomingBrains);
+            localStorage.setItem("nutriMindBrains", JSON.stringify(brains));
+
+            if (Array.isArray(parsed.events)) {
+              events = parsed.events
+                .map((evt) => normalizeNutriMindEvent(evt))
+                .filter(Boolean);
+              localStorage.setItem("nutriMindEvents", JSON.stringify(events));
+            }
+
+            if (["Tutor", "Analyst", "Strategist"].includes(parsed.reasoningMode)) {
+              reasoningMode = parsed.reasoningMode;
+              localStorage.setItem("nutriMindReasoningMode", reasoningMode);
+              updateTopModeLabel();
+            }
+
+            if (Array.isArray(parsed.chatHistory)) {
+              chatHistory = parsed.chatHistory.slice(-60);
+              persistChat();
+            }
+
+            if (Array.isArray(parsed.trashItems)) {
+              saveTrashItems(parsed.trashItems);
+            }
+
+            persist();
+            refreshBrains();
+            renderCalendar();
+            renderEvents();
+            restoreChatHistory();
+            toast("Local backup imported.", "success");
+          } catch (err) {
+            toast("That NutriMind backup file is not valid.", "error");
+          }
+
+          event.target.value = "";
+        };
+
+        reader.readAsText(file);
+      }
+
+      function exportAllData() {
+        exportNutriMindLocalBackup();
       }
 
       function downloadJson(filename, data) {
