@@ -401,6 +401,41 @@
           rgba(237, 243, 238, 0.9)
         );
       }
+      .topbar-sync {
+        display: flex;
+        align-items: center;
+        margin-left: auto;
+      }
+
+      .nm-sync-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+
+        border: 1px solid rgba(189, 206, 194, 0.72);
+        background: rgba(255, 255, 255, 0.9);
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        font-size: 0.95rem;
+        cursor: pointer;
+
+        transition: all 0.18s ease;
+      }
+
+      /* hover — premium glow */
+      .nm-sync-btn:hover {
+        border-color: rgba(216, 170, 39, 0.4);
+        box-shadow: 0 6px 16px rgba(216, 170, 39, 0.18);
+        transform: translateY(-1px);
+      }
+
+      /* active press */
+      .nm-sync-btn:active {
+        transform: scale(0.95);
+      }
 
       .topbar-left {
         display: flex;
@@ -6250,6 +6285,17 @@
               ⟳
             </button>
           </div>
+
+          <div class="topbar-sync">
+            <button
+              id="nmManualSyncBtn"
+              class="nm-sync-btn"
+              title="Manual Sync"
+              type="button"
+            >
+              ☁️
+            </button>
+          </div>
         </header>
 
         <section class="content">
@@ -8225,20 +8271,11 @@
       }
 
       function queueNutriMindCloudSave() {
-        if (!currentNutriMindUser) {
-          setNutriMindSyncStatus("paused", "☁️ Sync paused");
-          return;
-        }
-
         markNutriMindLocalChange();
-        setNutriMindSyncStatus("syncing", "☁️ Syncing.");
-
-        if (nutriMindCloudSaveTimer) clearTimeout(nutriMindCloudSaveTimer);
-
-        nutriMindCloudSaveTimer = setTimeout(async () => {
-          await saveNutriMindStateToCloud();
-          nutriMindCloudSaveTimer = null;
-        }, 900);
+        setNutriMindSyncStatus(
+          currentNutriMindUser ? "paused" : "paused",
+          currentNutriMindUser ? "☁️ Manual sync needed" : "☁️ Sync paused",
+        );
       }
 
       async function loadNutriMindStateFromCloud() {
@@ -13005,8 +13042,9 @@
         const authOk = await initNutriMindCloudAuth();
         if (!authOk) return;
 
-        await loadNutriMindStateFromCloud();
-        // Manual sync mode: watcher disabled to protect Supabase quota.
+        // Manual sync mode: no auto cloud load and no watcher.
+        // Press the ☁️ button to save → load → refresh.
+        // await loadNutriMindStateFromCloud();
         // startNutriMindCloudWatcher();
 
         refreshBrains();
