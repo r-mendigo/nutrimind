@@ -8234,7 +8234,7 @@
 
           const { data: remoteState } = await nutrimindSupabase
             .from("nutrimind_state")
-            .select("events")
+            .select("brains, events")
             .eq("user_id", currentNutriMindUser.id)
             .maybeSingle();
 
