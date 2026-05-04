@@ -7612,6 +7612,25 @@
           thinkingTextTimer = null;
         }
       }
+      function mergeNutriMindBrains(localMap, cloudMap) {
+        const result = { ...(cloudMap || {}) };
+
+        Object.entries(localMap || {}).forEach(([key, value]) => {
+          if (!result[key]) {
+            result[key] = value;
+          } else {
+            // simple priority: keep newer updatedAt
+            const localTime = new Date(value?.updatedAt || 0).getTime();
+            const cloudTime = new Date(result[key]?.updatedAt || 0).getTime();
+
+            if (localTime > cloudTime) {
+              result[key] = value;
+            }
+          }
+        });
+
+        return result;
+      }
 
       function normalizeBrainsMap(source) {
         const base = JSON.parse(JSON.stringify(defaultBrains));
@@ -8181,7 +8200,7 @@
             .from("nutrimind_state")
             .upsert({
               user_id: currentNutriMindUser.id,
-              brains,
+              brains: mergeNutriMindBrains(brains, remoteState?.brains || {}),
               events,
               updated_at: savedAt,
             });
@@ -8272,7 +8291,8 @@
           }
 
           if (data.brains && typeof data.brains === "object") {
-            brains = normalizeBrainsMap(data.brains);
+            brains = mergeNutriMindBrains(brains, data.brains);
+            brains = normalizeBrainsMap(brains);
             localStorage.setItem("nutriMindBrains", JSON.stringify(brains));
           }
 
