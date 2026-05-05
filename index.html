@@ -29,7 +29,6 @@
     />
     <link rel="apple-touch-icon" href="icons/icon-192.png?v=2" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
       * {
@@ -348,36 +347,6 @@
         font-size: 0.82rem;
         border-top: 1px solid rgba(189, 206, 194, 0.64);
         background: rgba(244, 248, 243, 0.92);
-      }
-
-      .nm-sync-status {
-        margin-top: 8px;
-        padding: 7px 9px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.72);
-        border: 1px solid rgba(189, 206, 194, 0.58);
-        color: #6c8276;
-        font-size: 0.76rem;
-        font-weight: 900;
-        line-height: 1.1;
-        white-space: nowrap;
-      }
-
-      .nm-sync-status.syncing {
-        color: #8a6812;
-      }
-
-      .nm-sync-status.synced {
-        color: #1f7a4b;
-      }
-
-      .nm-sync-status.paused {
-        color: #8a6870;
-      }
-
-      #nutriMindUserStatus {
-        line-height: 1.25;
-        word-break: break-word;
       }
 
       .main {
@@ -6032,148 +6001,215 @@
       .events-sidebar {
         scroll-behavior: smooth;
       }
-      .nutrimind-auth-gate {
+      .nm-lock-gate {
         position: fixed;
         inset: 0;
-        z-index: 9999;
-        display: none;
+        z-index: 5000;
+        display: flex;
         align-items: center;
         justify-content: center;
-        padding: 24px;
-        background:
-          radial-gradient(
-            circle at top left,
-            rgba(34, 179, 95, 0.08),
-            transparent 28%
-          ),
-          radial-gradient(
-            circle at top right,
-            rgba(216, 170, 39, 0.12),
-            transparent 26%
-          ),
-          linear-gradient(180deg, #eef4ef 0%, #e9f0ea 100%);
+        padding: 22px;
+        background: rgba(238, 244, 239, 0.92);
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
       }
 
-      .nutrimind-auth-gate.open {
-        display: flex;
-      }
-
-      .nutrimind-auth-card {
+      .nm-lock-card,
+      .nm-security-card {
         width: min(420px, 100%);
-        padding: 28px;
-        border-radius: 28px;
-        background: rgba(255, 255, 255, 0.92);
-        border: 1px solid rgba(189, 206, 194, 0.82);
-        box-shadow: 0 28px 70px rgba(57, 86, 70, 0.16);
+        border-radius: 24px;
+        padding: 24px;
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid rgba(189, 206, 194, 0.74);
+        box-shadow: 0 22px 60px rgba(43, 72, 58, 0.16);
+        text-align: center;
       }
 
-      .nutrimind-auth-icon {
-        width: 56px;
-        height: 56px;
+      .nm-lock-icon {
+        width: 54px;
+        height: 54px;
+        margin: 0 auto 12px;
         border-radius: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 18px;
-        background: linear-gradient(135deg, #22b35f 0%, #d8aa27 100%);
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #22b35f, #d8aa27);
+        color: white;
+        font-size: 1.4rem;
       }
 
-      .nutrimind-auth-card h2 {
-        margin: 0 0 6px;
-        font-size: 1.75rem;
-        line-height: 1.05;
-        letter-spacing: -0.05em;
+      .nm-lock-card h2,
+      .nm-security-card h3 {
+        margin: 0 0 8px;
         color: #173c2d;
       }
 
-      .nutrimind-auth-card p {
-        margin: 0 0 22px;
+      .nm-lock-card p {
+        margin: 0 0 18px;
         color: #6c8276;
         font-weight: 800;
       }
 
-      .nutrimind-auth-card input {
+      .nm-lock-card input,
+      .nm-security-card input {
         width: 100%;
         height: 48px;
-        margin-bottom: 12px;
-        padding: 0 16px;
+        margin-bottom: 10px;
+        padding: 0 15px;
         border-radius: 16px;
         border: 1px solid rgba(189, 206, 194, 0.86);
-        background: rgba(255, 255, 255, 0.96);
-        outline: none;
-        font-weight: 800;
+        background: rgba(255, 255, 255, 0.98);
         color: #173c2d;
+        font-weight: 800;
+        outline: none;
       }
 
-      .nutrimind-auth-actions {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-        margin-top: 8px;
-      }
-
-      .nutrimind-auth-actions button {
+      .nm-lock-primary {
+        width: 100%;
         height: 48px;
+        border: none;
         border-radius: 16px;
-        border: 1px solid rgba(189, 206, 194, 0.78);
+        background: linear-gradient(135deg, #22b35f, #1f9b54);
+        color: white;
         font-weight: 900;
         cursor: pointer;
       }
 
-      .nutrimind-auth-login {
-        background: linear-gradient(135deg, #22b35f, #1f9b54);
-        color: #fff;
-        border: none !important;
+      .nm-lock-status {
+        min-height: 20px;
+        margin-top: 12px;
+        color: #8a6812;
+        font-size: 0.86rem;
+        font-weight: 800;
       }
 
-      .nutrimind-auth-create {
-        background: rgba(255, 255, 255, 0.9);
+      .nm-security-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 5100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 22px;
+        background: rgba(45, 62, 52, 0.24);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+      }
+
+      .nm-security-card {
+        position: relative;
+      }
+
+      .nm-security-close {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 34px;
+        height: 34px;
+        border: 1px solid rgba(189, 206, 194, 0.72);
+        border-radius: 12px;
+        background: white;
+        cursor: pointer;
+        font-weight: 900;
+      }
+
+      .nm-local-title {
+        font-weight: 900;
         color: #173c2d;
       }
 
-      .nutrimind-auth-status {
-        margin-top: 16px;
+      .nm-local-sub {
+        margin-top: 5px;
         color: #6c8276;
+        font-size: 0.82rem;
         font-weight: 800;
-        font-size: 0.9rem;
+      }
+
+      .nm-password-status {
+        margin-top: 10px;
+        padding: 8px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.72);
+        border: 1px solid rgba(189, 206, 194, 0.58);
+        color: #173c2d;
+        font-size: 0.8rem;
+        font-weight: 900;
+      }
+
+      .nm-security-actions {
+        display: grid;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .nm-security-actions button {
+        width: 100%;
+        min-height: 38px;
+        border-radius: 14px;
+        border: 1px solid rgba(189, 206, 194, 0.72);
+        background: rgba(255, 255, 255, 0.88);
+        color: #173c2d;
+        font-weight: 900;
+        cursor: pointer;
       }
     </style>
   </head>
   <body>
-    <div id="nutriMindAuthGate" class="nutrimind-auth-gate">
-      <div class="nutrimind-auth-card">
-        <div class="nutrimind-auth-icon">🧠</div>
+    <div id="nutriMindLockGate" class="nm-lock-gate" style="display: none">
+      <div class="nm-lock-card">
+        <div class="nm-lock-icon">🔐</div>
+        <h2>NutriMind Locked</h2>
+        <p id="nmLockMessage">Enter your password to continue.</p>
 
-        <h2>Welcome to NutriMind</h2>
-        <p>Sync your mind across desktop and iPad.</p>
-
-        <input id="nutriMindAuthEmail" type="email" placeholder="Email" />
         <input
-          id="nutriMindAuthPassword"
+          id="nmUnlockPassword"
           type="password"
           placeholder="Password"
+          autocomplete="current-password"
         />
 
-        <div class="nutrimind-auth-actions">
-          <button
-            class="nutrimind-auth-login"
-            type="button"
-            onclick="signInNutriMind()"
-          >
-            Login
-          </button>
-          <button
-            class="nutrimind-auth-create"
-            type="button"
-            onclick="signUpNutriMind()"
-          >
-            Create Account
-          </button>
+        <button
+          type="button"
+          class="nm-lock-primary"
+          onclick="unlockNutriMind()"
+        >
+          Unlock
+        </button>
+
+        <div id="nmLockStatus" class="nm-lock-status"></div>
+      </div>
+    </div>
+
+    <div id="nmSecurityModal" class="nm-security-modal" style="display: none">
+      <div class="nm-security-card">
+        <button
+          class="nm-security-close"
+          type="button"
+          onclick="closeNutriMindSecurityModal()"
+        >
+          ×
+        </button>
+        <h3 id="nmSecurityTitle">Password</h3>
+
+        <div id="nmCurrentPasswordWrap" style="display: none">
+          <input
+            id="nmCurrentPassword"
+            type="password"
+            placeholder="Current password"
+          />
         </div>
 
-        <div id="nutriMindAuthStatus" class="nutrimind-auth-status">
-          Login to continue.
-        </div>
+        <input id="nmNewPassword" type="password" placeholder="New password" />
+        <input
+          id="nmConfirmPassword"
+          type="password"
+          placeholder="Confirm password"
+        />
+
+        <button id="nmSecurityActionBtn" type="button" class="nm-lock-primary">
+          Save
+        </button>
+
+        <div id="nmSecurityStatus" class="nm-lock-status"></div>
       </div>
     </div>
     <button class="mobile-menu" onclick="toggleSidebar()">☰</button>
@@ -6229,17 +6265,14 @@
         </div>
 
         <div class="sidebar-footer">
-          <div id="nutriMindUserStatus">Not signed in</div>
-          <div id="nutriMindSyncStatus" class="nm-sync-status paused">
-            ☁️ Sync paused
+          <div class="nm-local-title">NutriMind Local Mode</div>
+          <div class="nm-local-sub">Use 📤 export for backup.</div>
+
+          <div id="nmPasswordStatus" class="nm-password-status">
+            🔓 Password off
           </div>
-          <button
-            class="small-btn"
-            style="margin-top: 8px; width: 100%"
-            onclick="signOutNutriMind()"
-          >
-            Logout
-          </button>
+
+          <div id="nmSecurityActions" class="nm-security-actions"></div>
         </div>
       </aside>
 
@@ -6317,15 +6350,6 @@
                 onchange="importNutriMindLocalBackup(event)"
               />
             </label>
-
-            <button
-              id="nmManualSyncBtn"
-              class="nm-sync-btn"
-              title="Manual Sync"
-              type="button"
-            >
-              ☁️
-            </button>
           </div>
         </header>
 
@@ -7629,24 +7653,6 @@
       let leftPanelMode = "chat";
       let bingLastQuery = "";
 
-      const NM_SB_URL = "https://yskshgrjoaksngfdmbnz.supabase.co";
-      const NM_SB_ANON = "sb_publishable_fjUQf3Pd3ksu3GFbjNBiMQ_v8vK-6dr";
-
-      const nutrimindSupabase = window.supabase.createClient(
-        NM_SB_URL,
-        NM_SB_ANON,
-        {
-          auth: {
-            storageKey: "nutrimind-ipad-auth-v2",
-            persistSession: true,
-            autoRefreshToken: true,
-            detectSessionInUrl: false,
-          },
-        },
-      );
-
-      let currentNutriMindUser = null;
-
       let groqApiKey = localStorage.getItem("NUTRIMIND_GROQ_KEY") || "";
 
       function ensureGroqKey() {
@@ -7688,25 +7694,6 @@
           clearInterval(thinkingTextTimer);
           thinkingTextTimer = null;
         }
-      }
-      function mergeNutriMindBrains(localMap, cloudMap) {
-        const result = { ...(cloudMap || {}) };
-
-        Object.entries(localMap || {}).forEach(([key, value]) => {
-          if (!result[key]) {
-            result[key] = value;
-          } else {
-            // simple priority: keep newer updatedAt
-            const localTime = new Date(value?.updatedAt || 0).getTime();
-            const cloudTime = new Date(result[key]?.updatedAt || 0).getTime();
-
-            if (localTime > cloudTime) {
-              result[key] = value;
-            }
-          }
-        });
-
-        return result;
       }
 
       function normalizeBrainsMap(source) {
@@ -7874,8 +7861,6 @@
         } catch (err) {
           console.log("Local reasoning mode save skipped:", err);
         }
-
-        queueNutriMindCloudSave();
       }
 
       function persistChat() {
@@ -8063,381 +8048,6 @@
 
         const chatBox = document.getElementById("chatBox");
         if (shouldStickToBottom) chatBox.scrollTop = chatBox.scrollHeight;
-      }
-
-      function showNutriMindAuthGate(message = "Login to continue.") {
-        const gate = document.getElementById("nutriMindAuthGate");
-        const status = document.getElementById("nutriMindAuthStatus");
-
-        if (gate) gate.classList.add("open");
-        if (status) status.textContent = message;
-      }
-
-      function hideNutriMindAuthGate() {
-        const gate = document.getElementById("nutriMindAuthGate");
-        if (gate) gate.classList.remove("open");
-      }
-
-      async function initNutriMindCloudAuth() {
-        const {
-          data: { session },
-        } = await nutrimindSupabase.auth.getSession();
-
-        currentNutriMindUser = session?.user || null;
-
-        if (!currentNutriMindUser) {
-          updateNutriMindUserStatus();
-          showNutriMindAuthGate("Login to continue.");
-          return false;
-        }
-
-        hideNutriMindAuthGate();
-        updateNutriMindUserStatus();
-        return true;
-      }
-
-      async function signInNutriMind() {
-        const email = document
-          .getElementById("nutriMindAuthEmail")
-          ?.value.trim();
-        const password = document.getElementById(
-          "nutriMindAuthPassword",
-        )?.value;
-        const status = document.getElementById("nutriMindAuthStatus");
-
-        if (!email || !password) {
-          if (status) status.textContent = "Enter email and password.";
-          return;
-        }
-
-        if (status) status.textContent = "Signing in...";
-
-        const { error } = await nutrimindSupabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) {
-          if (status) status.textContent = error.message;
-          return;
-        }
-
-        location.reload();
-      }
-
-      async function signUpNutriMind() {
-        const email = document
-          .getElementById("nutriMindAuthEmail")
-          ?.value.trim();
-        const password = document.getElementById(
-          "nutriMindAuthPassword",
-        )?.value;
-        const status = document.getElementById("nutriMindAuthStatus");
-
-        if (!email || !password) {
-          if (status) status.textContent = "Enter email and password.";
-          return;
-        }
-
-        if (status) status.textContent = "Creating account...";
-
-        const { error } = await nutrimindSupabase.auth.signUp({
-          email,
-          password,
-        });
-
-        if (error) {
-          if (status) status.textContent = error.message;
-          return;
-        }
-
-        if (status) status.textContent = "Account created. Login now.";
-      }
-
-      function setNutriMindSyncStatus(state, text) {
-        const el = document.getElementById("nutriMindSyncStatus");
-        if (!el) return;
-
-        el.className = `nm-sync-status ${state}`;
-        el.textContent = text;
-      }
-
-      function updateNutriMindUserStatus() {
-        const el = document.getElementById("nutriMindUserStatus");
-        if (!el) return;
-
-        el.innerHTML = currentNutriMindUser?.email
-          ? `Logged in as<br><strong>${currentNutriMindUser.email}</strong>`
-          : "Not signed in";
-
-        setNutriMindSyncStatus(
-          currentNutriMindUser ? "synced" : "paused",
-          currentNutriMindUser ? "☁️ Synced just now" : "☁️ Sync paused",
-        );
-      }
-
-      async function signOutNutriMind() {
-        await nutrimindSupabase.auth.signOut();
-        currentNutriMindUser = null;
-        updateNutriMindUserStatus();
-        location.reload();
-      }
-      let nutriMindCloudSaveTimer = null;
-      let nutriMindCloudWatchTimer = null;
-      let lastNutriMindCloudUpdatedAt = 0;
-      let lastNutriMindLocalChangedAt = 0;
-
-      function markNutriMindLocalChange() {
-        lastNutriMindLocalChangedAt = Date.now();
-      }
-
-      function mergeNutriMindEvents(localList, cloudList) {
-        const merged = new Map();
-
-        [
-          ...(Array.isArray(cloudList) ? cloudList : []),
-          ...(Array.isArray(localList) ? localList : []),
-        ].forEach((evt) => {
-          if (!evt || typeof evt !== "object") return;
-
-          const id =
-            evt.id ||
-            `${evt.date || ""}|${evt.time || ""}|${evt.title || evt.text || ""}|${evt.note || ""}`;
-
-          if (!id || id === "|||") return;
-
-          merged.set(id, {
-            ...evt,
-            id,
-            date: evt.date || evt.day || evt.eventDate || "",
-            time: evt.time || evt.eventTime || "",
-            title:
-              evt.title ||
-              evt.text ||
-              evt.name ||
-              evt.summary ||
-              "Untitled event",
-            note: evt.note || evt.notes || evt.description || "",
-            createdAt:
-              evt.createdAt || evt.created_at || new Date().toISOString(),
-          });
-        });
-
-        return Array.from(merged.values()).sort((a, b) => {
-          const da = new Date(`${a.date || ""}T${a.time || "00:00"}`).getTime();
-          const db = new Date(`${b.date || ""}T${b.time || "00:00"}`).getTime();
-          return da - db;
-        });
-      }
-
-      async function saveNutriMindStateToCloud() {
-        if (!currentNutriMindUser) {
-          setNutriMindSyncStatus("paused", "☁️ Sync paused");
-          return false;
-        }
-
-        setNutriMindSyncStatus("syncing", "☁️ Syncing...");
-
-        try {
-          const { data: existing, error: readError } = await nutrimindSupabase
-            .from("nutrimind_state")
-            .select("updated_at")
-            .eq("user_id", currentNutriMindUser.id)
-            .maybeSingle();
-
-          if (readError) {
-            console.log(
-              "NutriMind cloud timestamp check failed:",
-              readError.message,
-            );
-            setNutriMindSyncStatus("paused", "☁️ Sync paused");
-            return false;
-          }
-
-          const remoteTime = existing?.updated_at
-            ? new Date(existing.updated_at).getTime()
-            : 0;
-
-          if (
-            remoteTime &&
-            lastNutriMindLocalChangedAt &&
-            remoteTime > lastNutriMindLocalChangedAt
-          ) {
-            console.warn("Skipped stale local save. Cloud is newer.");
-            lastNutriMindCloudUpdatedAt = remoteTime;
-            setNutriMindSyncStatus("synced", "☁️ Synced just now");
-            return false;
-          }
-
-          const { data: remoteState } = await nutrimindSupabase
-            .from("nutrimind_state")
-            .select("brains, events")
-            .eq("user_id", currentNutriMindUser.id)
-            .maybeSingle();
-
-          events = mergeNutriMindEvents(events, remoteState?.events || []);
-
-          const savedAt = new Date().toISOString();
-
-          const { error } = await nutrimindSupabase
-            .from("nutrimind_state")
-            .upsert({
-              user_id: currentNutriMindUser.id,
-              brains: mergeNutriMindBrains(brains, remoteState?.brains || {}),
-              events,
-              updated_at: savedAt,
-            });
-
-          if (error) {
-            console.log("NutriMind cloud state save failed:", error.message);
-            setNutriMindSyncStatus("paused", "☁️ Sync paused");
-            return false;
-          }
-
-          lastNutriMindCloudUpdatedAt = new Date(savedAt).getTime();
-          lastNutriMindLocalChangedAt = lastNutriMindCloudUpdatedAt;
-
-          console.log("NutriMind cloud state saved.");
-          setNutriMindSyncStatus("synced", "☁️ Synced just now");
-          return true;
-        } catch (err) {
-          console.log("NutriMind cloud state save skipped:", err);
-          setNutriMindSyncStatus("paused", "☁️ Sync paused");
-          return false;
-        }
-      }
-
-      function queueNutriMindCloudSave() {
-        markNutriMindLocalChange();
-        setNutriMindSyncStatus(
-          currentNutriMindUser ? "paused" : "paused",
-          currentNutriMindUser ? "☁️ Manual sync needed" : "☁️ Sync paused",
-        );
-      }
-
-      async function loadNutriMindStateFromCloud() {
-        if (!currentNutriMindUser) {
-          setNutriMindSyncStatus("paused", "☁️ Sync paused");
-          return false;
-        }
-
-        setNutriMindSyncStatus("syncing", "☁️ Syncing...");
-
-        try {
-          const { data, error } = await nutrimindSupabase
-            .from("nutrimind_state")
-            .select("brains, events, updated_at")
-            .eq("user_id", currentNutriMindUser.id)
-            .maybeSingle();
-
-          if (error) {
-            console.log("NutriMind cloud state load failed:", error.message);
-            setNutriMindSyncStatus("paused", "☁️ Sync paused");
-            return false;
-          }
-
-          if (!data) {
-            setNutriMindSyncStatus("synced", "☁️ Synced just now");
-            return false;
-          }
-
-          const cloudTime = data.updated_at
-            ? new Date(data.updated_at).getTime()
-            : 0;
-
-          if (
-            cloudTime &&
-            lastNutriMindLocalChangedAt &&
-            lastNutriMindLocalChangedAt > cloudTime
-          ) {
-            console.warn("Skipped cloud load. Local changes are newer.");
-            setNutriMindSyncStatus("synced", "☁️ Synced just now");
-            return false;
-          }
-
-          if (
-            cloudTime &&
-            lastNutriMindCloudUpdatedAt &&
-            cloudTime <= lastNutriMindCloudUpdatedAt
-          ) {
-            setNutriMindSyncStatus("synced", "☁️ Synced just now");
-            return false;
-          }
-
-          if (data.brains && typeof data.brains === "object") {
-            brains = mergeNutriMindBrains(brains, data.brains);
-            brains = normalizeBrainsMap(brains);
-            localStorage.setItem("nutriMindBrains", JSON.stringify(brains));
-          }
-
-          if (Array.isArray(data.events)) {
-            events = mergeNutriMindEvents(events, data.events);
-            localStorage.setItem("nutriMindEvents", JSON.stringify(events));
-          }
-
-          lastNutriMindCloudUpdatedAt = cloudTime || Date.now();
-          lastNutriMindLocalChangedAt = lastNutriMindCloudUpdatedAt;
-
-          console.log("NutriMind cloud state loaded.");
-          setNutriMindSyncStatus("synced", "☁️ Synced just now");
-          return true;
-        } catch (err) {
-          console.log("NutriMind cloud state load skipped:", err);
-          setNutriMindSyncStatus("paused", "☁️ Sync paused");
-          return false;
-        }
-      }
-
-      async function manualNutriMindSync() {
-        const btn = document.getElementById("nmManualSyncBtn");
-
-        if (!currentNutriMindUser) {
-          setNutriMindSyncStatus("paused", "☁️ Sync paused");
-          return;
-        }
-
-        if (btn) {
-          btn.disabled = true;
-          btn.textContent = "⏳";
-        }
-
-        setNutriMindSyncStatus("syncing", "☁️ Syncing...");
-
-        const loaded = await loadNutriMindStateFromCloud();
-
-        if (!loaded) {
-          await saveNutriMindStateToCloud();
-        }
-
-        refreshBrains();
-        renderCalendar();
-        renderEvents();
-
-        setNutriMindSyncStatus("synced", "☁️ Synced just now");
-
-        if (btn) {
-          btn.disabled = false;
-          btn.textContent = "☁️";
-        }
-      }
-
-      function startNutriMindCloudWatcher() {
-        if (nutriMindCloudWatchTimer) clearInterval(nutriMindCloudWatchTimer);
-
-        nutriMindCloudWatchTimer = setInterval(async () => {
-          if (!currentNutriMindUser) {
-            setNutriMindSyncStatus("paused", "☁️ Sync paused");
-            return;
-          }
-
-          const loaded = await loadNutriMindStateFromCloud();
-
-          if (loaded) {
-            refreshBrains();
-            renderCalendar();
-            renderEvents();
-          }
-        }, 15000);
       }
 
       function toast(message, type = "info") {
@@ -10667,47 +10277,13 @@
         setStudySaveState("saved");
       }
 
-      async function syncCurrentStudyToCloud() {
-        try {
-          if (!currentNutriMindUser) return;
-
-          const input = document.getElementById("studyReaderInput");
-          if (!input) return;
-
-          const titleEl = document.getElementById("studyReaderTitle");
-
-          const noteTitle = (titleEl?.textContent || "Study Note").trim();
-
-          const noteContent = input.innerHTML || "";
-
-          await nutrimindSupabase.from("nutrimind_notes").upsert(
-            {
-              user_id: currentNutriMindUser.id,
-              note_title: noteTitle,
-              note_content: noteContent,
-              updated_at: new Date().toISOString(),
-            },
-            { onConflict: "user_id" },
-          );
-        } catch (err) {
-          console.log("Cloud sync skipped:", err);
-        }
-      }
-
       function queueStudyAutoSave() {
         setStudySaveState("saving");
 
         if (studyAutoSaveTimer) clearTimeout(studyAutoSaveTimer);
 
-        studyAutoSaveTimer = setTimeout(async () => {
+        studyAutoSaveTimer = setTimeout(() => {
           runStudyAutoSave();
-
-          try {
-            await syncCurrentStudyToCloud();
-          } catch (error) {
-            console.log("Study cloud sync skipped:", error);
-          }
-
           studyAutoSaveTimer = null;
         }, 700);
       }
@@ -12935,7 +12511,10 @@
             typeof getTrashItems === "function" ? getTrashItems() : [],
         };
 
-        downloadJson(`nutrimind-local-backup-${getLocalDateKey()}.json`, backup);
+        downloadJson(
+          `nutrimind-local-backup-${getLocalDateKey()}.json`,
+          backup,
+        );
         toast("Local backup exported.", "success");
       }
 
@@ -12977,7 +12556,9 @@
               localStorage.setItem("nutriMindEvents", JSON.stringify(events));
             }
 
-            if (["Tutor", "Analyst", "Strategist"].includes(parsed.reasoningMode)) {
+            if (
+              ["Tutor", "Analyst", "Strategist"].includes(parsed.reasoningMode)
+            ) {
               reasoningMode = parsed.reasoningMode;
               localStorage.setItem("nutriMindReasoningMode", reasoningMode);
               updateTopModeLabel();
@@ -13154,31 +12735,269 @@
 
       updateEngineBanner("fallback", "Fallback ready", true);
 
-      const nmManualSyncBtn = document.getElementById("nmManualSyncBtn");
-      if (nmManualSyncBtn) {
-        nmManualSyncBtn.addEventListener("click", manualNutriMindSync);
-      }
+      const NM_LOCK_ENABLED_KEY = "nutriMindLockEnabled";
+      const NM_PASSWORD_HASH_KEY = "nutriMindPasswordHash";
 
-      (async () => {
-        const authOk = await initNutriMindCloudAuth();
-        if (!authOk) return;
+      let nutriMindStarted = false;
 
-        // Manual sync mode: no auto cloud load and no watcher.
-        // Press the ☁️ button to save → load → refresh.
-        // await loadNutriMindStateFromCloud();
-        // startNutriMindCloudWatcher();
+      function runNutriMindLocalStartup() {
+        if (nutriMindStarted) return;
+        nutriMindStarted = true;
 
         refreshBrains();
         renderCalendar();
         renderEvents();
+
         restoreChatHistory();
         attachChatScrollWatcher();
         forceChatToBottom();
+
         runFreudBridgeAutoImport("startup");
 
         updateModelStatus("ready", "Mind engine ready");
         updateEngineBanner("fallback", "Groq / fallback ready", true);
-      })();
+
+        refreshNutriMindSecurityPanel();
+      }
+
+      async function hashNutriMindPassword(password) {
+        const data = new TextEncoder().encode(password);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+        return Array.from(new Uint8Array(hashBuffer))
+          .map((byte) => byte.toString(16).padStart(2, "0"))
+          .join("");
+      }
+
+      function isNutriMindLockEnabled() {
+        return (
+          localStorage.getItem(NM_LOCK_ENABLED_KEY) === "true" &&
+          !!localStorage.getItem(NM_PASSWORD_HASH_KEY)
+        );
+      }
+
+      function showNutriMindLockGate(
+        message = "Enter your password to continue.",
+      ) {
+        const gate = document.getElementById("nutriMindLockGate");
+        const app = document.getElementById("appShell");
+        const msg = document.getElementById("nmLockMessage");
+        const input = document.getElementById("nmUnlockPassword");
+        const status = document.getElementById("nmLockStatus");
+
+        if (app) app.style.display = "none";
+        if (gate) gate.style.display = "flex";
+        if (msg) msg.textContent = message;
+        if (status) status.textContent = "";
+        if (input) {
+          input.value = "";
+          setTimeout(() => input.focus(), 80);
+        }
+      }
+
+      function hideNutriMindLockGate() {
+        const gate = document.getElementById("nutriMindLockGate");
+        const app = document.getElementById("appShell");
+
+        if (gate) gate.style.display = "none";
+        if (app) app.style.display = "";
+      }
+
+      async function unlockNutriMind() {
+        const input = document.getElementById("nmUnlockPassword");
+        const status = document.getElementById("nmLockStatus");
+        const password = input?.value || "";
+
+        if (!password) {
+          if (status) status.textContent = "Enter your password.";
+          return;
+        }
+
+        const savedHash = localStorage.getItem(NM_PASSWORD_HASH_KEY) || "";
+        const typedHash = await hashNutriMindPassword(password);
+
+        if (typedHash !== savedHash) {
+          if (status) status.textContent = "Wrong password.";
+          return;
+        }
+
+        hideNutriMindLockGate();
+        runNutriMindLocalStartup();
+      }
+
+      function openNutriMindSecurityModal(mode) {
+        const modal = document.getElementById("nmSecurityModal");
+        const title = document.getElementById("nmSecurityTitle");
+        const currentWrap = document.getElementById("nmCurrentPasswordWrap");
+        const current = document.getElementById("nmCurrentPassword");
+        const pass = document.getElementById("nmNewPassword");
+        const confirm = document.getElementById("nmConfirmPassword");
+        const btn = document.getElementById("nmSecurityActionBtn");
+        const status = document.getElementById("nmSecurityStatus");
+
+        if (!modal || !btn) return;
+
+        if (current) current.value = "";
+        if (pass) pass.value = "";
+        if (confirm) confirm.value = "";
+        if (status) status.textContent = "";
+
+        if (mode === "enable") {
+          title.textContent = "Enable password";
+          currentWrap.style.display = "none";
+          pass.style.display = "";
+          confirm.style.display = "";
+          btn.textContent = "Enable password";
+          btn.onclick = enableNutriMindPassword;
+        }
+
+        if (mode === "change") {
+          title.textContent = "Change password";
+          currentWrap.style.display = "";
+          pass.style.display = "";
+          confirm.style.display = "";
+          btn.textContent = "Change password";
+          btn.onclick = changeNutriMindPassword;
+        }
+
+        if (mode === "disable") {
+          title.textContent = "Disable password";
+          currentWrap.style.display = "";
+          pass.style.display = "none";
+          confirm.style.display = "none";
+          btn.textContent = "Disable password";
+          btn.onclick = disableNutriMindPassword;
+        }
+
+        modal.style.display = "flex";
+      }
+
+      function closeNutriMindSecurityModal() {
+        const modal = document.getElementById("nmSecurityModal");
+        if (modal) modal.style.display = "none";
+      }
+
+      async function verifyCurrentNutriMindPassword() {
+        const current = document.getElementById("nmCurrentPassword");
+        const status = document.getElementById("nmSecurityStatus");
+        const savedHash = localStorage.getItem(NM_PASSWORD_HASH_KEY) || "";
+        const typedHash = await hashNutriMindPassword(current?.value || "");
+
+        if (typedHash !== savedHash) {
+          if (status) status.textContent = "Current password is wrong.";
+          return false;
+        }
+
+        return true;
+      }
+
+      async function enableNutriMindPassword() {
+        const pass = document.getElementById("nmNewPassword")?.value || "";
+        const confirm =
+          document.getElementById("nmConfirmPassword")?.value || "";
+        const status = document.getElementById("nmSecurityStatus");
+
+        if (pass.length < 4) {
+          if (status) status.textContent = "Use at least 4 characters.";
+          return;
+        }
+
+        if (pass !== confirm) {
+          if (status) status.textContent = "Passwords do not match.";
+          return;
+        }
+
+        localStorage.setItem(
+          NM_PASSWORD_HASH_KEY,
+          await hashNutriMindPassword(pass),
+        );
+        localStorage.setItem(NM_LOCK_ENABLED_KEY, "true");
+
+        closeNutriMindSecurityModal();
+        refreshNutriMindSecurityPanel();
+        toast("Password protection enabled.", "success");
+      }
+
+      async function changeNutriMindPassword() {
+        const ok = await verifyCurrentNutriMindPassword();
+        if (!ok) return;
+
+        const pass = document.getElementById("nmNewPassword")?.value || "";
+        const confirm =
+          document.getElementById("nmConfirmPassword")?.value || "";
+        const status = document.getElementById("nmSecurityStatus");
+
+        if (pass.length < 4) {
+          if (status) status.textContent = "Use at least 4 characters.";
+          return;
+        }
+
+        if (pass !== confirm) {
+          if (status) status.textContent = "Passwords do not match.";
+          return;
+        }
+
+        localStorage.setItem(
+          NM_PASSWORD_HASH_KEY,
+          await hashNutriMindPassword(pass),
+        );
+        localStorage.setItem(NM_LOCK_ENABLED_KEY, "true");
+
+        closeNutriMindSecurityModal();
+        refreshNutriMindSecurityPanel();
+        toast("Password changed.", "success");
+      }
+
+      async function disableNutriMindPassword() {
+        const ok = await verifyCurrentNutriMindPassword();
+        if (!ok) return;
+
+        localStorage.setItem(NM_LOCK_ENABLED_KEY, "false");
+        localStorage.removeItem(NM_PASSWORD_HASH_KEY);
+
+        closeNutriMindSecurityModal();
+        refreshNutriMindSecurityPanel();
+        toast("Password protection disabled.", "success");
+      }
+
+      function lockNutriMindNow() {
+        if (!isNutriMindLockEnabled()) return;
+        showNutriMindLockGate("NutriMind is locked.");
+      }
+
+      function refreshNutriMindSecurityPanel() {
+        const status = document.getElementById("nmPasswordStatus");
+        const actions = document.getElementById("nmSecurityActions");
+        if (!status || !actions) return;
+
+        if (isNutriMindLockEnabled()) {
+          status.textContent = "🔐 Password protected";
+          actions.innerHTML = `
+      <button type="button" onclick="lockNutriMindNow()">Lock now</button>
+      <button type="button" onclick="openNutriMindSecurityModal('change')">Change password</button>
+      <button type="button" onclick="openNutriMindSecurityModal('disable')">Disable password</button>
+    `;
+        } else {
+          status.textContent = "🔓 Password off";
+          actions.innerHTML = `
+      <button type="button" onclick="openNutriMindSecurityModal('enable')">Enable password</button>
+    `;
+        }
+      }
+
+      window.unlockNutriMind = unlockNutriMind;
+      window.openNutriMindSecurityModal = openNutriMindSecurityModal;
+      window.closeNutriMindSecurityModal = closeNutriMindSecurityModal;
+      window.enableNutriMindPassword = enableNutriMindPassword;
+      window.changeNutriMindPassword = changeNutriMindPassword;
+      window.disableNutriMindPassword = disableNutriMindPassword;
+      window.lockNutriMindNow = lockNutriMindNow;
+
+      if (isNutriMindLockEnabled()) {
+        showNutriMindLockGate();
+      } else {
+        hideNutriMindLockGate();
+        runNutriMindLocalStartup();
+      }
 
       const chatInput = document.getElementById("chatInput");
       if (chatInput) {
@@ -13436,31 +13255,13 @@
         }, 250);
       }
 
-      async function refreshNutriMindFromCloud(reason = "resume") {
-        if (!currentNutriMindUser) {
-          setNutriMindSyncStatus("paused", "☁️ Sync paused");
-          return;
-        }
-
-        const loaded = await loadNutriMindStateFromCloud();
-
-        if (loaded) {
-          refreshBrains();
-          renderCalendar();
-          renderEvents();
-          refreshSidebarDashboard(reason);
-        }
-      }
-
       window.addEventListener("focus", () => {
         runFreudBridgeAutoImport("window-focus");
-        refreshNutriMindFromCloud("window-focus");
       });
 
       document.addEventListener("visibilitychange", () => {
         if (!document.hidden) {
           runFreudBridgeAutoImport("visibility-return");
-          refreshNutriMindFromCloud("visibility-return");
         }
       });
 
