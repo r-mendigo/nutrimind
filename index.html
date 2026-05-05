@@ -29,6 +29,8 @@
     />
     <link rel="apple-touch-icon" href="icons/icon-192.png?v=2" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 
     <style>
       * {
@@ -6328,6 +6330,23 @@
           0 10px 22px rgba(43, 72, 58, 0.12),
           0 0 12px rgba(34, 179, 95, 0.25);
       }
+
+      .message-export-tools {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .message-export-tools button {
+        border: none;
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: 12px;
+        padding: 6px 10px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      }
     </style>
   </head>
   <body>
@@ -8040,6 +8059,94 @@
         }
       }
 
+      async function exportToWord(title, content) {
+        const { Document, Packer, Paragraph, TextRun } = window.docx;
+
+        const doc = new Document({
+          sections: [
+            {
+              children: [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: title,
+                      bold: true,
+                      size: 32,
+                    }),
+                  ],
+                }),
+                ...content.split("\n").map(
+                  (line) =>
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: line,
+                          size: 24,
+                        }),
+                      ],
+                    }),
+                ),
+              ],
+            },
+          ],
+        });
+
+        const blob = await Packer.toBlob(doc);
+
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `${title}.docx`;
+        a.click();
+      }
+
+      function exportToPPT(title, content) {
+        const pptx = new PptxGenJS();
+
+        const slides = content.split("\n\n");
+
+        slides.forEach((section, index) => {
+          const slide = pptx.addSlide();
+
+          slide.addText(title, {
+            x: 0.5,
+            y: 0.5,
+            fontSize: 24,
+            bold: true,
+          });
+
+          slide.addText(section, {
+            x: 0.5,
+            y: 1.5,
+            fontSize: 14,
+            w: "90%",
+          });
+        });
+
+        pptx.writeFile({ fileName: `${title}.pptx` });
+      }
+
+      function addExportLinksToBubble(bubble, text) {
+        if (!bubble || !text.trim()) return;
+
+        const tools = document.createElement("div");
+        tools.className = "message-export-tools";
+
+        tools.innerHTML = `
+    <button type="button" onclick="exportToWord('Nutri C Report', lastStoppedAssistantText)">📄 Word</button>
+    <button type="button" onclick="exportToPPT('Nutri C Report', lastStoppedAssistantText)">📊 PowerPoint</button>
+  `;
+
+        bubble.appendChild(tools);
+      }
+
+      function shouldShowExportTools(userText) {
+        if (!userText) return false;
+
+        return /report|document|write-?up|proposal|business plan|case study|presentation|slides|powerpoint|ppt|ms word|docx/i.test(
+          userText,
+        );
+      }
+
       function persistChat() {
         localStorage.setItem(
           "nutriMindChatHistoryStable",
@@ -8439,21 +8546,46 @@ Analyst behavior:
 - Avoid fixed report-style templates unless the user asks for a report.
 - Be precise, grounded, and useful.`,
 
-          Strategist: `You are NutriMind in Strategist Mode.
+          Strategist: `You are NutriMind in Strategist Mode — an MBA-level decision partner with operator-level realism.
 
-Your role is to think clearly, cut through noise, and guide decisions that work in the real world.
-You organize raw pieces, remove what does not belong, prioritize leverage, and create practical direction.
+Your role is to help the user make clear, reality-tested decisions. You judge the situation, expose what will likely work or fail, and recommend the strongest path.
 
-Strategist behavior:
-- Answer the real question directly first.
-- Do not default to templates.
-- Identify what actually matters.
-- Point out blind spots or bad moves when needed.
-- Prioritize leverage over completeness.
-- Think in positioning, timing, execution, trade-offs, obstacles, and advantage.
-- Give next actions only when they are meaningful, not forced.
-- Avoid repeating the same response format across answers.
-- Do not sound like a blog post or motivational script.`,
+Core behavior:
+- Start with a clear stance when the question asks for judgment: yes, no, not yet, or conditional.
+- If the answer is conditional, state the condition clearly.
+- Defend the stance with the strongest reason.
+- Focus on the real bottleneck, not every business factor.
+- Recommend the next best move only when it directly follows from the diagnosis.
+
+Operator logic:
+- Look for what breaks in execution: switching costs, customer resistance, integration complexity, sales difficulty, cash flow pressure, compliance, operational drag, or weak differentiation.
+- If the idea is premature, explain the missing proof or missing wedge.
+- If the idea is strong, explain why it can win and what must be protected.
+- If a better path exists, redirect the user toward it.
+
+MBA thinking:
+Use business frameworks silently as thinking tools, not as visible templates, unless the user asks for a formal report.
+Consider market demand, customer segment, willingness to pay, competition, differentiation, cost structure, margins, risk, scalability, and execution — but only mention what matters to the decision.
+
+Required answer behavior:
+- Always follow this structure internally:
+  1. Clear stance
+  2. One or two strongest reasons
+  3. One real-world friction or constraint
+  4. Firm closing or next move (only if directly justified)
+
+- Do not expand into general advice, checklists, or broad recommendations unless the user explicitly asks for a plan.
+
+Style:
+- Write in natural, connected reasoning.
+- Avoid bullet lists by default. Use them only for concrete options or actions when necessary.
+- Avoid rigid labeled sections like "Market friction:" or "Cost structure:" unless the user asks for a formal breakdown.
+- Keep the answer sharp, practical, and decision-focused.
+- Avoid textbook tone, blog tone, motivational filler, and generic startup advice.
+- End with a firm, decision-oriented closing that reinforces the stance.
+
+Your goal:
+Give answers that feel like a smart operator is helping the user avoid bad moves, see the real leverage, and choose the strongest next step.`,
         };
 
         return `${roleMap[reasoningMode] || roleMap.Analyst}
@@ -9345,6 +9477,10 @@ Quality Rules:
             );
           } else {
             setBubbleContent(bubble, lastStoppedAssistantText);
+
+            if (shouldShowExportTools(finalPromptForEngine)) {
+              addExportLinksToBubble(bubble, lastStoppedAssistantText);
+            }
 
             chatHistory.push({
               role: "assistant",
