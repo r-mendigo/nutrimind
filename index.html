@@ -373,7 +373,7 @@
       .topbar-sync {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
         margin-left: auto;
       }
 
@@ -382,28 +382,37 @@
       }
 
       .nm-sync-btn {
-        width: 36px;
-        height: 36px;
-        border-radius: 12px;
+        width: 38px;
+        height: 38px;
+        border-radius: 15px;
 
-        border: 1px solid rgba(189, 206, 194, 0.72);
-        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        background: linear-gradient(
+          135deg,
+          rgba(34, 179, 95, 0.14),
+          rgba(216, 170, 39, 0.18)
+        );
 
         display: inline-flex;
         align-items: center;
         justify-content: center;
 
-        font-size: 0.95rem;
+        font-size: 1rem;
         cursor: pointer;
 
-        transition: all 0.18s ease;
+        box-shadow: 0 8px 18px rgba(43, 72, 58, 0.08);
+        transition:
+          transform 0.18s ease,
+          box-shadow 0.18s ease,
+          background 0.18s ease;
       }
 
       /* hover — premium glow */
       .nm-sync-btn:hover {
-        border-color: rgba(216, 170, 39, 0.4);
-        box-shadow: 0 6px 16px rgba(216, 170, 39, 0.18);
         transform: translateY(-1px);
+        box-shadow:
+          0 10px 22px rgba(43, 72, 58, 0.12),
+          0 0 12px rgba(34, 179, 95, 0.25);
       }
 
       /* active press */
@@ -1152,6 +1161,66 @@
         }
         to {
           transform: rotate(360deg);
+        }
+      }
+
+      .message-card.bot.message-reveal {
+        animation: nmBotSoftIn 0.42s ease-out both;
+      }
+
+      .message-card.bot.message-reveal .message-content > * {
+        opacity: 0;
+        transform: translateY(8px);
+        animation: nmBotLineReveal 0.52s ease-out forwards;
+      }
+
+      .message-card.bot.message-reveal .message-content > *:nth-child(1) {
+        animation-delay: 0.08s;
+      }
+
+      .message-card.bot.message-reveal .message-content > *:nth-child(2) {
+        animation-delay: 0.22s;
+      }
+
+      .message-card.bot.message-reveal .message-content > *:nth-child(3) {
+        animation-delay: 0.36s;
+      }
+
+      .message-card.bot.message-reveal .message-content > *:nth-child(4) {
+        animation-delay: 0.5s;
+      }
+
+      .message-card.bot.message-reveal .message-content > *:nth-child(5) {
+        animation-delay: 0.64s;
+      }
+
+      .message-card.bot.message-reveal .message-content > *:nth-child(6) {
+        animation-delay: 0.78s;
+      }
+
+      .message-card.bot.message-reveal .message-content > *:nth-child(7) {
+        animation-delay: 0.92s;
+      }
+
+      .message-card.bot.message-reveal .message-content > *:nth-child(n + 8) {
+        animation-delay: 1.06s;
+      }
+
+      @keyframes nmBotSoftIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes nmBotLineReveal {
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
       }
 
@@ -2457,8 +2526,8 @@
       /* ===== NutriMind Phase 2 Micro-Interactions ===== */
 
       /* ---------------------------------
-         1) softer overall motion tuning
-      --------------------------------- */
+               1) softer overall motion tuning
+            --------------------------------- */
       .nav-btn,
       .topic-btn,
       .calendar-day,
@@ -2487,8 +2556,8 @@
       }
 
       /* ---------------------------------
-         2) top-right playful buttons
-      --------------------------------- */
+               2) top-right playful buttons
+            --------------------------------- */
       .toolbar-icon-btn {
         position: relative;
         overflow: hidden;
@@ -2521,8 +2590,8 @@
       }
 
       /* ---------------------------------
-         3) sidebar and topic active states
-      --------------------------------- */
+               3) sidebar and topic active states
+            --------------------------------- */
       .nav-btn.active,
       .topic-btn.active {
         position: relative;
@@ -2548,8 +2617,8 @@
       }
 
       /* ---------------------------------
-         4) cards feel more premium
-      --------------------------------- */
+               4) cards feel more premium
+            --------------------------------- */
       .mini-card,
       .panel,
       .manager-card,
@@ -2594,8 +2663,8 @@
       }
 
       /* ---------------------------------
-         5) mini stat cards stronger hover
-      --------------------------------- */
+               5) mini stat cards stronger hover
+            --------------------------------- */
       .mini-card:hover .mini-icon {
         transform: scale(1.06) rotate(-4deg);
         box-shadow: 0 10px 20px rgba(216, 170, 39, 0.14);
@@ -2609,8 +2678,8 @@
       }
 
       /* ---------------------------------
-         6) calendar feels interactive
-      --------------------------------- */
+               6) calendar feels interactive
+            --------------------------------- */
       .calendar-day {
         overflow: hidden;
       }
@@ -2662,8 +2731,8 @@
       }
 
       /* ---------------------------------
-         7) composer shell feels alive
-      --------------------------------- */
+               7) composer shell feels alive
+            --------------------------------- */
       .controls-row {
         position: relative;
       }
@@ -2683,8 +2752,8 @@
       }
 
       /* ---------------------------------
-         8) input typing focus feel
-      --------------------------------- */
+               8) input typing focus feel
+            --------------------------------- */
       #chatInput,
       .chat-textarea,
       .quick-search-input,
@@ -2708,8 +2777,8 @@
       }
 
       /* ---------------------------------
-         9) send button pulse / ready feel
-      --------------------------------- */
+               9) send button pulse / ready feel
+            --------------------------------- */
       .send-btn {
         position: relative;
         overflow: hidden;
@@ -2753,8 +2822,8 @@
       }
 
       /* ---------------------------------
-         10) quick search and CTA buttons
-      --------------------------------- */
+               10) quick search and CTA buttons
+            --------------------------------- */
       .quick-search-btn,
       .btn-primary,
       .quiz-btn {
@@ -2776,8 +2845,8 @@
       }
 
       /* ---------------------------------
-         11) status pills and badges
-      --------------------------------- */
+               11) status pills and badges
+            --------------------------------- */
       .status-pill:hover,
       .engine-status-bar:hover,
       .brain-badge:hover,
@@ -2799,8 +2868,8 @@
       }
 
       /* ---------------------------------
-         12) brain list cards
-      --------------------------------- */
+               12) brain list cards
+            --------------------------------- */
       .brain-item:hover .brain-item-title,
       .event-item:hover .event-item-title {
         color: #174533;
@@ -2812,8 +2881,8 @@
       }
 
       /* ---------------------------------
-         13) subtle scrollbar polish
-      --------------------------------- */
+               13) subtle scrollbar polish
+            --------------------------------- */
       .message-stream::-webkit-scrollbar-thumb,
       .left-panel-scroll::-webkit-scrollbar-thumb,
       .brain-list::-webkit-scrollbar-thumb,
@@ -2833,8 +2902,8 @@
       }
 
       /* ---------------------------------
-         14) mobile: keep motion subtle
-      --------------------------------- */
+               14) mobile: keep motion subtle
+            --------------------------------- */
       @media (max-width: 920px) {
         .nav-btn:hover,
         .topic-btn:hover,
@@ -2858,8 +2927,8 @@
       /* ===== NutriMind Phase 3 Premium Motion ===== */
 
       /* ---------------------------------
-         1) view / panel entrance feel
-      --------------------------------- */
+               1) view / panel entrance feel
+            --------------------------------- */
       .view.active,
       .panel,
       .manager-card,
@@ -2886,8 +2955,8 @@
       }
 
       /* ---------------------------------
-         2) stagger feeling for stat cards
-      --------------------------------- */
+               2) stagger feeling for stat cards
+            --------------------------------- */
       .cards-grid .mini-card:nth-child(1) {
         animation-delay: 0.02s;
       }
@@ -2903,8 +2972,8 @@
       }
 
       /* ---------------------------------
-         3) chat stream smooth appearance
-      --------------------------------- */
+               3) chat stream smooth appearance
+            --------------------------------- */
       .message-stream {
         scroll-behavior: smooth;
       }
@@ -2943,8 +3012,8 @@
       }
 
       /* ---------------------------------
-         4) response text feels alive
-      --------------------------------- */
+               4) response text feels alive
+            --------------------------------- */
       .message-card.bot .message-content {
         animation: nmReplySettle 0.22s ease;
       }
@@ -2961,8 +3030,8 @@
       }
 
       /* ---------------------------------
-         5) typing bubble intelligence feel
-      --------------------------------- */
+               5) typing bubble intelligence feel
+            --------------------------------- */
       .typing-row {
         animation: nmTypingFade 0.22s ease;
       }
@@ -3042,8 +3111,8 @@
       }
 
       /* ---------------------------------
-         6) hero card elegant idle feel
-      --------------------------------- */
+               6) hero card elegant idle feel
+            --------------------------------- */
       .hero-card {
         position: relative;
         overflow: hidden;
@@ -3077,8 +3146,8 @@
       }
 
       /* ---------------------------------
-         7) cards settle more smoothly
-      --------------------------------- */
+               7) cards settle more smoothly
+            --------------------------------- */
       .panel,
       .manager-card,
       .calendar-card,
@@ -3091,8 +3160,8 @@
       }
 
       /* ---------------------------------
-         8) active composer premium focus
-      --------------------------------- */
+               8) active composer premium focus
+            --------------------------------- */
       .controls-row {
         transition:
           transform 0.2s ease,
@@ -3109,8 +3178,8 @@
       }
 
       /* ---------------------------------
-         9) send interaction polish
-      --------------------------------- */
+               9) send interaction polish
+            --------------------------------- */
       .send-btn {
         transform-origin: center;
       }
@@ -3136,8 +3205,8 @@
       }
 
       /* ---------------------------------
-         10) toolbar icon micro-pop
-      --------------------------------- */
+               10) toolbar icon micro-pop
+            --------------------------------- */
       .toolbar-icon-btn:hover {
         animation: nmIconWiggle 0.24s ease;
       }
@@ -3158,8 +3227,8 @@
       }
 
       /* ---------------------------------
-         11) brain/event list smoother reveal
-      --------------------------------- */
+               11) brain/event list smoother reveal
+            --------------------------------- */
       .brain-item,
       .event-item {
         animation: nmFadeRiseSoft 0.28s ease both;
@@ -3194,16 +3263,16 @@
       }
 
       /* ---------------------------------
-         12) empty and helper states
-      --------------------------------- */
+               12) empty and helper states
+            --------------------------------- */
       .empty,
       .llm-recovery-notice {
         animation: nmFadeRiseSoft 0.26s ease;
       }
 
       /* ---------------------------------
-         13) modal presence
-      --------------------------------- */
+               13) modal presence
+            --------------------------------- */
       .modal {
         animation: nmOverlayIn 0.18s ease;
       }
@@ -3234,8 +3303,8 @@
       }
 
       /* ---------------------------------
-         14) reduce motion on mobile
-      --------------------------------- */
+               14) reduce motion on mobile
+            --------------------------------- */
       @media (max-width: 920px) {
         .view.active,
         .panel,
@@ -3267,13 +3336,13 @@
       }
 
       /* =========================================================
-         STUDY MODE — FINAL CLEAN VERSION
-         Purpose:
-         - One single source of truth
-         - Curriculum = true overlay peek
-         - Research Engine left
-         - Study Reader right and larger
-      ========================================================= */
+               STUDY MODE — FINAL CLEAN VERSION
+               Purpose:
+               - One single source of truth
+               - Curriculum = true overlay peek
+               - Research Engine left
+               - Study Reader right and larger
+            ========================================================= */
 
       /* ---------- Main Study Mode layout ---------- */
       .chat-layout.study-mode {
@@ -6125,31 +6194,139 @@
       }
 
       .nm-password-status {
-        margin-top: 10px;
-        padding: 8px 10px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.72);
-        border: 1px solid rgba(189, 206, 194, 0.58);
-        color: #173c2d;
-        font-size: 0.8rem;
-        font-weight: 900;
+        margin-top: 14px;
+        margin-bottom: 6px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        /* REMOVE ALL PILL STYLING */
+        padding: 0;
+        background: none;
+        border: none;
+        box-shadow: none;
+      }
+
+      .nm-vault-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: inline-block;
+        position: relative;
+        background:
+          radial-gradient(circle at center, #173c2d 0 20%, transparent 22%),
+          conic-gradient(from 40deg, #d8aa27, #22b35f, #d8aa27);
+
+        box-shadow:
+          inset 0 0 0 3px rgba(255, 255, 255, 0.7),
+          0 0 0 2px rgba(34, 179, 95, 0.25),
+          0 6px 16px rgba(34, 179, 95, 0.25),
+          0 0 18px rgba(34, 179, 95, 0.35);
+
+        animation: nmVaultGlow 2.4s ease-in-out infinite;
+      }
+
+      .nm-vault-icon::after {
+        content: "";
+        position: absolute;
+        inset: 6px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.7);
+      }
+
+      @keyframes nmVaultGlow {
+        0% {
+          box-shadow:
+            inset 0 0 0 3px rgba(255, 255, 255, 0.7),
+            0 0 0 2px rgba(34, 179, 95, 0.2),
+            0 6px 16px rgba(34, 179, 95, 0.2),
+            0 0 10px rgba(34, 179, 95, 0.25);
+        }
+        50% {
+          box-shadow:
+            inset 0 0 0 3px rgba(255, 255, 255, 0.7),
+            0 0 0 3px rgba(34, 179, 95, 0.35),
+            0 8px 20px rgba(34, 179, 95, 0.35),
+            0 0 22px rgba(34, 179, 95, 0.55);
+        }
+        100% {
+          box-shadow:
+            inset 0 0 0 3px rgba(255, 255, 255, 0.7),
+            0 0 0 2px rgba(34, 179, 95, 0.2),
+            0 6px 16px rgba(34, 179, 95, 0.2),
+            0 0 10px rgba(34, 179, 95, 0.25);
+        }
+      }
+      .nm-vault-icon.off {
+        animation: none;
+        background:
+          radial-gradient(circle at center, #ffffff 0 20%, transparent 22%),
+          conic-gradient(from 40deg, #cddbd2, #f4f7f3, #cddbd2);
+
+        box-shadow:
+          inset 0 0 0 3px rgba(255, 255, 255, 0.7),
+          0 4px 10px rgba(43, 72, 58, 0.1);
+      }
+
+      .nm-vault-icon.off {
+        color: #8ca097;
+        background:
+          radial-gradient(circle at center, #ffffff 0 18%, transparent 20%),
+          conic-gradient(from 40deg, #cddbd2, #f4f7f3, #cddbd2);
       }
 
       .nm-security-actions {
         display: grid;
+        grid-template-columns: repeat(3, 1fr);
         gap: 8px;
         margin-top: 10px;
       }
 
       .nm-security-actions button {
-        width: 100%;
-        min-height: 38px;
-        border-radius: 14px;
-        border: 1px solid rgba(189, 206, 194, 0.72);
-        background: rgba(255, 255, 255, 0.88);
+        min-height: 46px;
+        border: none;
+        background: transparent;
+        box-shadow: none;
         color: #173c2d;
         font-weight: 900;
         cursor: pointer;
+        display: grid;
+        place-items: center;
+        gap: 3px;
+        font-size: 0.72rem;
+        padding: 0;
+      }
+
+      .nm-security-actions button:hover {
+        transform: translateY(-1px);
+      }
+
+      .nm-security-actions .nm-sec-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(
+          135deg,
+          rgba(34, 179, 95, 0.14),
+          rgba(216, 170, 39, 0.18)
+        );
+        font-size: 1rem;
+        box-shadow: 0 8px 18px rgba(43, 72, 58, 0.08);
+      }
+
+      .nm-security-actions .nm-sec-label {
+        line-height: 1;
+        font-size: 0.68rem;
+        opacity: 0.75;
+        font-weight: 800;
+      }
+
+      .nm-sec-icon:hover {
+        box-shadow:
+          0 10px 22px rgba(43, 72, 58, 0.12),
+          0 0 12px rgba(34, 179, 95, 0.25);
       }
     </style>
   </head>
@@ -7996,7 +8173,8 @@
       function addMessage(text, type) {
         const box = document.getElementById("chatBox");
         const msg = document.createElement("div");
-        msg.className = "message-card " + type;
+        msg.className =
+          "message-card " + type + (type === "bot" ? " message-reveal" : "");
 
         const wrap = document.createElement("div");
         wrap.className = "message-content";
@@ -8013,7 +8191,7 @@
       function addTypingBubble() {
         const box = document.getElementById("chatBox");
         const msg = document.createElement("div");
-        msg.className = "message-card bot";
+        msg.className = "message-card bot message-reveal";
         msg.style.minWidth = "140px";
         msg.innerHTML = `
                 <div class="message-content">
@@ -8041,6 +8219,10 @@
 
         const wrap = bubble.querySelector(".message-content");
         if (!wrap) return;
+
+        bubble.classList.remove("message-reveal");
+        void bubble.offsetWidth;
+        bubble.classList.add("message-reveal");
 
         wrap.innerHTML = formatMessage(
           String(text || "").replaceAll("<br>", "\n"),
@@ -8230,103 +8412,89 @@
         const roleMap = {
           Tutor: `You are NutriMind in Tutor Mode.
 
-      Your role is to teach clearly, patiently, and intelligently.
-      You turn confusion into understanding.
-      You simplify difficult ideas without making them shallow.
-      You explain step-by-step, use examples, analogies, and practical exercises when useful.
-      Adapt to the user's level: beginner, intermediate, or advanced.
-      Prioritize learning clarity over showing off intelligence.
+Your role is to teach clearly, patiently, and intelligently.
+You turn confusion into understanding.
+You simplify difficult ideas without making them shallow.
+You adapt to the user's level: beginner, intermediate, or advanced.
 
-      Tutor response style:
-      1. Direct answer first
-      2. Simple explanation
-      3. Example when useful
-      4. Quick recap when helpful`,
+Tutor behavior:
+- Answer the direct question first.
+- Explain in the simplest useful way before adding depth.
+- Use examples, analogies, or practice only when they help.
+- Do not sound like a textbook.
+- Do not force a fixed teaching format.
+- Vary your structure depending on the question.`,
 
           Analyst: `You are NutriMind in Analyst Mode.
 
-      Your role is to examine what already exists and turn raw information into useful insight.
-      You inspect patterns, compare options, detect problems, identify waste, test assumptions, and optimize systems.
-      You eliminate noise and focus on what matters.
-      You think logically, objectively, and with evidence.
+Your role is to examine what already exists and turn raw information into useful insight.
+You inspect patterns, compare options, detect problems, identify waste, test assumptions, and optimize systems.
+You eliminate noise and focus on what matters.
 
-      Analyst response style:
-      1. Current reality
-      2. Key findings
-      3. Root causes
-      4. Opportunities
-      5. Recommended improvements
-      6. Optional tests or metrics`,
+Analyst behavior:
+- Start with the most important finding.
+- Diagnose before recommending.
+- Explain causes, tradeoffs, and consequences clearly.
+- Use bullets or sections only when they improve clarity.
+- Avoid fixed report-style templates unless the user asks for a report.
+- Be precise, grounded, and useful.`,
 
           Strategist: `You are NutriMind in Strategist Mode.
 
-      Your role is to build winning direction from imperfect reality.
+Your role is to think clearly, cut through noise, and guide decisions that work in the real world.
+You organize raw pieces, remove what does not belong, prioritize leverage, and create practical direction.
 
-      You organize raw pieces, remove what does not belong, prioritize leverage, and create plans that work in the real world.
-
-      You focus on positioning, timing, execution, trade-offs, obstacles, and advantage.
-
-      You do not give generic advice.
-      You do not simply list options.
-      You do not motivate without direction.
-
-      You seek the smartest path, not the busiest path.
-
-      Strategist thinking rules:
-      - Start with the real situation, not fantasy.
-      - Identify the highest-leverage move.
-      - Separate urgent action from long-term positioning.
-      - Explain what to avoid.
-      - Think in trade-offs, timing, and advantage.
-      - If competition exists, explain how to stand out without looking desperate or political.
-      - If uncertainty exists, give a resilient plan.
-      - If the user shows builder traits, systems thinking, or self-directed learning, recognize that as strategic leverage.
-
-      Strategist response style:
-      1. Reality check
-      2. Best move now
-      3. Why this gives leverage
-      4. Risks or traps
-      5. Next 3 actions
-      6. Longer-term play`,
+Strategist behavior:
+- Answer the real question directly first.
+- Do not default to templates.
+- Identify what actually matters.
+- Point out blind spots or bad moves when needed.
+- Prioritize leverage over completeness.
+- Think in positioning, timing, execution, trade-offs, obstacles, and advantage.
+- Give next actions only when they are meaningful, not forced.
+- Avoid repeating the same response format across answers.
+- Do not sound like a blog post or motivational script.`,
         };
 
         return `${roleMap[reasoningMode] || roleMap.Analyst}
 
-      Global Rules:
-      - Do not use romantic language.
-      - Do not use pet names.
-      - Keep a calm, professional tone.
-      - Answer the direct question first.
-      - Stay concise, but make the answer genuinely useful.
-      - Avoid bland generic summaries.
-      - Avoid repeating the user's wording unless necessary.
-      - Use short sections when structure helps.
-      - Use bullets only when they improve clarity.
-      - Put syntax or code in fenced code blocks.
+Global Rules:
+- Do not use romantic language.
+- Do not use pet names.
+- Keep a calm, professional tone.
+- Answer the direct question first.
+- Stay concise, but make the answer genuinely useful.
+- Avoid bland generic summaries.
+- Avoid repeating the user's wording unless necessary.
+- Do not force headings or numbered sections.
+- Use short sections only when structure helps.
+- Use bullets only when they improve clarity.
+- Vary the response shape based on the user's question.
+- Put syntax or code in fenced code blocks.
 
-      Topic Rules:
-      - Topic controls WHAT the response is about.
-      - Mode controls HOW NutriMind thinks.
-      - If the current topic is Explore, answer using general knowledge, reasoning, and broad practical thinking.
-      - If the current topic is not Explore, use the current topic and its saved notes as the primary guide.
-      - If saved notes are available, prioritize them over generic knowledge.
-      - If saved notes do not contain the answer, say that clearly, then provide the best general answer.
-      - When the user asks about their notes, do not invent details that are not in the saved notes.
+Topic Rules:
+- Topic controls WHAT the response is about.
+- Mode controls HOW NutriMind thinks.
+- If the current topic is Explore, answer using general knowledge, reasoning, and broad practical thinking.
+- If the current topic is not Explore, use the current topic and its saved notes as the primary guide.
+- If saved notes are available, prioritize them over generic knowledge.
+- If saved notes do not contain the answer, say that clearly, then provide the best general answer.
+- When the user asks about their notes, do not invent details that are not in the saved notes.
 
-      Saved Notes Summary Format:
-      Core Idea
-      Key Lessons
-      Action Steps
-      What Matters Most
+Saved Notes Summary Format:
+Use this format only when the user asks to summarize saved notes:
+Core Idea
+Key Lessons
+Action Steps
+What Matters Most
 
-      Quality Rules:
-      - When explaining, make it simple first, then add depth.
-      - When analyzing, diagnose what exists before suggesting improvements.
-      - When giving strategy, include priority order and next action.
-      - When creating quiz questions, focus on active recall, not trivia.
-      - When the user shows builder traits, systems thinking, resilience, or self-directed learning, recognize their hidden leverage naturally without exaggeration.
-      - Do not treat a builder, creator, or self-taught app developer like an average advice seeker.`;
+Quality Rules:
+- When explaining, make it simple first, then add depth.
+- When analyzing, diagnose what exists before suggesting improvements.
+- When giving strategy, include priority order only when it helps the decision.
+- When creating quiz questions, focus on active recall, not trivia.
+- When the user shows builder traits, systems thinking, resilience, or self-directed learning, recognize their hidden leverage naturally without exaggeration.
+- Do not treat a builder, creator, or self-taught app developer like an average advice seeker.`;
       }
       function getRelevantSavedNotes(topic, userText) {
         const notes = brains[topic] || [];
@@ -12970,17 +13138,29 @@
         if (!status || !actions) return;
 
         if (isNutriMindLockEnabled()) {
-          status.textContent = "🔐 Password protected";
+          status.innerHTML = `<span class="nm-vault-icon"></span>`;
           actions.innerHTML = `
-      <button type="button" onclick="lockNutriMindNow()">Lock now</button>
-      <button type="button" onclick="openNutriMindSecurityModal('change')">Change password</button>
-      <button type="button" onclick="openNutriMindSecurityModal('disable')">Disable password</button>
-    `;
+  <button type="button" onclick="lockNutriMindNow()" title="Lock now">
+    <span class="nm-sec-icon">🔒</span>
+    <span class="nm-sec-label">Lock</span>
+  </button>
+  <button type="button" onclick="openNutriMindSecurityModal('change')" title="Change password">
+    <span class="nm-sec-icon">🔁</span>
+    <span class="nm-sec-label">Change</span>
+  </button>
+  <button type="button" onclick="openNutriMindSecurityModal('disable')" title="Disable password">
+    <span class="nm-sec-icon">🔓</span>
+    <span class="nm-sec-label">Off</span>
+  </button>
+`;
         } else {
-          status.textContent = "🔓 Password off";
+          status.innerHTML = `<span class="nm-vault-icon off"></span>`;
           actions.innerHTML = `
-      <button type="button" onclick="openNutriMindSecurityModal('enable')">Enable password</button>
-    `;
+  <button type="button" onclick="openNutriMindSecurityModal('enable')" title="Enable password">
+    <span class="nm-sec-icon">🔐</span>
+    <span class="nm-sec-label">Enable</span>
+  </button>
+`;
         }
       }
 
