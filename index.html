@@ -10623,6 +10623,42 @@ Quality Rules:
         input.normalize();
       }
 
+      function renumberStudyReaderNumberedLines() {
+        const input = document.getElementById("studyReaderInput");
+        if (!input) return false;
+
+        const blocks = Array.from(input.querySelectorAll("p, div")).filter(
+          (block) => {
+            if (!input.contains(block)) return false;
+            if (block.closest("ol, ul")) return false;
+            if (block.querySelector("img")) return false;
+
+            const text = String(block.textContent || "").trim();
+            return /^\d+\.\s*/.test(text);
+          },
+        );
+
+        if (blocks.length < 2) return false;
+
+        let changed = false;
+
+        blocks.forEach((block, index) => {
+          const expectedNumber = index + 1;
+          const oldText = String(block.textContent || "");
+          const newText = oldText.replace(
+            /^\s*\d+\.\s*/,
+            `${expectedNumber}. `,
+          );
+
+          if (newText !== oldText) {
+            block.textContent = newText;
+            changed = true;
+          }
+        });
+
+        return changed;
+      }
+
       function updateStudyReaderStats() {
         const input = document.getElementById("studyReaderInput");
         const stats = document.getElementById("studyReaderStats");
@@ -10655,7 +10691,10 @@ Quality Rules:
 
         input.addEventListener("input", () => {
           cleanupEmptyStudyFormatting();
-          pushStudyHistorySnapshot();
+
+          const didRenumber = renumberStudyReaderNumberedLines();
+
+          pushStudyHistorySnapshot(didRenumber);
           queueStudyAutoSave();
           queueStudyUiRefresh();
         });
