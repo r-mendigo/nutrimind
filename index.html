@@ -6467,6 +6467,653 @@
         cursor: pointer;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
       }
+      /* ===== iPhone Portrait Final Layout Layer ===== */
+      @media (max-width: 640px) and (orientation: portrait) {
+        html,
+        body {
+          height: 100%;
+          overflow: hidden;
+        }
+
+        .app {
+          height: 100dvh !important;
+          min-height: 100dvh !important;
+          overflow: hidden !important;
+          display: flex !important;
+          flex-direction: column !important;
+        }
+
+        .main {
+          height: 100dvh !important;
+          min-height: 0 !important;
+          overflow: hidden !important;
+        }
+
+        .topbar {
+          height: 58px !important;
+          min-height: 58px !important;
+          padding: 6px 8px !important;
+          gap: 8px !important;
+          overflow: hidden !important;
+          position: sticky !important;
+          top: 0 !important;
+          z-index: 700 !important;
+        }
+
+        .topbar-left {
+          width: 100% !important;
+          min-width: 0 !important;
+          display: grid !important;
+          grid-template-columns: 38px minmax(0, 1fr) 116px 40px !important;
+          align-items: center !important;
+          gap: 7px !important;
+        }
+
+        .sidebar-toggle-btn {
+          width: 38px !important;
+          height: 38px !important;
+          min-width: 38px !important;
+        }
+
+        .page-title {
+          font-size: 1.35rem !important;
+          line-height: 1 !important;
+          min-width: 0 !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+          white-space: nowrap !important;
+        }
+
+        .top-mode-wrap {
+          min-width: 0 !important;
+          width: 116px !important;
+        }
+
+        .top-mode-chip {
+          width: 116px !important;
+          height: 38px !important;
+          padding: 0 8px !important;
+          gap: 6px !important;
+          font-size: 0.78rem !important;
+          justify-content: center !important;
+          overflow: hidden !important;
+        }
+
+        .top-mode-light {
+          width: 9px !important;
+          height: 9px !important;
+        }
+
+        .topbar-sync {
+          display: none !important;
+        }
+
+        .topbar .toolbar-icon-btn-sm,
+        .topbar .toolbar-icon-btn {
+          width: 40px !important;
+          height: 40px !important;
+          min-width: 40px !important;
+          border-radius: 13px !important;
+        }
+
+        .content {
+          flex: 1 1 auto !important;
+          min-height: 0 !important;
+          overflow: hidden !important;
+          padding: 8px !important;
+        }
+
+        .view.active {
+          height: 100% !important;
+          min-height: 0 !important;
+          overflow: hidden !important;
+        }
+
+        .chat-layout {
+          height: 100% !important;
+          min-height: 0 !important;
+          overflow: hidden !important;
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 8px !important;
+        }
+
+        .chat-panel {
+          flex: 1 1 auto !important;
+          min-height: 0 !important;
+          overflow: hidden !important;
+          padding: 10px !important;
+          display: flex !important;
+          flex-direction: column !important;
+        }
+
+        .message-stream {
+          flex: 1 1 auto !important;
+          min-height: 0 !important;
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+          -webkit-overflow-scrolling: touch !important;
+          padding: 0 2px 8px !important;
+        }
+
+        .message-content {
+          font-size: 0.94rem !important;
+          line-height: 1.46 !important;
+        }
+
+        .chat-controls {
+          position: relative !important;
+          bottom: auto !important;
+          flex: 0 0 auto !important;
+          margin-top: 6px !important;
+          padding-bottom: calc(env(safe-area-inset-bottom) + 4px) !important;
+        }
+
+        .controls-row {
+          width: 100% !important;
+          max-width: 100% !important;
+          grid-template-columns: minmax(0, 1fr) 36px !important;
+          gap: 6px !important;
+          padding: 5px !important;
+          border-radius: 28px !important;
+        }
+
+        .chat-compose-wrap {
+          min-height: 44px !important;
+          padding: 0 8px !important;
+          gap: 7px !important;
+        }
+
+        .chat-textarea {
+          min-height: 28px !important;
+          max-height: 70px !important;
+          font-size: 0.9rem !important;
+          line-height: 1.25 !important;
+        }
+
+        .attach-btn {
+          width: 26px !important;
+          height: 26px !important;
+          min-width: 26px !important;
+        }
+
+        .send-btn {
+          width: 36px !important;
+          height: 36px !important;
+          min-width: 36px !important;
+        }
+
+        .chat-icon-btn {
+          width: 34px !important;
+          height: 34px !important;
+          min-width: 34px !important;
+        }
+
+        .mobile-menu {
+          width: 50px !important;
+          height: 50px !important;
+          right: 12px !important;
+          bottom: calc(env(safe-area-inset-bottom) + 12px) !important;
+          z-index: 1300 !important;
+        }
+
+        .chat-layout.study-mode {
+          display: grid !important;
+          grid-template-rows: minmax(245px, 42dvh) minmax(300px, 1fr) !important;
+          height: 100% !important;
+          min-height: 0 !important;
+          overflow: hidden !important;
+        }
+
+        .chat-layout.study-mode > .chat-panel {
+          height: auto !important;
+          min-height: 0 !important;
+        }
+
+        .chat-layout.study-mode > .study-reader-panel {
+          height: auto !important;
+          min-height: 0 !important;
+          overflow: hidden !important;
+          margin-top: 0 !important;
+          padding: 8px !important;
+          display: flex !important;
+          flex-direction: column !important;
+        }
+
+        .chat-layout.study-mode .study-reader-header {
+          min-height: 92px !important;
+          padding: 8px !important;
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 5px !important;
+        }
+
+        .chat-layout.study-mode .study-header-topline {
+          display: grid !important;
+          grid-template-columns: minmax(0, 1fr) auto !important;
+          gap: 6px !important;
+          align-items: center !important;
+        }
+
+        .chat-layout.study-mode .study-reader-title-wrap .card-title {
+          max-width: 130px !important;
+          font-size: 0.84rem !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+          white-space: nowrap !important;
+        }
+
+        .chat-layout.study-mode .study-reader-actions {
+          position: static !important;
+          width: 100% !important;
+          display: flex !important;
+          justify-content: flex-start !important;
+          gap: 6px !important;
+          overflow-x: auto !important;
+          padding: 2px 0 1px !important;
+        }
+
+        .chat-layout.study-mode .study-reader-actions .study-icon-btn {
+          width: 34px !important;
+          height: 34px !important;
+          min-width: 34px !important;
+          min-height: 34px !important;
+          border-radius: 11px !important;
+          font-size: 0.78rem !important;
+        }
+
+        .chat-layout.study-mode .study-reader-meta {
+          font-size: 0.72rem !important;
+          line-height: 1.25 !important;
+          padding-right: 0 !important;
+          flex-wrap: wrap !important;
+        }
+
+        .study-reader-editor {
+          flex: 1 1 auto !important;
+          min-height: 0 !important;
+          overflow-y: auto !important;
+          -webkit-overflow-scrolling: touch !important;
+        }
+
+        #view-calendar {
+          height: 100% !important;
+          overflow-y: auto !important;
+          -webkit-overflow-scrolling: touch !important;
+          padding: 8px !important;
+        }
+
+        .calendar-layout {
+          grid-template-columns: 1fr !important;
+          gap: 10px !important;
+        }
+
+        .calendar-card {
+          padding: 12px !important;
+          overflow: visible !important;
+        }
+
+        .calendar-head {
+          gap: 8px !important;
+        }
+
+        .calendar-head .card-title {
+          font-size: 1.35rem !important;
+        }
+
+        .calendar-weekdays {
+          gap: 5px !important;
+          font-size: 0.78rem !important;
+        }
+
+        .calendar-grid {
+          grid-template-columns: repeat(7, minmax(38px, 1fr)) !important;
+          gap: 6px !important;
+        }
+
+        .calendar-day {
+          min-height: 52px !important;
+          padding: 8px 7px !important;
+          border-radius: 14px !important;
+        }
+
+        .calendar-day-number {
+          font-size: 0.95rem !important;
+        }
+      }
+      /* =========================================================
+   iPHONE PORTRAIT HOTFIX 01
+   Purpose:
+   - restore scrolling in Data Manager / Calendar
+   - allow top mode dropdown to open
+   - allow left sidebar drawer to appear
+   - stop full-app overflow lock from breaking mobile pages
+   ========================================================= */
+      @media (max-width: 640px) and (orientation: portrait) {
+        .main,
+        .content {
+          overflow: visible !important;
+        }
+
+        .view.active {
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+          -webkit-overflow-scrolling: touch !important;
+        }
+
+        #view-manager,
+        #view-calendar {
+          height: calc(100dvh - 58px) !important;
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+          -webkit-overflow-scrolling: touch !important;
+          padding-bottom: 88px !important;
+        }
+
+        .topbar {
+          overflow: visible !important;
+        }
+
+        .top-mode-wrap {
+          position: relative !important;
+          z-index: 1600 !important;
+        }
+
+        .top-mode-menu {
+          position: fixed !important;
+          top: 58px !important;
+          left: 92px !important;
+          right: 12px !important;
+          min-width: 0 !important;
+          width: auto !important;
+          z-index: 1800 !important;
+        }
+
+        .sidebar {
+          z-index: 1900 !important;
+        }
+
+        .sidebar.open {
+          transform: translateX(0) !important;
+        }
+
+        .mobile-menu {
+          z-index: 2000 !important;
+        }
+      }
+
+      /* =========================================================
+   iPHONE PORTRAIT STUDY READER LAYER 01
+   Purpose:
+   - Study Reader becomes full-screen on iPhone
+   - no squeezed desktop split layout
+   - Nutri C stays behind for now
+   ========================================================= */
+      @media (max-width: 640px) and (orientation: portrait) {
+        .chat-layout.study-mode {
+          display: block !important;
+          height: calc(100dvh - 58px) !important;
+          overflow: hidden !important;
+        }
+
+        .chat-layout.study-mode .chat-panel {
+          display: none !important;
+        }
+
+        .chat-layout.study-mode .study-reader-panel {
+          position: relative !important;
+          height: 100% !important;
+          min-height: 0 !important;
+          margin: 0 !important;
+          padding: 8px !important;
+          display: flex !important;
+          flex-direction: column !important;
+          overflow: hidden !important;
+        }
+
+        .chat-layout.study-mode .study-reader-header {
+          flex: 0 0 auto !important;
+          min-height: auto !important;
+          padding: 8px !important;
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 6px !important;
+        }
+
+        .chat-layout.study-mode .study-reader-actions {
+          width: 100% !important;
+          display: flex !important;
+          justify-content: flex-start !important;
+          gap: 6px !important;
+          overflow-x: auto !important;
+          overflow-y: hidden !important;
+          padding-bottom: 2px !important;
+        }
+
+        .chat-layout.study-mode .study-reader-body,
+        .chat-layout.study-mode .study-reader-editor {
+          flex: 1 1 auto !important;
+          min-height: 0 !important;
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+          -webkit-overflow-scrolling: touch !important;
+        }
+      }
+      /* =========================================================
+   iPHONE PORTRAIT CHAT DRAWER LAYER 01
+   Purpose:
+   - When Study Reader is open on iPhone, Nutri C becomes
+     a right-side full-screen drawer.
+   - Study Reader stays full-screen behind it.
+   - Gold top-left button toggles Nutri C drawer.
+   - iPad / desktop / iPad landscape are untouched.
+   ========================================================= */
+      @media (max-width: 640px) and (orientation: portrait) {
+        .chat-layout.study-mode > .chat-panel {
+          position: fixed !important;
+          top: 58px !important;
+          right: 0 !important;
+          bottom: 0 !important;
+          left: 0 !important;
+
+          display: flex !important;
+          flex-direction: column !important;
+
+          width: 100vw !important;
+          height: calc(100dvh - 58px) !important;
+          min-height: 0 !important;
+
+          padding: 10px !important;
+          border-radius: 0 !important;
+
+          background:
+            radial-gradient(
+              circle at 24% 14%,
+              rgba(34, 179, 95, 0.08),
+              transparent 34%
+            ),
+            radial-gradient(
+              circle at 88% 20%,
+              rgba(216, 170, 39, 0.09),
+              transparent 30%
+            ),
+            linear-gradient(
+              180deg,
+              rgba(244, 250, 246, 0.98),
+              rgba(234, 244, 238, 0.98)
+            ) !important;
+
+          z-index: 1450 !important;
+          opacity: 0 !important;
+          pointer-events: none !important;
+          transform: translateX(104%) !important;
+
+          transition:
+            transform 0.26s ease,
+            opacity 0.22s ease !important;
+        }
+
+        body.mobile-chat-drawer-open .chat-layout.study-mode > .chat-panel {
+          opacity: 1 !important;
+          pointer-events: auto !important;
+          transform: translateX(0) !important;
+        }
+
+        body.mobile-chat-drawer-open
+          .chat-layout.study-mode
+          > .study-reader-panel {
+          filter: blur(1px);
+        }
+
+        .chat-layout.study-mode > .chat-panel .message-stream {
+          flex: 1 1 auto !important;
+          min-height: 0 !important;
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+          -webkit-overflow-scrolling: touch !important;
+          padding-bottom: 10px !important;
+        }
+
+        .chat-layout.study-mode > .chat-panel .chat-controls {
+          flex: 0 0 auto !important;
+          padding-bottom: calc(env(safe-area-inset-bottom) + 8px) !important;
+        }
+
+        body.mobile-chat-drawer-open .sidebar-toggle-btn {
+          background: linear-gradient(
+            135deg,
+            #22b35f 0%,
+            #1f9b54 100%
+          ) !important;
+          color: #ffffff !important;
+        }
+      }
+      /* =========================================================
+   iPHONE PORTRAIT CURRICULUM DRAWER LAYER 01
+   Purpose:
+   - Books icon opens Tools/Curriculum from the LEFT.
+   - Drawer floats full-height under the topbar on iPhone.
+   - Study Reader stays behind it.
+   - Nutri C right drawer remains separate.
+   - iPad / desktop / iPad landscape are untouched.
+   ========================================================= */
+      @media (max-width: 640px) and (orientation: portrait) {
+        .chat-layout.study-mode > .left-panel.panel {
+          position: fixed !important;
+          top: 58px !important;
+          left: 0 !important;
+          bottom: 0 !important;
+
+          width: min(86vw, 320px) !important;
+          min-width: 0 !important;
+          height: calc(100dvh - 58px) !important;
+
+          z-index: 1500 !important;
+
+          opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+
+          transform: translateX(-104%) !important;
+          transition:
+            transform 0.26s ease,
+            opacity 0.2s ease,
+            visibility 0.2s ease !important;
+
+          border-radius: 0 24px 24px 0 !important;
+          overflow: hidden !important;
+
+          background:
+            radial-gradient(
+              circle at 24% 14%,
+              rgba(34, 179, 95, 0.08),
+              transparent 34%
+            ),
+            radial-gradient(
+              circle at 86% 24%,
+              rgba(216, 170, 39, 0.1),
+              transparent 30%
+            ),
+            linear-gradient(
+              180deg,
+              rgba(248, 252, 249, 0.98),
+              rgba(235, 244, 238, 0.98)
+            ) !important;
+
+          backdrop-filter: blur(22px) saturate(145%) !important;
+          -webkit-backdrop-filter: blur(22px) saturate(145%) !important;
+
+          border-right: 1px solid rgba(189, 206, 194, 0.72) !important;
+          box-shadow: 18px 0 40px rgba(23, 60, 45, 0.14) !important;
+        }
+
+        .chat-layout.study-mode > .left-panel.panel.drawer-open {
+          opacity: 1 !important;
+          visibility: visible !important;
+          pointer-events: auto !important;
+          transform: translateX(0) !important;
+        }
+
+        .chat-layout.study-mode > .left-panel.panel .left-panel-scroll {
+          position: absolute !important;
+          inset: 0 !important;
+
+          display: flex !important;
+          flex-direction: column !important;
+
+          padding: 14px 12px calc(env(safe-area-inset-bottom) + 18px) !important;
+
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+          -webkit-overflow-scrolling: touch !important;
+
+          border-radius: 0 24px 24px 0 !important;
+          background: transparent !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+
+        .chat-layout.study-mode .left-panel-topic-scroll {
+          flex: 1 1 auto !important;
+          min-height: 0 !important;
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+          -webkit-overflow-scrolling: touch !important;
+        }
+
+        .chat-layout.study-mode .study-curriculum-toggle {
+          z-index: 1600 !important;
+        }
+
+        .chat-layout.study-mode .study-curriculum-toggle.active {
+          background: linear-gradient(
+            135deg,
+            #22b35f 0%,
+            #1f9b54 100%
+          ) !important;
+          color: #ffffff !important;
+        }
+
+        body.mobile-chat-drawer-open
+          .chat-layout.study-mode
+          > .left-panel.panel.drawer-open {
+          transform: translateX(-104%) !important;
+          opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+        }
+      }
+      /* =========================================================
+   iPHONE PORTRAIT CHAT DRAWER CLEANUP 01
+   Purpose:
+   - Hide Study Reader books/tools icon while Nutri C drawer is open.
+   - Prevent left Tools drawer confusion inside chat-only view.
+   ========================================================= */
+      @media (max-width: 640px) and (orientation: portrait) {
+        body.mobile-chat-drawer-open .study-curriculum-toggle {
+          display: none !important;
+        }
+      }
     </style>
   </head>
   <body>
@@ -10297,11 +10944,50 @@ Quality Rules:
           document.getElementById("sidebar").classList.remove("open");
       }
 
+      function isIphonePortraitStudyMode() {
+        return (
+          window.matchMedia("(max-width: 640px) and (orientation: portrait)")
+            .matches && document.querySelector(".chat-layout.study-mode")
+        );
+      }
+
+      function openMobileChatDrawer() {
+        closeStudyCurriculumDrawer?.();
+        document.body.classList.add("mobile-chat-drawer-open");
+
+        const btn = document.querySelector(".sidebar-toggle-btn");
+        if (btn) btn.textContent = "×";
+
+        requestAnimationFrame(() => {
+          forceChatToBottom?.();
+        });
+      }
+
+      function closeMobileChatDrawer() {
+        document.body.classList.remove("mobile-chat-drawer-open");
+
+        const btn = document.querySelector(".sidebar-toggle-btn");
+        if (btn) btn.textContent = "«";
+      }
+
+      function toggleMobileChatDrawer() {
+        if (document.body.classList.contains("mobile-chat-drawer-open")) {
+          closeMobileChatDrawer();
+        } else {
+          openMobileChatDrawer();
+        }
+      }
+
       function toggleSidebar() {
         document.getElementById("sidebar").classList.toggle("open");
       }
 
       function toggleDesktopSidebar() {
+        if (isIphonePortraitStudyMode()) {
+          toggleMobileChatDrawer();
+          return;
+        }
+
         const app = document.getElementById("appShell");
         const btn = document.querySelector(".sidebar-toggle-btn");
         if (!app || !btn) return;
@@ -12565,6 +13251,7 @@ Quality Rules:
         }
 
         closeStudyCurriculumDrawer();
+        closeMobileChatDrawer?.();
 
         if (layout) layout.classList.remove("study-mode");
         if (panel) panel.style.display = "none";
