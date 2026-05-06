@@ -7488,6 +7488,32 @@
           transform: scale(0.86) !important;
         }
       }
+      /* =========================================================
+   iPHONE EVENT SHEET REFINEMENT 03
+   Purpose:
+   - Keep date/time/title/note fields inside Add Event sheet.
+   - Fix iOS input overflow.
+   ========================================================= */
+      @media (max-width: 640px) and (orientation: portrait) {
+        #eventModal .modal-card {
+          box-sizing: border-box !important;
+        }
+
+        #eventModal .input,
+        #eventModal .textarea {
+          width: 100% !important;
+          max-width: 100% !important;
+          min-width: 0 !important;
+          box-sizing: border-box !important;
+        }
+
+        #modalEventDate,
+        #modalEventTime {
+          display: block !important;
+          appearance: none !important;
+          -webkit-appearance: none !important;
+        }
+      }
     </style>
   </head>
   <body>
