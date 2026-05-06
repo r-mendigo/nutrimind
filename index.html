@@ -7478,20 +7478,14 @@
       /* =========================================================
    iPHONE EVENT SHEET REFINEMENT 02
    Purpose:
-   - Prevent floating menu from overlapping Cancel button.
-   - Give event sheet actions more breathing room.
+   - Hide floating green menu while Add Event sheet is open.
+   - Prevent overlap with Save/Cancel buttons.
    ========================================================= */
       @media (max-width: 640px) and (orientation: portrait) {
-        #eventModal .modal-card {
-          margin-bottom: 34px !important;
-        }
-
-        #eventModal .actions-wrap {
-          padding-right: 58px !important;
-        }
-
-        #eventModal .actions-wrap {
-          grid-template-columns: 1fr 0.62fr !important;
+        body.event-modal-open .mobile-menu {
+          opacity: 0 !important;
+          pointer-events: none !important;
+          transform: scale(0.86) !important;
         }
       }
     </style>
@@ -13790,7 +13784,7 @@ Quality Rules:
 
       function openEventModal() {
         editingEventId = null;
-
+        document.body.classList.add("event-modal-open");
         document.getElementById("modalEventDate").value =
           selectedCalendarDate || new Date().toISOString().slice(0, 10);
         document.getElementById("modalEventTime").value = "";
@@ -13801,6 +13795,7 @@ Quality Rules:
 
       function closeEventModal() {
         document.getElementById("eventModal").style.display = "none";
+        document.body.classList.remove("event-modal-open");
       }
 
       function addEventFromModal() {
