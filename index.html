@@ -7357,6 +7357,124 @@
           gap: 6px;
         }
       }
+      /* =========================================================
+   iPHONE EVENT SHEET REFINEMENT 01
+   Purpose:
+   - Make Add/New Event modal feel like a premium iPhone sheet.
+   - Tighten spacing, reduce oversized fields, improve buttons.
+   - iPhone portrait only.
+   ========================================================= */
+      @media (max-width: 640px) and (orientation: portrait) {
+        #eventModal {
+          align-items: flex-end !important;
+          justify-content: center !important;
+          padding: 0 12px calc(env(safe-area-inset-bottom) + 14px) !important;
+          background: rgba(23, 60, 45, 0.18) !important;
+          backdrop-filter: blur(8px) saturate(125%) !important;
+          -webkit-backdrop-filter: blur(8px) saturate(125%) !important;
+        }
+
+        #eventModal .modal-card {
+          width: 100% !important;
+          max-width: 430px !important;
+          max-height: min(78dvh, 620px) !important;
+
+          padding: 18px 16px 14px !important;
+          gap: 10px !important;
+
+          border-radius: 28px !important;
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+
+          background:
+            radial-gradient(
+              circle at 78% 12%,
+              rgba(216, 170, 39, 0.1),
+              transparent 34%
+            ),
+            linear-gradient(
+              180deg,
+              rgba(255, 255, 255, 0.98),
+              rgba(244, 250, 246, 0.98)
+            ) !important;
+
+          box-shadow:
+            0 -10px 34px rgba(23, 60, 45, 0.14),
+            0 0 0 1px rgba(255, 255, 255, 0.56) inset !important;
+
+          -webkit-overflow-scrolling: touch !important;
+        }
+
+        #eventModal .modal-card::before {
+          content: "";
+          width: 44px;
+          height: 5px;
+          border-radius: 999px;
+          background: rgba(108, 130, 118, 0.32);
+          align-self: center;
+          margin-bottom: 4px;
+        }
+
+        #eventModal .card-title {
+          font-size: 1.45rem !important;
+          line-height: 1.1 !important;
+          margin: 0 0 2px !important;
+          letter-spacing: -0.05em !important;
+        }
+
+        #eventModal .input {
+          min-height: 48px !important;
+          padding: 10px 14px !important;
+          border-radius: 17px !important;
+          font-size: 0.98rem !important;
+          background: rgba(255, 255, 255, 0.94) !important;
+        }
+
+        #eventModal textarea.textarea {
+          min-height: 112px !important;
+          max-height: 150px !important;
+          padding: 12px 14px !important;
+          border-radius: 18px !important;
+          font-size: 0.98rem !important;
+          line-height: 1.4 !important;
+          resize: none !important;
+          background: rgba(255, 255, 255, 0.94) !important;
+        }
+
+        #eventModal .actions-wrap {
+          position: sticky !important;
+          bottom: -14px !important;
+
+          display: grid !important;
+          grid-template-columns: 1fr 0.72fr !important;
+          gap: 10px !important;
+
+          margin-top: 4px !important;
+          padding: 10px 0 0 !important;
+
+          background: linear-gradient(
+            180deg,
+            rgba(244, 250, 246, 0),
+            rgba(244, 250, 246, 0.98) 36%
+          ) !important;
+        }
+
+        #eventModal .actions-wrap .btn {
+          min-height: 50px !important;
+          border-radius: 18px !important;
+          font-size: 1rem !important;
+          font-weight: 900 !important;
+          padding: 0 14px !important;
+        }
+
+        #eventModal .actions-wrap .btn-primary {
+          box-shadow: 0 10px 22px rgba(34, 179, 95, 0.18) !important;
+        }
+
+        #eventModal .actions-wrap .btn-secondary {
+          background: rgba(255, 255, 255, 0.88) !important;
+        }
+      }
     </style>
   </head>
   <body>
