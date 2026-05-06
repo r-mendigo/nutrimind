@@ -7177,6 +7177,27 @@
           .message-stream {
           padding-top: 4px !important;
         }
+        body.mobile-chat-drawer-open
+          .chat-layout.study-mode
+          > .left-panel.panel {
+          opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+          transform: translateX(-104%) !important;
+        }
+
+        body.mobile-chat-drawer-open
+          .chat-layout.study-mode
+          > .left-panel.panel.drawer-open {
+          opacity: 1 !important;
+          visibility: visible !important;
+          pointer-events: auto !important;
+          transform: translateX(0) !important;
+        }
+
+        body.mobile-chat-drawer-open .chat-layout.study-mode > .chat-panel {
+          padding-top: 10px !important;
+        }
       }
     </style>
   </head>
