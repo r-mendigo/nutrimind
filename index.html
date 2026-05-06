@@ -7318,6 +7318,45 @@
           transform: translateX(0) !important;
         }
       }
+      /* =========================================================
+   RESPONSIVE BACKUP CONTROLS 01
+   Purpose:
+   - iPhone portrait: show import/export inside sidebar only.
+   - iPad/desktop: keep topbar import/export only.
+   ========================================================= */
+      .nm-sidebar-backup-actions {
+        display: none;
+      }
+
+      @media (max-width: 640px) and (orientation: portrait) {
+        .topbar-sync {
+          display: none !important;
+        }
+
+        .nm-sidebar-backup-actions {
+          display: flex !important;
+          gap: 8px;
+          margin-bottom: 12px;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .nm-sidebar-backup-btn {
+          min-height: 34px;
+          padding: 8px 10px;
+          border-radius: 12px;
+          border: 1px solid rgba(189, 206, 194, 0.72);
+          background: rgba(255, 255, 255, 0.82);
+          color: var(--text);
+          font-size: 0.78rem;
+          font-weight: 900;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+        }
+      }
     </style>
   </head>
   <body>
@@ -7432,6 +7471,27 @@
         </div>
 
         <div class="sidebar-footer">
+          <div class="nm-sidebar-backup-actions">
+            <button
+              type="button"
+              class="nm-sidebar-backup-btn"
+              onclick="exportNutriMindLocalBackup()"
+              title="Export local backup"
+            >
+              📤 Export
+            </button>
+
+            <label class="nm-sidebar-backup-btn" title="Import local backup">
+              📥 Import
+              <input
+                class="nm-backup-input"
+                type="file"
+                accept=".json,application/json"
+                onchange="importNutriMindLocalBackup(event)"
+              />
+            </label>
+          </div>
+
           <div class="nm-local-title">NutriMind Local Mode</div>
           <div class="nm-local-sub">Use 📤 export for backup.</div>
 
