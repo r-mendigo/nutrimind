@@ -12906,22 +12906,30 @@ Quality Rules:
       }
 
       function importNutriMindLocalBackup(event) {
-        const file = event?.target?.files?.[0];
+        const inputEl = event?.target;
+        const file = inputEl?.files?.[0];
+
         if (!file) return;
 
         const reader = new FileReader();
+
         reader.onload = () => {
           try {
-            const parsed = JSON.parse(reader.result);
-            if (!parsed || typeof parsed !== "object") throw new Error();
+            const parsed = JSON.parse(String(reader.result || ""));
+
+            if (!parsed || typeof parsed !== "object") {
+              throw new Error("Invalid JSON structure");
+            }
 
             const incomingBrains =
               parsed.brains && typeof parsed.brains === "object"
                 ? parsed.brains
-                : parsed;
+                : null;
 
-            if (!incomingBrains || typeof incomingBrains !== "object") {
-              throw new Error();
+            if (!incomingBrains) {
+              throw new Error(
+                "This file does not contain NutriMind brains data.",
+              );
             }
 
             if (
@@ -12929,27 +12937,32 @@ Quality Rules:
                 "Import this NutriMind backup? This will replace the current local brains/events on this device.",
               )
             ) {
-              event.target.value = "";
+              inputEl.value = "";
               return;
             }
 
-            brains = normalizeBrainsMap(incomingBrains);
-            localStorage.setItem("nutriMindBrains", JSON.stringify(brains));
+            const nextBrains = normalizeBrainsMap(incomingBrains);
+            const nextEvents = Array.isArray(parsed.events)
+              ? parsed.events
+                  .map((evt) => normalizeNutriMindEvent(evt))
+                  .filter(Boolean)
+              : events;
 
-            if (Array.isArray(parsed.events)) {
-              events = parsed.events
-                .map((evt) => normalizeNutriMindEvent(evt))
-                .filter(Boolean);
-              localStorage.setItem("nutriMindEvents", JSON.stringify(events));
-            }
+            const nextReasoningMode = [
+              "Tutor",
+              "Analyst",
+              "Strategist",
+            ].includes(parsed.reasoningMode)
+              ? parsed.reasoningMode
+              : reasoningMode;
 
-            if (
-              ["Tutor", "Analyst", "Strategist"].includes(parsed.reasoningMode)
-            ) {
-              reasoningMode = parsed.reasoningMode;
-              localStorage.setItem("nutriMindReasoningMode", reasoningMode);
-              updateTopModeLabel();
-            }
+            localStorage.setItem("nutriMindBrains", JSON.stringify(nextBrains));
+            localStorage.setItem("nutriMindEvents", JSON.stringify(nextEvents));
+            localStorage.setItem("nutriMindReasoningMode", nextReasoningMode);
+
+            brains = nextBrains;
+            events = nextEvents;
+            reasoningMode = nextReasoningMode;
 
             if (Array.isArray(parsed.chatHistory)) {
               chatHistory = parsed.chatHistory.slice(-60);
@@ -12960,17 +12973,31 @@ Quality Rules:
               saveTrashItems(parsed.trashItems);
             }
 
-            persist();
             refreshBrains();
             renderCalendar();
             renderEvents();
             restoreChatHistory();
+            updateTopModeLabel();
+
             toast("Local backup imported.", "success");
           } catch (err) {
-            toast("That NutriMind backup file is not valid.", "error");
+            console.error("NutriMind backup import failed:", err);
+
+            const message =
+              err?.name === "QuotaExceededError"
+                ? "Import failed: this backup is too large for local storage on this device."
+                : err?.message || "That NutriMind backup file is not valid.";
+
+            toast(message, "error");
           }
 
-          event.target.value = "";
+          if (inputEl) inputEl.value = "";
+        };
+
+        reader.onerror = () => {
+          console.error("NutriMind backup file could not be read.");
+          toast("Import failed: NutriMind could not read this file.", "error");
+          if (inputEl) inputEl.value = "";
         };
 
         reader.readAsText(file);
