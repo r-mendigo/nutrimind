@@ -7475,6 +7475,25 @@
           background: rgba(255, 255, 255, 0.88) !important;
         }
       }
+      /* =========================================================
+   iPHONE EVENT SHEET REFINEMENT 02
+   Purpose:
+   - Prevent floating menu from overlapping Cancel button.
+   - Give event sheet actions more breathing room.
+   ========================================================= */
+      @media (max-width: 640px) and (orientation: portrait) {
+        #eventModal .modal-card {
+          margin-bottom: 34px !important;
+        }
+
+        #eventModal .actions-wrap {
+          padding-right: 58px !important;
+        }
+
+        #eventModal .actions-wrap {
+          grid-template-columns: 1fr 0.62fr !important;
+        }
+      }
     </style>
   </head>
   <body>
