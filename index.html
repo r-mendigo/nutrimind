@@ -8034,13 +8034,19 @@
         try {
           localStorage.setItem("nutriMindBrains", JSON.stringify(brains));
         } catch (err) {
-          console.log("Local brains save skipped:", err);
+          console.error("❌ nutriMindBrains save failed:", err);
+          toast?.(
+            "⚠️ Notes/images too large. Brain save failed. Please export backup.",
+            "error",
+          );
+          return false;
         }
 
         try {
           localStorage.setItem("nutriMindEvents", JSON.stringify(events));
         } catch (err) {
-          console.log("Local events save skipped:", err);
+          console.error("❌ nutriMindEvents save failed:", err);
+          toast?.("⚠️ Event save failed.", "error");
         }
 
         try {
@@ -8049,14 +8055,16 @@
             JSON.stringify(notifiedIds),
           );
         } catch (err) {
-          console.log("Local notified ids save skipped:", err);
+          console.error("❌ nutriMindNotifiedIds save failed:", err);
         }
 
         try {
           localStorage.setItem("nutriMindReasoningMode", reasoningMode);
         } catch (err) {
-          console.log("Local reasoning mode save skipped:", err);
+          console.error("❌ nutriMindReasoningMode save failed:", err);
         }
+
+        return true;
       }
 
       async function exportToWord(title, content) {
@@ -11650,9 +11658,41 @@ Quality Rules:
         const reader = new FileReader();
 
         reader.onload = () => {
-          insertImageIntoStudyReader(String(reader.result || ""));
-          pushStudyHistorySnapshot(true);
-          queueStudyAutoSave();
+          const source = String(reader.result || "");
+          if (!source) return;
+
+          const img = new Image();
+
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+
+            let width = img.width;
+            let height = img.height;
+
+            const MAX_WIDTH = 1200;
+
+            if (width > MAX_WIDTH) {
+              height = Math.round(height * (MAX_WIDTH / width));
+              width = MAX_WIDTH;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext("2d");
+            if (!ctx) return;
+
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const compressedBase64 = canvas.toDataURL("image/jpeg", 0.72);
+
+            insertImageIntoStudyReader(compressedBase64);
+            pushStudyHistorySnapshot(true);
+            queueStudyAutoSave();
+            queueStudyUiRefresh();
+          };
+
+          img.src = source;
         };
 
         reader.readAsDataURL(file);
@@ -11949,9 +11989,13 @@ Quality Rules:
           const note = notes[activeStudyNoteIndex];
 
           if (input) {
-            input.innerHTML = linkifyStudyNoteHtml(
-              note.html || note.text || "",
-            );
+            const savedStudyHtml = note.html || note.text || "";
+
+            if (note.html) {
+              input.innerHTML = savedStudyHtml;
+            } else {
+              input.innerHTML = linkifyStudyNoteHtml(savedStudyHtml);
+            }
           }
 
           if (meta) {
