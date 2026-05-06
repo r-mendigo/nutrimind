@@ -7103,15 +7103,79 @@
           pointer-events: none !important;
         }
       }
+
       /* =========================================================
-   iPHONE PORTRAIT CHAT DRAWER CLEANUP 01
+   iPHONE PORTRAIT NUTRI C TOOLS COLLAPSE 01
    Purpose:
-   - Hide Study Reader books/tools icon while Nutri C drawer is open.
-   - Prevent left Tools drawer confusion inside chat-only view.
+   - In Nutri C full-screen drawer, Tools/Curriculum is collapsed by default.
+   - The 📚 button becomes visible.
+   - Tools list opens only when tapped.
+   - Nutri C gets more full-screen space.
    ========================================================= */
       @media (max-width: 640px) and (orientation: portrait) {
         body.mobile-chat-drawer-open .study-curriculum-toggle {
+          display: inline-flex !important;
+          position: fixed !important;
+          left: 12px !important;
+          top: 66px !important;
+          z-index: 1700 !important;
+          width: 42px !important;
+          height: 42px !important;
+          min-width: 42px !important;
+          border-radius: 14px !important;
+        }
+
+        body.mobile-chat-drawer-open
+          .chat-layout.study-mode
+          > .left-panel.panel {
+          position: fixed !important;
+          top: 58px !important;
+          left: 0 !important;
+          bottom: 0 !important;
+
+          width: min(88vw, 330px) !important;
+          height: calc(100dvh - 58px) !important;
+
+          z-index: 1650 !important;
+          opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+          transform: translateX(-104%) !important;
+
+          border-radius: 0 24px 24px 0 !important;
+          overflow: hidden !important;
+
+          transition:
+            transform 0.26s ease,
+            opacity 0.2s ease,
+            visibility 0.2s ease !important;
+        }
+
+        body.mobile-chat-drawer-open
+          .chat-layout.study-mode
+          > .left-panel.panel.drawer-open {
+          opacity: 1 !important;
+          visibility: visible !important;
+          pointer-events: auto !important;
+          transform: translateX(0) !important;
+        }
+
+        body.mobile-chat-drawer-open .chat-layout.study-mode > .chat-panel {
+          padding-top: 58px !important;
+        }
+
+        body.mobile-chat-drawer-open
+          .chat-layout.study-mode
+          > .chat-panel
+          .hero-card {
           display: none !important;
+        }
+
+        body.mobile-chat-drawer-open
+          .chat-layout.study-mode
+          > .chat-panel
+          .message-stream {
+          padding-top: 4px !important;
         }
       }
     </style>
