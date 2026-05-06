@@ -7514,6 +7514,24 @@
           -webkit-appearance: none !important;
         }
       }
+      /* =========================================================
+   iPHONE NUTRI C FAB POSITION FIX 01
+   Purpose:
+   - Move green mobile menu away from Nutri C composer icons.
+   - Prevent overlap with clear/brush button.
+   ========================================================= */
+      @media (max-width: 640px) and (orientation: portrait) {
+        .chat-layout:not(.study-mode) ~ .mobile-menu,
+        body:not(.mobile-chat-drawer-open) .mobile-menu {
+          right: 14px !important;
+          bottom: calc(env(safe-area-inset-bottom) + 76px) !important;
+        }
+
+        body.mobile-chat-drawer-open .mobile-menu {
+          right: 14px !important;
+          bottom: calc(env(safe-area-inset-bottom) + 76px) !important;
+        }
+      }
     </style>
   </head>
   <body>
