@@ -12108,7 +12108,17 @@ Quality Rules:
 
         const input = document.getElementById("studyReaderInput");
         const rawHtml = String(input?.innerHTML || "").trim();
-        const html = linkifyStudyNoteHtml(rawHtml);
+
+        const hasRichFormatting =
+          rawHtml.includes("<div") ||
+          rawHtml.includes("<span") ||
+          rawHtml.includes("<img") ||
+          rawHtml.includes("study-callout") ||
+          rawHtml.includes("style=");
+
+        const html = hasRichFormatting
+          ? rawHtml
+          : linkifyStudyNoteHtml(rawHtml);
         const text = String(input?.textContent || "").trim();
 
         if (!text && !html.includes("<img")) {
@@ -12977,7 +12987,6 @@ Quality Rules:
             renderCalendar();
             renderEvents();
             restoreChatHistory();
-            updateTopModeLabel();
 
             toast("Local backup imported.", "success");
           } catch (err) {
