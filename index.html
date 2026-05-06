@@ -7199,6 +7199,125 @@
           padding-top: 10px !important;
         }
       }
+      /* =========================================================
+   iPHONE PORTRAIT NUTRI C FULLSCREEN CLEANUP 01
+   Purpose:
+   - Hide embedded inline Tools/Curriculum card
+     inside Nutri C mobile drawer.
+   - Nutri C chat becomes true fullscreen.
+   ========================================================= */
+      @media (max-width: 640px) and (orientation: portrait) {
+        body.mobile-chat-drawer-open
+          .chat-layout.study-mode
+          > .chat-panel
+          .left-panel {
+          display: none !important;
+        }
+
+        body.mobile-chat-drawer-open
+          .chat-layout.study-mode
+          > .chat-panel
+          .hero-card {
+          margin-top: 0 !important;
+        }
+
+        body.mobile-chat-drawer-open
+          .chat-layout.study-mode
+          > .chat-panel
+          .message-stream {
+          padding-top: 0 !important;
+        }
+      }
+      /* =========================================================
+   iPHONE PORTRAIT NUTRI C FULLSCREEN CLEANUP 02
+   Purpose:
+   - Hide the slim Tools/Curriculum panel beside Nutri C.
+   - Stop Tools from appearing underneath chat stream.
+   - Let Nutri C own the full mobile screen.
+   ========================================================= */
+      @media (max-width: 640px) and (orientation: portrait) {
+        body.mobile-chat-drawer-open
+          .chat-layout.study-mode
+          > .left-panel.panel {
+          display: flex !important;
+          position: fixed !important;
+          top: 58px !important;
+          left: 0 !important;
+          bottom: 0 !important;
+          width: min(86vw, 320px) !important;
+          height: calc(100dvh - 58px) !important;
+          z-index: 1800 !important;
+
+          opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+          transform: translateX(-104%) !important;
+        }
+
+        body.mobile-chat-drawer-open
+          .chat-layout.study-mode
+          > .left-panel.panel.drawer-open {
+          opacity: 1 !important;
+          visibility: visible !important;
+          pointer-events: auto !important;
+          transform: translateX(0) !important;
+        }
+
+        body.mobile-chat-drawer-open .chat-layout.study-mode > .chat-panel {
+          left: 0 !important;
+          width: 100vw !important;
+          max-width: 100vw !important;
+        }
+
+        body.mobile-chat-drawer-open .chat-layout.study-mode {
+          grid-template-columns: 1fr !important;
+        }
+
+        .chat-layout:not(.study-mode) > .left-panel.panel {
+          display: none !important;
+        }
+
+        .chat-layout:not(.study-mode) > .chat-panel {
+          width: 100% !important;
+        }
+      }
+      /* =========================================================
+   iPHONE PORTRAIT NORMAL NUTRI C TOOLS DRAWER FIX 01
+   Purpose:
+   - In normal Nutri C view, gold button can reveal Tools panel.
+   - Tools panel is hidden by default but still alive.
+   ========================================================= */
+      @media (max-width: 640px) and (orientation: portrait) {
+        .chat-layout:not(.study-mode) > .left-panel.panel {
+          display: flex !important;
+          position: fixed !important;
+          top: 58px !important;
+          left: 0 !important;
+          bottom: 0 !important;
+
+          width: min(86vw, 320px) !important;
+          height: calc(100dvh - 58px) !important;
+
+          z-index: 1800 !important;
+
+          opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+          transform: translateX(-104%) !important;
+
+          transition:
+            transform 0.26s ease,
+            opacity 0.2s ease,
+            visibility 0.2s ease !important;
+        }
+
+        .chat-layout:not(.study-mode) > .left-panel.panel.drawer-open {
+          opacity: 1 !important;
+          visibility: visible !important;
+          pointer-events: auto !important;
+          transform: translateX(0) !important;
+        }
+      }
     </style>
   </head>
   <body>
@@ -11056,11 +11175,16 @@ Quality Rules:
       }
 
       function toggleMobileChatDrawer() {
-        if (document.body.classList.contains("mobile-chat-drawer-open")) {
+        const chatOpen = document.body.classList.contains(
+          "mobile-chat-drawer-open",
+        );
+
+        if (chatOpen) {
           closeMobileChatDrawer();
-        } else {
-          openMobileChatDrawer();
+          return;
         }
+
+        openMobileChatDrawer();
       }
 
       function toggleSidebar() {
@@ -11068,8 +11192,39 @@ Quality Rules:
       }
 
       function toggleDesktopSidebar() {
-        if (isIphonePortraitStudyMode()) {
-          toggleMobileChatDrawer();
+        const isIphonePortrait = window.matchMedia(
+          "(max-width: 640px) and (orientation: portrait)",
+        ).matches;
+
+        const chatLayout = document.querySelector(".chat-layout");
+        const isStudyMode = Boolean(
+          chatLayout?.classList.contains("study-mode"),
+        );
+        const chatDrawerOpen = document.body.classList.contains(
+          "mobile-chat-drawer-open",
+        );
+
+        const toolsPanel = chatLayout?.querySelector(".left-panel.panel");
+
+        // 1. Study Reader visible, Nutri C NOT open:
+        // gold button opens Nutri C.
+        if (isIphonePortrait && isStudyMode && !chatDrawerOpen) {
+          openMobileChatDrawer();
+          return;
+        }
+
+        // 2. Nutri C opened on top of Study Reader:
+        // gold/green X closes Nutri C and returns to Study Reader.
+        if (isIphonePortrait && isStudyMode && chatDrawerOpen) {
+          closeStudyCurriculumDrawer?.();
+          closeMobileChatDrawer();
+          return;
+        }
+
+        // 3. Normal Nutri C full view:
+        // gold button opens/closes slim Tools panel.
+        if (isIphonePortrait && !isStudyMode && toolsPanel) {
+          toolsPanel.classList.toggle("drawer-open");
           return;
         }
 
