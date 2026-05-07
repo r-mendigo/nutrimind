@@ -7476,18 +7476,100 @@
         }
       }
       /* =========================================================
-   iPHONE EVENT SHEET REFINEMENT 02
-   Purpose:
-   - Hide floating green menu while Add Event sheet is open.
-   - Prevent overlap with Save/Cancel buttons.
+   iPHONE FINAL STUDY + CALENDAR POLISH 02
    ========================================================= */
       @media (max-width: 640px) and (orientation: portrait) {
-        body.event-modal-open .mobile-menu {
-          opacity: 0 !important;
-          pointer-events: none !important;
-          transform: scale(0.86) !important;
+        body.study-zen-mode #studyZenBtn {
+          position: fixed !important;
+          top: calc(env(safe-area-inset-top) + 12px) !important;
+          right: 12px !important;
+          z-index: 4000 !important;
+          width: 46px !important;
+          height: 46px !important;
+          min-width: 46px !important;
+          min-height: 46px !important;
+          border-radius: 999px !important;
+          background: rgba(255, 255, 255, 0.92) !important;
+          border: 1px solid rgba(216, 170, 39, 0.38) !important;
+          box-shadow: 0 14px 28px rgba(57, 86, 70, 0.16) !important;
+        }
+
+        .chat-layout.study-mode .study-reader-title-wrap {
+          width: 100% !important;
+          min-width: 0 !important;
+          padding: 6px 8px !important;
+        }
+
+        .chat-layout.study-mode .study-header-topline {
+          position: relative !important;
+          width: 100% !important;
+          min-height: auto !important;
+          padding-right: 0 !important;
+          display: block !important;
+        }
+
+        .chat-layout.study-mode .study-header-topline .section-label,
+        .chat-layout.study-mode .study-header-topline .study-title-row {
+          position: static !important;
+          transform: none !important;
+        }
+
+        .chat-layout.study-mode .study-header-topline .study-title-row {
+          justify-content: flex-start !important;
+          margin-top: 3px !important;
+          max-width: 100% !important;
+        }
+
+        .chat-layout.study-mode .study-reader-title-wrap .card-title {
+          max-width: calc(100vw - 56px) !important;
+          font-size: 0.9rem !important;
+        }
+
+        .chat-layout.study-mode .study-reader-meta {
+          display: grid !important;
+          grid-template-columns: minmax(0, 1fr) !important;
+          gap: 5px !important;
+        }
+
+        .chat-layout.study-mode .study-note-nav {
+          max-width: 100% !important;
+          display: grid !important;
+          grid-template-columns: minmax(58px, auto) auto minmax(58px, auto) !important;
+          gap: 6px !important;
+          align-items: center !important;
+          justify-content: start !important;
+          overflow: hidden !important;
+        }
+
+        .chat-layout.study-mode .study-note-nav button {
+          min-width: 0 !important;
+          max-width: 74px !important;
+          padding: 6px 8px !important;
+          font-size: 0.72rem !important;
+          white-space: nowrap !important;
+        }
+
+        .calendar-grid {
+          align-items: start !important;
+        }
+
+        .calendar-day {
+          height: 58px !important;
+          min-height: 58px !important;
+          max-height: 58px !important;
+          overflow: hidden !important;
+          gap: 3px !important;
+        }
+
+        .calendar-day-title,
+        .calendar-day-more {
+          max-width: 100% !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+          white-space: nowrap !important;
         }
       }
+
       /* =========================================================
    iPHONE EVENT SHEET REFINEMENT 03
    Purpose:
