@@ -13890,6 +13890,16 @@ Quality Rules:
       }
 
       function closeStudyMode() {
+        if (document.body.classList.contains("study-zen-mode")) {
+          document.body.classList.remove("study-zen-mode");
+
+          const zenBtn = document.getElementById("studyZenBtn");
+          if (zenBtn) {
+            zenBtn.textContent = "🌙";
+            zenBtn.title = "Zen Mode";
+          }
+        }
+
         if (studyModeOpen && activeStudyTopic) {
           runStudyAutoSave();
         }
