@@ -7712,6 +7712,296 @@
           display: none !important;
         }
       }
+      /* =========================================================
+   iPHONE LANDSCAPE COMPACT MODE 01
+   Purpose:
+   - Stop iPhone landscape from behaving like iPad view.
+   - Reduce vertical waste.
+   - Keep Nutri C, Study Reader, and Calendar inside usable scroll areas.
+   ========================================================= */
+      @media (max-width: 920px) and (orientation: landscape) {
+        html,
+        body {
+          height: 100%;
+          overflow: hidden !important;
+        }
+
+        .app {
+          height: 100dvh !important;
+          min-height: 100dvh !important;
+          overflow: hidden !important;
+        }
+
+        .main {
+          height: 100dvh !important;
+          min-height: 0 !important;
+          overflow: hidden !important;
+        }
+
+        .topbar {
+          height: 48px !important;
+          min-height: 48px !important;
+          padding: 4px 10px !important;
+          gap: 8px !important;
+        }
+
+        .page-title {
+          font-size: 1.05rem !important;
+        }
+
+        .sidebar-toggle-btn,
+        .top-mode-chip,
+        .toolbar-icon-btn-sm,
+        .nm-sync-btn {
+          height: 36px !important;
+          min-height: 36px !important;
+        }
+
+        .sidebar-toggle-btn,
+        .toolbar-icon-btn-sm,
+        .nm-sync-btn {
+          width: 36px !important;
+          min-width: 36px !important;
+        }
+
+        .content {
+          height: calc(100dvh - 48px) !important;
+          min-height: 0 !important;
+          overflow: hidden !important;
+          padding: 8px !important;
+        }
+
+        .view.active,
+        .chat-layout {
+          height: 100% !important;
+          min-height: 0 !important;
+          overflow: hidden !important;
+        }
+
+        .chat-layout {
+          display: grid !important;
+          grid-template-columns: 180px minmax(0, 1fr) !important;
+          gap: 8px !important;
+        }
+
+        .left-panel,
+        .chat-panel,
+        .study-reader-panel {
+          min-height: 0 !important;
+          overflow: hidden !important;
+        }
+
+        .left-panel-scroll {
+          padding: 10px !important;
+          gap: 8px !important;
+          overflow-y: auto !important;
+          -webkit-overflow-scrolling: touch !important;
+        }
+
+        .hero-card {
+          padding: 10px !important;
+        }
+
+        .hero-card h3 {
+          font-size: 0.9rem !important;
+          margin-bottom: 6px !important;
+        }
+
+        .topic-btn {
+          padding: 9px 10px !important;
+          font-size: 0.82rem !important;
+        }
+
+        .quiz-btn {
+          height: 36px !important;
+          min-height: 36px !important;
+          padding: 0 12px !important;
+          font-size: 0.82rem !important;
+        }
+
+        .chat-panel {
+          padding: 8px !important;
+          gap: 8px !important;
+          display: flex !important;
+          flex-direction: column !important;
+        }
+
+        .message-stream {
+          flex: 1 1 auto !important;
+          min-height: 0 !important;
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+          -webkit-overflow-scrolling: touch !important;
+        }
+
+        .message-content {
+          font-size: 0.86rem !important;
+          line-height: 1.38 !important;
+        }
+
+        .chat-controls {
+          flex: 0 0 auto !important;
+          margin: 4px 0 0 !important;
+          padding-bottom: 0 !important;
+        }
+
+        .controls-row {
+          min-height: 42px !important;
+          padding: 4px 6px !important;
+        }
+
+        .chat-compose-wrap {
+          min-height: 40px !important;
+          padding: 0 10px !important;
+        }
+
+        .chat-textarea {
+          min-height: 30px !important;
+          max-height: 64px !important;
+          font-size: 0.86rem !important;
+          line-height: 1.2 !important;
+        }
+
+        .send-btn {
+          width: 36px !important;
+          height: 36px !important;
+          min-width: 36px !important;
+        }
+
+        .mobile-menu {
+          width: 46px !important;
+          height: 46px !important;
+          right: 14px !important;
+          bottom: 14px !important;
+        }
+
+        .chat-layout.study-mode {
+          grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr) !important;
+        }
+
+        .chat-layout.study-mode > .chat-panel,
+        .chat-layout.study-mode > .study-reader-panel {
+          height: 100% !important;
+          max-height: 100% !important;
+        }
+
+        .study-reader-panel {
+          padding: 8px !important;
+          display: flex !important;
+          flex-direction: column !important;
+          overflow: hidden !important;
+        }
+
+        .study-reader-header {
+          flex: 0 0 auto !important;
+          padding: 10px !important;
+          gap: 6px !important;
+        }
+
+        .study-header-topline {
+          display: grid !important;
+          grid-template-columns: minmax(0, 1fr) auto !important;
+          gap: 8px !important;
+          align-items: center !important;
+        }
+
+        .study-reader-title-wrap .card-title {
+          font-size: 0.9rem !important;
+          max-width: 240px !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+          white-space: nowrap !important;
+        }
+
+        .study-reader-meta {
+          font-size: 0.72rem !important;
+          line-height: 1.2 !important;
+          max-height: 34px !important;
+          overflow: hidden !important;
+        }
+
+        .study-reader-actions {
+          display: flex !important;
+          gap: 6px !important;
+          overflow-x: auto !important;
+          padding-bottom: 2px !important;
+        }
+
+        .study-reader-actions .study-icon-btn {
+          width: 34px !important;
+          height: 34px !important;
+          min-width: 34px !important;
+          min-height: 34px !important;
+          border-radius: 11px !important;
+          font-size: 0.78rem !important;
+        }
+
+        .study-reader-editor {
+          flex: 1 1 auto !important;
+          min-height: 0 !important;
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+          -webkit-overflow-scrolling: touch !important;
+        }
+
+        #view-calendar {
+          height: 100% !important;
+          overflow-y: auto !important;
+          padding: 8px !important;
+          -webkit-overflow-scrolling: touch !important;
+        }
+
+        .calendar-layout {
+          grid-template-columns: 1fr !important;
+          gap: 8px !important;
+        }
+
+        .calendar-card {
+          padding: 10px !important;
+        }
+
+        .calendar-head {
+          margin-bottom: 8px !important;
+        }
+
+        .calendar-head .card-title {
+          font-size: 1.05rem !important;
+        }
+
+        .calendar-weekdays {
+          gap: 5px !important;
+          margin-bottom: 6px !important;
+          font-size: 0.72rem !important;
+        }
+
+        .calendar-grid {
+          grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+          gap: 5px !important;
+        }
+
+        .calendar-day {
+          min-height: 44px !important;
+          height: 44px !important;
+          max-height: 44px !important;
+          padding: 6px !important;
+          border-radius: 12px !important;
+          gap: 2px !important;
+          overflow: hidden !important;
+        }
+
+        .calendar-day-number {
+          font-size: 0.82rem !important;
+        }
+
+        .calendar-day-title,
+        .calendar-day-more {
+          font-size: 0.58rem !important;
+          max-width: 100% !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+          white-space: nowrap !important;
+        }
+      }
     </style>
   </head>
   <body>
