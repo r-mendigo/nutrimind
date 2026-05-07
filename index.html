@@ -2210,13 +2210,21 @@
         }
 
         .chat-panel {
-          min-height: calc(100dvh - 84px);
-          overflow: visible;
+          flex: 1 1 auto;
+          min-height: 0;
+          height: 100%;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
         }
 
         .message-stream {
+          flex: 1 1 auto;
+          min-height: 0;
           max-height: none;
-          overflow: visible;
+          overflow-y: auto;
+          overflow-x: hidden;
+          -webkit-overflow-scrolling: touch;
         }
 
         .chat-controls {
@@ -5941,12 +5949,21 @@
         grid-template-columns: 1fr !important;
       }
 
+      body.study-zen-mode,
+      body.study-zen-mode html {
+        height: 100dvh !important;
+        overflow: hidden !important;
+      }
+
+      body.study-zen-mode .app,
       body.study-zen-mode .main,
       body.study-zen-mode .content,
       body.study-zen-mode .view.active,
       body.study-zen-mode .chat-layout {
         height: 100dvh !important;
+        max-height: 100dvh !important;
         width: 100% !important;
+        overflow: hidden !important;
       }
 
       body.study-zen-mode .content {
@@ -5959,9 +5976,20 @@
 
       body.study-zen-mode .study-reader-panel {
         width: min(1080px, 100%);
-        height: calc(100dvh - 44px);
+        height: calc(100dvh - 44px) !important;
+        max-height: calc(100dvh - 44px) !important;
         margin: 0 auto;
         border-radius: 30px;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+      body.study-zen-mode .study-reader-editor {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
       }
 
       body.study-zen-mode .study-reader-header {
