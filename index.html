@@ -7614,6 +7614,76 @@
           bottom: calc(env(safe-area-inset-bottom) + 76px) !important;
         }
       }
+      /* =========================================================
+   iPHONE STUDY HEADER OVERLAP FINAL FIX
+   ========================================================= */
+      @media (max-width: 640px) and (orientation: portrait) {
+        .chat-layout.study-mode .study-reader-header {
+          min-height: 148px !important;
+          overflow: visible !important;
+        }
+
+        .chat-layout.study-mode .study-header-topline {
+          display: block !important;
+          min-height: auto !important;
+          padding-right: 0 !important;
+        }
+
+        .chat-layout.study-mode .study-header-topline .section-label,
+        .chat-layout.study-mode .study-header-topline .study-title-row {
+          position: static !important;
+          transform: none !important;
+        }
+
+        .chat-layout.study-mode .study-title-row {
+          justify-content: flex-start !important;
+          margin-top: 4px !important;
+        }
+
+        .chat-layout.study-mode .study-reader-meta {
+          display: grid !important;
+          grid-template-columns: 1fr !important;
+          gap: 7px !important;
+          margin-top: 8px !important;
+          padding-right: 0 !important;
+          font-size: 0.7rem !important;
+          line-height: 1.15 !important;
+        }
+
+        .chat-layout.study-mode #studyReaderMeta {
+          display: block !important;
+          max-width: 100% !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+        }
+
+        .chat-layout.study-mode .study-note-nav {
+          width: 100% !important;
+          display: grid !important;
+          grid-template-columns: 72px 1fr 72px !important;
+          align-items: center !important;
+          gap: 8px !important;
+        }
+
+        .chat-layout.study-mode .study-note-nav span {
+          text-align: center !important;
+          white-space: nowrap !important;
+        }
+
+        .chat-layout.study-mode .study-note-nav button {
+          width: 72px !important;
+          max-width: 72px !important;
+          min-width: 0 !important;
+          padding: 6px 6px !important;
+          font-size: 0.7rem !important;
+          white-space: nowrap !important;
+        }
+
+        .chat-layout.study-mode .study-reader-stats {
+          display: none !important;
+        }
+      }
     </style>
   </head>
   <body>
@@ -11505,6 +11575,11 @@ Quality Rules:
       }
 
       function toggleSidebar() {
+        if (document.body.classList.contains("study-zen-mode")) {
+          toggleStudyZenMode();
+          return;
+        }
+
         document.getElementById("sidebar").classList.toggle("open");
       }
 
