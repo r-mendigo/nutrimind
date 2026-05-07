@@ -9571,7 +9571,7 @@
 
           // Normal text block - convert newlines properly
           const blocks = part
-            .split(/\n\s*\n/)
+            .split(/\n\s*\n(?!\s*(?:[2-9]\d*|1\d+)[.)]\s+)/)
             .map((b) => b.trim())
             .filter(Boolean);
 
