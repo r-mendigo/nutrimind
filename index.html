@@ -7713,28 +7713,204 @@
         }
       }
       /* =========================================================
-   iPHONE LANDSCAPE FOCUS WORKSPACE 04
+   iPHONE LANDSCAPE TRUE FULLSCREEN FIX 05
    ========================================================= */
       @media (max-width: 920px) and (orientation: landscape) {
-        .chat-layout {
-          grid-template-columns: minmax(0, 1fr) !important;
+        html,
+        body,
+        .app,
+        .main {
+          height: 100dvh !important;
+          max-height: 100dvh !important;
+          overflow: hidden !important;
         }
 
-        .left-panel {
+        .content {
+          height: calc(100dvh - 48px) !important;
+          max-height: calc(100dvh - 48px) !important;
+          overflow: hidden !important;
+        }
+
+        .chat-layout {
+          height: 100% !important;
+          max-height: 100% !important;
+          overflow: hidden !important;
+        }
+
+        .view.active {
+          height: 100% !important;
+          max-height: 100% !important;
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+          -webkit-overflow-scrolling: touch !important;
+        }
+
+        #view-chat.view.active {
+          overflow: hidden !important;
+        }
+
+        #view-manager,
+        #view-calendar {
+          height: 100% !important;
+          max-height: 100% !important;
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+          -webkit-overflow-scrolling: touch !important;
+          padding-bottom: 72px !important;
+        }
+
+        .chat-layout {
+          display: block !important;
+        }
+
+        .chat-layout > .left-panel.panel {
+          display: flex !important;
+          position: fixed !important;
+          top: 48px !important;
+          left: 0 !important;
+          bottom: 0 !important;
+          width: min(42vw, 300px) !important;
+          height: calc(100dvh - 48px) !important;
+          z-index: 1900 !important;
+          opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+          transform: translateX(-104%) !important;
+          transition:
+            transform 0.22s ease,
+            opacity 0.22s ease !important;
+        }
+
+        .chat-layout > .left-panel.panel.drawer-open,
+        .chat-layout > .left-panel.panel.open,
+        body.mobile-chat-drawer-open
+          .chat-layout
+          > .left-panel.panel.drawer-open {
+          opacity: 1 !important;
+          visibility: visible !important;
+          pointer-events: auto !important;
+          transform: translateX(0) !important;
+        }
+
+        .chat-layout > .chat-panel.panel {
+          display: flex !important;
+          width: 100% !important;
+          height: 100% !important;
+          max-height: 100% !important;
+          overflow: hidden !important;
+        }
+
+        .chat-layout.study-mode > .chat-panel.panel {
           display: none !important;
         }
 
-        .chat-panel {
+        .chat-layout.study-mode > .study-reader-panel {
+          display: flex !important;
           width: 100% !important;
-          max-width: 100% !important;
+          height: 100% !important;
+          max-height: 100% !important;
+          overflow: hidden !important;
         }
 
-        .message-card.user {
-          margin-top: 0 !important;
+        .message-stream,
+        .study-reader-editor,
+        .study-reader-body {
+          flex: 1 1 auto !important;
+          min-height: 0 !important;
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+          -webkit-overflow-scrolling: touch !important;
         }
 
-        .message-stream {
-          padding-top: 0 !important;
+        .chat-controls {
+          flex: 0 0 auto !important;
+        }
+
+        .mobile-menu {
+          z-index: 2100 !important;
+          right: 14px !important;
+          bottom: 72px !important;
+        }
+      }
+      /* =========================================================
+   iPHONE LANDSCAPE STUDY CHAT DRAWER 06
+   ========================================================= */
+      @media (max-width: 920px) and (orientation: landscape) {
+        body.mobile-chat-drawer-open
+          .chat-layout.study-mode
+          > .chat-panel.panel {
+          display: flex !important;
+          position: fixed !important;
+          top: 48px !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
+          width: 100vw !important;
+          height: calc(100dvh - 48px) !important;
+          max-height: calc(100dvh - 48px) !important;
+          z-index: 2050 !important;
+          padding: 8px !important;
+          border-radius: 0 !important;
+          overflow: hidden !important;
+          background: rgba(244, 250, 246, 0.98) !important;
+        }
+
+        body.mobile-chat-drawer-open
+          .chat-layout.study-mode
+          > .study-reader-panel {
+          filter: blur(1px);
+        }
+
+        body.mobile-chat-drawer-open .sidebar-toggle-btn {
+          background: linear-gradient(
+            135deg,
+            #22b35f 0%,
+            #1f9b54 100%
+          ) !important;
+          color: #ffffff !important;
+        }
+
+        body.mobile-chat-drawer-open .mobile-menu {
+          display: none !important;
+        }
+      }
+      /* =========================================================
+   iPHONE LANDSCAPE TOOLS DRAWER ABOVE NUTRI C 07
+   ========================================================= */
+      @media (max-width: 920px) and (orientation: landscape) {
+        body.mobile-chat-drawer-open
+          .chat-layout.study-mode
+          > .left-panel.panel {
+          display: flex !important;
+          position: fixed !important;
+          top: 48px !important;
+          left: 0 !important;
+          bottom: 0 !important;
+          width: min(42vw, 320px) !important;
+          height: calc(100dvh - 48px) !important;
+          z-index: 2300 !important;
+          border-radius: 0 22px 22px 0 !important;
+          overflow: hidden !important;
+        }
+
+        body.mobile-chat-drawer-open
+          .chat-layout.study-mode
+          > .left-panel.panel.drawer-open {
+          opacity: 1 !important;
+          visibility: visible !important;
+          pointer-events: auto !important;
+          transform: translateX(0) !important;
+        }
+
+        body.mobile-chat-drawer-open
+          .chat-layout.study-mode
+          > .left-panel.panel
+          .left-panel-scroll {
+          height: 100% !important;
+          max-height: 100% !important;
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+          -webkit-overflow-scrolling: touch !important;
         }
       }
     </style>
@@ -11641,6 +11817,10 @@ Quality Rules:
           "(max-width: 640px) and (orientation: portrait)",
         ).matches;
 
+        const isIphoneLandscape = window.matchMedia(
+          "(max-width: 920px) and (orientation: landscape)",
+        ).matches;
+
         const chatLayout = document.querySelector(".chat-layout");
         const isStudyMode = Boolean(
           chatLayout?.classList.contains("study-mode"),
@@ -11653,14 +11833,22 @@ Quality Rules:
 
         // 1. Study Reader visible, Nutri C NOT open:
         // gold button opens Nutri C.
-        if (isIphonePortrait && isStudyMode && !chatDrawerOpen) {
+        if (
+          (isIphonePortrait || isIphoneLandscape) &&
+          isStudyMode &&
+          !chatDrawerOpen
+        ) {
           openMobileChatDrawer();
           return;
         }
 
         // 2. Nutri C opened on top of Study Reader:
         // gold/green X closes Nutri C and returns to Study Reader.
-        if (isIphonePortrait && isStudyMode && chatDrawerOpen) {
+        if (
+          (isIphonePortrait || isIphoneLandscape) &&
+          isStudyMode &&
+          chatDrawerOpen
+        ) {
           closeStudyCurriculumDrawer?.();
           closeMobileChatDrawer();
           return;
@@ -11668,7 +11856,11 @@ Quality Rules:
 
         // 3. Normal Nutri C full view:
         // gold button opens/closes slim Tools panel.
-        if (isIphonePortrait && !isStudyMode && toolsPanel) {
+        if (
+          (isIphonePortrait || isIphoneLandscape) &&
+          !isStudyMode &&
+          toolsPanel
+        ) {
           toolsPanel.classList.toggle("drawer-open");
           return;
         }
