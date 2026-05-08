@@ -7913,6 +7913,111 @@
           -webkit-overflow-scrolling: touch !important;
         }
       }
+      /* =========================================================
+   iPHONE LANDSCAPE COMPACT LOCAL MODE 08
+   ========================================================= */
+      @media (max-width: 920px) and (orientation: landscape) {
+        .local-mode-card,
+        .sync-lock-card,
+        .nutrimind-local-card {
+          padding: 12px 14px !important;
+          min-height: auto !important;
+        }
+
+        .local-mode-card h3,
+        .sync-lock-card h3,
+        .nutrimind-local-card h3 {
+          margin-bottom: 4px !important;
+          font-size: 0.95rem !important;
+          line-height: 1.1 !important;
+        }
+
+        .local-mode-card p,
+        .sync-lock-card p,
+        .nutrimind-local-card p {
+          margin-bottom: 10px !important;
+          font-size: 0.78rem !important;
+          line-height: 1.2 !important;
+        }
+
+        .local-mode-actions,
+        .sync-lock-actions {
+          gap: 10px !important;
+          justify-content: space-between !important;
+        }
+
+        .local-mode-actions button,
+        .sync-lock-actions button {
+          padding: 6px 8px !important;
+          min-height: auto !important;
+        }
+
+        .local-mode-actions .icon-circle,
+        .sync-lock-actions .icon-circle {
+          width: 42px !important;
+          height: 42px !important;
+          min-width: 42px !important;
+          min-height: 42px !important;
+          font-size: 1rem !important;
+        }
+
+        .local-mode-actions span,
+        .sync-lock-actions span {
+          font-size: 0.72rem !important;
+        }
+      }
+      @media (max-width: 920px) and (orientation: landscape) {
+        #nmSecurityActions {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          gap: 10px !important;
+          flex-wrap: nowrap !important;
+        }
+
+        #nmSecurityActions button {
+          flex: 1 1 0 !important;
+        }
+
+        #nmPasswordStatus {
+          display: none !important;
+        }
+      }
+      /* =========================================================
+   iPAD LANDSCAPE RESTORE GUARD
+   Keeps iPhone landscape patches away from iPad/tablet height.
+   ========================================================= */
+      @media (orientation: landscape) and (min-height: 501px) {
+        .chat-layout > .left-panel.panel {
+          position: static !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+          pointer-events: auto !important;
+          transform: none !important;
+          width: auto !important;
+          height: auto !important;
+          z-index: auto !important;
+        }
+
+        .chat-layout.study-mode > .chat-panel.panel {
+          display: flex !important;
+          position: static !important;
+          width: auto !important;
+          height: auto !important;
+          max-height: none !important;
+          border-radius: 14px !important;
+        }
+
+        .mobile-menu {
+          right: 18px !important;
+          bottom: 18px !important;
+        }
+
+        #view-manager,
+        #view-calendar {
+          padding-bottom: 16px !important;
+        }
+      }
     </style>
   </head>
   <body>
@@ -11818,7 +11923,7 @@ Quality Rules:
         ).matches;
 
         const isIphoneLandscape = window.matchMedia(
-          "(max-width: 920px) and (orientation: landscape)",
+          "(orientation: landscape) and (max-height: 500px)",
         ).matches;
 
         const chatLayout = document.querySelector(".chat-layout");
@@ -15087,9 +15192,18 @@ Quality Rules:
         const actions = document.getElementById("nmSecurityActions");
         if (!status || !actions) return;
 
+        const isIphoneLandscape = window.matchMedia(
+          "(orientation: landscape) and (max-height: 500px)",
+        ).matches;
+
         if (isNutriMindLockEnabled()) {
-          status.innerHTML = `<span class="nm-vault-icon"></span>`;
-          actions.innerHTML = `
+          if (isIphoneLandscape) {
+            status.innerHTML = "";
+            actions.innerHTML = `
+  <button type="button" class="nm-vault-action" title="Vault active">
+    <span class="nm-vault-icon"></span>
+    <span class="nm-sec-label">Vault</span>
+  </button>
   <button type="button" onclick="lockNutriMindNow()" title="Lock now">
     <span class="nm-sec-icon">🔒</span>
     <span class="nm-sec-label">Lock</span>
@@ -15103,14 +15217,45 @@ Quality Rules:
     <span class="nm-sec-label">Off</span>
   </button>
 `;
+          } else {
+            status.innerHTML = `<span class="nm-vault-icon"></span>`;
+            actions.innerHTML = `
+  <button type="button" onclick="lockNutriMindNow()" title="Lock now">
+    <span class="nm-sec-icon">🔒</span>
+    <span class="nm-sec-label">Lock</span>
+  </button>
+  <button type="button" onclick="openNutriMindSecurityModal('change')" title="Change password">
+    <span class="nm-sec-icon">🔁</span>
+    <span class="nm-sec-label">Change</span>
+  </button>
+  <button type="button" onclick="openNutriMindSecurityModal('disable')" title="Disable password">
+    <span class="nm-sec-icon">🔓</span>
+    <span class="nm-sec-label">Off</span>
+  </button>
+`;
+          }
         } else {
-          status.innerHTML = `<span class="nm-vault-icon off"></span>`;
-          actions.innerHTML = `
+          if (isIphoneLandscape) {
+            status.innerHTML = "";
+            actions.innerHTML = `
+  <button type="button" class="nm-vault-action" title="Vault off">
+    <span class="nm-vault-icon off"></span>
+    <span class="nm-sec-label">Vault</span>
+  </button>
   <button type="button" onclick="openNutriMindSecurityModal('enable')" title="Enable password">
     <span class="nm-sec-icon">🔐</span>
     <span class="nm-sec-label">Enable</span>
   </button>
 `;
+          } else {
+            status.innerHTML = `<span class="nm-vault-icon off"></span>`;
+            actions.innerHTML = `
+  <button type="button" onclick="openNutriMindSecurityModal('enable')" title="Enable password">
+    <span class="nm-sec-icon">🔐</span>
+    <span class="nm-sec-label">Enable</span>
+  </button>
+`;
+          }
         }
       }
 
