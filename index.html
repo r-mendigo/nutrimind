@@ -12605,11 +12605,21 @@ Quality Rules:
                 event.preventDefault();
 
                 const nextNumber = Number(match[1]) + 1;
-                document.execCommand("insertText", false, `\n${nextNumber}. `);
 
-                pushStudyHistorySnapshot(true);
-                queueStudyAutoSave();
-                queueStudyUiRefresh();
+                document.execCommand(
+                  "insertHTML",
+                  false,
+                  `<div>${nextNumber}.&nbsp;</div>`,
+                );
+
+                setTimeout(() => {
+                  const didRenumber = renumberStudyReaderNumberedLines();
+
+                  pushStudyHistorySnapshot(didRenumber);
+                  queueStudyAutoSave();
+                  queueStudyUiRefresh();
+                }, 0);
+
                 return;
               }
             }
