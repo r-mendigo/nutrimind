@@ -12546,7 +12546,9 @@ Quality Rules:
 
         input.addEventListener("click", (event) => {
           if (toggleChecklistLineFromClick(event)) return;
+
           const checkBox = event.target.closest(".study-check-box");
+
           if (checkBox && input.contains(checkBox)) {
             event.preventDefault();
 
@@ -12565,6 +12567,7 @@ Quality Rules:
           }
 
           const link = event.target.closest("a");
+
           if (link) {
             event.preventDefault();
             window.open(link.href, "_blank", "noopener,noreferrer");
@@ -12592,47 +12595,44 @@ Quality Rules:
           if (event.key === "Enter" && !event.shiftKey) {
             const selection = window.getSelection();
 
-            if (
-              selection &&
-              selection.rangeCount > 0 &&
-              selection.isCollapsed
-            ) {
+            if (selection && selection.rangeCount > 0) {
               const node = selection.anchorNode;
-              const lineText = String(node?.textContent || "");
-              const match = lineText.match(/^\s*(\d+)\.\s*(.*)$/);
 
-              if (match) {
-                event.preventDefault();
+              const currentBlock =
+                node?.nodeType === Node.TEXT_NODE
+                  ? node.parentElement?.closest("div, p")
+                  : node?.closest?.("div, p");
 
-                const currentBlock =
-                  node.nodeType === Node.TEXT_NODE
-                    ? node.parentElement.closest("p, div")
-                    : node.closest("p, div");
+              if (currentBlock && input.contains(currentBlock)) {
+                const lineText = String(currentBlock.textContent || "");
+                const match = lineText.match(/^\s*(\d+)\.\s*(.*)$/);
 
-                if (!currentBlock || !input.contains(currentBlock)) return;
+                if (match) {
+                  event.preventDefault();
 
-                const nextNumber = Number(match[1]) + 1;
-                const newBlock = currentBlock.cloneNode(false);
+                  const nextNumber = Number(match[1]) + 1;
+                  const newBlock = currentBlock.cloneNode(false);
 
-                newBlock.innerHTML = `${nextNumber}.&nbsp;`;
-                currentBlock.insertAdjacentElement("afterend", newBlock);
+                  newBlock.innerHTML = `${nextNumber}.&nbsp;`;
+                  currentBlock.insertAdjacentElement("afterend", newBlock);
 
-                const range = document.createRange();
-                range.selectNodeContents(newBlock);
-                range.collapse(false);
+                  const range = document.createRange();
+                  range.selectNodeContents(newBlock);
+                  range.collapse(false);
 
-                selection.removeAllRanges();
-                selection.addRange(range);
+                  selection.removeAllRanges();
+                  selection.addRange(range);
 
-                setTimeout(() => {
-                  const didRenumber = renumberStudyReaderNumberedLines();
+                  setTimeout(() => {
+                    const didRenumber = renumberStudyReaderNumberedLines();
 
-                  pushStudyHistorySnapshot(didRenumber);
-                  queueStudyAutoSave();
-                  queueStudyUiRefresh();
-                }, 0);
+                    pushStudyHistorySnapshot(didRenumber);
+                    queueStudyAutoSave();
+                    queueStudyUiRefresh();
+                  }, 0);
 
-                return;
+                  return;
+                }
               }
             }
           }
