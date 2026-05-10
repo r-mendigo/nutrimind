@@ -9388,9 +9388,35 @@
         ],
       };
 
-      let brains = normalizeBrainsMap(
-        JSON.parse(localStorage.getItem("nutriMindBrains") || "null"),
-      );
+      const NUTRIMIND_BRAINS_KEY = "nutriMindBrains";
+      const NUTRIMIND_BRAINS_BACKUP_KEY = "nutriMindBrains_backup_v1";
+
+      function loadNutriMindBrains() {
+        try {
+          const primary = JSON.parse(
+            localStorage.getItem(NUTRIMIND_BRAINS_KEY) || "null",
+          );
+
+          if (primary && typeof primary === "object") {
+            return normalizeBrainsMap(primary);
+          }
+        } catch {}
+
+        try {
+          const backup = JSON.parse(
+            localStorage.getItem(NUTRIMIND_BRAINS_BACKUP_KEY) || "null",
+          );
+
+          if (backup && typeof backup === "object") {
+            localStorage.setItem(NUTRIMIND_BRAINS_KEY, JSON.stringify(backup));
+            return normalizeBrainsMap(backup);
+          }
+        } catch {}
+
+        return normalizeBrainsMap(null);
+      }
+
+      let brains = loadNutriMindBrains();
 
       function getTrashItems() {
         return JSON.parse(localStorage.getItem(TRASH_STORAGE_KEY) || "[]");
@@ -9724,7 +9750,10 @@
 
       function persist() {
         try {
-          localStorage.setItem("nutriMindBrains", JSON.stringify(brains));
+          const brainPayload = JSON.stringify(brains);
+
+          localStorage.setItem(NUTRIMIND_BRAINS_KEY, brainPayload);
+          localStorage.setItem(NUTRIMIND_BRAINS_BACKUP_KEY, brainPayload);
         } catch (err) {
           console.error("❌ nutriMindBrains save failed:", err);
           toast?.(
@@ -12387,6 +12416,26 @@ Quality Rules:
           studyAutoSaveTimer = null;
         }, 700);
       }
+      function flushStudyReaderSave(reason = "") {
+        if (studyAutoSaveTimer) {
+          clearTimeout(studyAutoSaveTimer);
+          studyAutoSaveTimer = null;
+        }
+
+        if (studyModeOpen && activeStudyTopic) {
+          runStudyAutoSave();
+        }
+      }
+
+      window.addEventListener("pagehide", () => {
+        flushStudyReaderSave("pagehide");
+      });
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden") {
+          flushStudyReaderSave("hidden");
+        }
+      });
 
       function cleanupEmptyStudyFormatting() {
         const input = document.getElementById("studyReaderInput");
