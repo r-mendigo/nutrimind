@@ -12604,13 +12604,25 @@ Quality Rules:
               if (match) {
                 event.preventDefault();
 
-                const nextNumber = Number(match[1]) + 1;
+                const currentBlock =
+                  node.nodeType === Node.TEXT_NODE
+                    ? node.parentElement.closest("p, div")
+                    : node.closest("p, div");
 
-                document.execCommand(
-                  "insertHTML",
-                  false,
-                  `<div>${nextNumber}.&nbsp;</div>`,
-                );
+                if (!currentBlock || !input.contains(currentBlock)) return;
+
+                const nextNumber = Number(match[1]) + 1;
+                const newBlock = currentBlock.cloneNode(false);
+
+                newBlock.innerHTML = `${nextNumber}.&nbsp;`;
+                currentBlock.insertAdjacentElement("afterend", newBlock);
+
+                const range = document.createRange();
+                range.selectNodeContents(newBlock);
+                range.collapse(false);
+
+                selection.removeAllRanges();
+                selection.addRange(range);
 
                 setTimeout(() => {
                   const didRenumber = renumberStudyReaderNumberedLines();
