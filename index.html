@@ -8134,6 +8134,16 @@
       .study-table td {
         background: rgba(255, 255, 255, 0.86);
       }
+      .study-table-exit {
+        min-height: 24px;
+        margin: 6px 0 10px;
+        outline: none;
+        caret-color: var(--text);
+      }
+
+      .study-table-exit:empty::before {
+        content: "\200B";
+      }
       .study-table-wrap {
         position: relative;
       }
@@ -13304,6 +13314,27 @@ Quality Rules:
         queueStudyUiRefresh();
         return true;
       }
+      function createStudyTableExitLine() {
+        const exit = document.createElement("p");
+        exit.className = "study-table-exit";
+        exit.contentEditable = "true";
+        exit.innerHTML = "<br>";
+        return exit;
+      }
+
+      function placeCaretAtEndOfStudyBlock(block) {
+        if (!block) return;
+
+        block.focus?.();
+
+        const range = document.createRange();
+        range.selectNodeContents(block);
+        range.collapse(false);
+
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
       function insertStudyTable() {
         const input = document.getElementById("studyReaderInput");
         if (!input) return;
@@ -13364,13 +13395,18 @@ Quality Rules:
     <button type="button" class="study-table-mini-btn" onclick="addStudyTableRowFromButton(this)">＋ Row</button>
   </div>
 </div>
-<p><br></p>
+<p class="study-table-exit" contenteditable="true"><br></p>
   `;
 
         pushStudyHistorySnapshot(true);
 
         document.execCommand("insertHTML", false, tableHtml);
         repairStudyTables();
+
+        const latestExit = input.querySelector(
+          ".study-table-wrap + .study-table-exit:last-of-type",
+        );
+        placeCaretAtEndOfStudyBlock(latestExit);
 
         pushStudyHistorySnapshot(true);
         queueStudyAutoSave();
@@ -13395,6 +13431,7 @@ Quality Rules:
           if (!wrap.querySelector(".study-table-mini-controls.top")) {
             const topControls = document.createElement("div");
             topControls.className = "study-table-mini-controls top";
+            topControls.contentEditable = "false";
             topControls.innerHTML = `<button type="button" class="study-table-mini-btn" onclick="addStudyTableColumnFromButton(this)">＋ Col</button>`;
             wrap.insertBefore(topControls, table);
           }
@@ -13402,8 +13439,30 @@ Quality Rules:
           if (!wrap.querySelector(".study-table-mini-controls.bottom")) {
             const bottomControls = document.createElement("div");
             bottomControls.className = "study-table-mini-controls bottom";
+            bottomControls.contentEditable = "false";
             bottomControls.innerHTML = `<button type="button" class="study-table-mini-btn" onclick="addStudyTableRowFromButton(this)">＋ Row</button>`;
             wrap.appendChild(bottomControls);
+          }
+
+          wrap
+            .querySelectorAll(".study-table-mini-controls")
+            .forEach((controls) => {
+              controls.contentEditable = "false";
+            });
+
+          table.querySelectorAll("th, td").forEach((cell) => {
+            cell.contentEditable = "true";
+            if (!cell.innerHTML.trim()) cell.innerHTML = "<br>";
+          });
+
+          let exit = wrap.nextElementSibling;
+
+          if (!exit || !exit.classList?.contains("study-table-exit")) {
+            exit = createStudyTableExitLine();
+            wrap.insertAdjacentElement("afterend", exit);
+          } else {
+            exit.contentEditable = "true";
+            if (!exit.innerHTML.trim()) exit.innerHTML = "<br>";
           }
         });
       }
