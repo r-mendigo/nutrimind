@@ -5870,6 +5870,35 @@
         margin-bottom: 0.75em;
       }
 
+      /* Better pasted lists */
+      .study-reader-input ol,
+      .study-reader-input ul {
+        margin: 0.45em 0 0.8em 1.05em;
+        padding-left: 0.45em;
+        list-style-position: outside;
+      }
+
+      .study-reader-input li {
+        margin: 0.18em 0;
+        padding-left: 0;
+        line-height: 1.5;
+      }
+
+      .study-reader-input li::marker {
+        font-size: 0.9em;
+      }
+
+      .study-reader-input li > p,
+      .study-reader-input li > div,
+      .study-reader-input li p,
+      .study-reader-input li div {
+        margin: 0;
+        display: inline;
+        line-height: inherit;
+        font-size: inherit;
+        font-weight: inherit;
+      }
+
       /* Focus when active */
       .study-reader-input:focus {
         outline: none;
@@ -5900,6 +5929,119 @@
       .study-save-state.saving {
         color: #d8aa27;
         font-weight: 800;
+      }
+
+      /* Normalized Study Reader document style */
+
+      .study-reader-input h1 {
+        font-size: 2rem;
+        line-height: 1.2;
+        margin: 1.4em 0 0.7em;
+        font-weight: 800;
+        color: #173c2d;
+      }
+
+      .study-reader-input h2 {
+        font-size: 1.45rem;
+        line-height: 1.3;
+        margin: 1.2em 0 0.6em;
+        font-weight: 800;
+        color: #173c2d;
+      }
+
+      .study-reader-input h3 {
+        font-size: 1.12rem;
+        line-height: 1.4;
+        margin: 1em 0 0.45em;
+        font-weight: 700;
+        color: #173c2d;
+      }
+
+      .study-reader-input p {
+        margin: 0 0 0.9em;
+        line-height: 1.58;
+      }
+
+      .study-reader-input strong {
+        font-weight: 700;
+      }
+
+      /* Final list alignment normalization */
+      .study-reader-input ul,
+      .study-reader-input ol {
+        padding-left: 1.35rem !important;
+        margin-left: 0 !important;
+        list-style-position: outside !important;
+      }
+
+      .study-reader-input li {
+        display: list-item !important;
+        padding-left: 0.15rem !important;
+        margin: 0.2em 0 !important;
+        line-height: 1.55 !important;
+      }
+
+      .study-reader-input li > p,
+      .study-reader-input li > div {
+        display: inline !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: inherit !important;
+      }
+
+      .study-reader-input li > p:first-child,
+      .study-reader-input li > div:first-child {
+        display: inline !important;
+      }
+
+      .study-reader-input li::marker {
+        font-size: 0.9em !important;
+      }
+
+      .study-reader-input .study-flat-list-line {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.55em;
+        margin: 0.28em 0;
+        line-height: 1.55;
+      }
+
+      .study-reader-input .study-flat-list-marker {
+        flex: 0 0 1.25em;
+        width: 1.25em;
+        text-align: left;
+        color: #173c2d;
+      }
+
+      .study-reader-input .study-flat-list-text {
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+
+      .study-reader-input blockquote {
+        margin: 1em 0;
+        padding: 0.7em 1em;
+        border-left: 4px solid rgba(216, 170, 39, 0.65);
+        background: rgba(216, 170, 39, 0.08);
+        border-radius: 10px;
+      }
+
+      .study-reader-input table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1em 0;
+      }
+
+      .study-reader-input th,
+      .study-reader-input td {
+        border: 1px solid rgba(189, 206, 194, 0.72);
+        padding: 8px 10px;
+        vertical-align: top;
+      }
+
+      .study-reader-input th {
+        background: rgba(216, 170, 39, 0.08);
+        font-weight: 700;
       }
       /* ===== Study Reader Pro v2 — Callout Blocks ===== */
 
@@ -9097,7 +9239,7 @@
                 <div class="study-reader-body">
                   <div
                     id="studyReaderInput"
-                    class="textarea study-reader-textarea study-reader-editor"
+                    class="textarea study-reader-textarea study-reader-editor study-reader-input"
                     contenteditable="true"
                     data-placeholder="Opened note will appear here."
                   ></div>
@@ -9704,7 +9846,23 @@
 
         if (item.type === "note") {
           if (!brains[item.topic]) brains[item.topic] = [];
-          brains[item.topic].push(item.note);
+
+          const restoredNote = JSON.parse(JSON.stringify(item.note || {}));
+
+          if (!restoredNote.html && restoredNote.text) {
+            restoredNote.html = linkifyStudyNoteHtml(restoredNote.text);
+          }
+
+          if (!restoredNote.text && restoredNote.html) {
+            const temp = document.createElement("div");
+            temp.innerHTML = restoredNote.html;
+            restoredNote.text = String(temp.textContent || "").trim();
+          }
+
+          restoredNote.savedAt =
+            restoredNote.savedAt || new Date().toISOString();
+
+          brains[item.topic].push(restoredNote);
         }
 
         items.splice(index, 1);
@@ -12451,6 +12609,7 @@ Quality Rules:
       let studyHistoryIndex = -1;
       let studyHistoryRestoring = false;
       let studyHistoryLastSavedHtml = "";
+      let suppressStudyAutoSave = false;
 
       function updateStudySaveIndicator(state = "saved") {
         const btn = document.getElementById("studySaveBtn");
@@ -12555,6 +12714,7 @@ Quality Rules:
           .slice(0, 4);
       }
       function runStudyAutoSave() {
+        if (suppressStudyAutoSave) return;
         if (!activeStudyTopic) return;
 
         const input = document.getElementById("studyReaderInput");
@@ -12570,12 +12730,18 @@ Quality Rules:
 
         const now = new Date().toISOString();
 
+        const stableNoteId =
+          activeStudyNoteId ||
+          "note_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
+
         if (
           activeStudyNoteIndex >= 0 &&
           brains[activeStudyTopic][activeStudyNoteIndex]
         ) {
           brains[activeStudyTopic][activeStudyNoteIndex] = {
             ...brains[activeStudyTopic][activeStudyNoteIndex],
+            id:
+              brains[activeStudyTopic][activeStudyNoteIndex].id || stableNoteId,
             text,
             html,
             tags: detectStudyNoteTags(text),
@@ -12583,6 +12749,7 @@ Quality Rules:
           };
         } else {
           brains[activeStudyTopic].push({
+            id: stableNoteId,
             text,
             html,
             tags: detectStudyNoteTags(text),
@@ -12592,7 +12759,7 @@ Quality Rules:
         }
 
         activeStudyNoteId = String(
-          brains[activeStudyTopic][activeStudyNoteIndex]?.savedAt || "",
+          brains[activeStudyTopic][activeStudyNoteIndex]?.id || stableNoteId,
         );
 
         persist();
@@ -12684,40 +12851,41 @@ Quality Rules:
         input.normalize();
       }
 
-      function renumberStudyReaderNumberedLines() {
+      /* function renumberStudyReaderNumberedLines() {
         const input = document.getElementById("studyReaderInput");
         if (!input) return false;
 
-        const blocks = Array.from(input.querySelectorAll("p, div")).filter(
-          (block) => {
-            if (!input.contains(block)) return false;
-            if (block.closest("ol, ul")) return false;
-            if (block.querySelector("img")) return false;
-
-            const text = String(block.textContent || "").trim();
-            return /^\d+\.\s*/.test(text);
-          },
-        );
-
-        if (blocks.length < 2) return false;
-
         let changed = false;
+        let numberCounter = 0;
 
-        blocks.forEach((block, index) => {
-          const expectedNumber = index + 1;
-          const oldText = String(block.textContent || "");
-          const newText = oldText.replace(
-            /^\s*\d+\.\s*/,
-            `${expectedNumber}. `,
-          );
+        Array.from(input.children).forEach((block) => {
+          const marker = block.querySelector?.(".study-flat-list-marker");
 
-          if (newText !== oldText) {
-            block.textContent = newText;
-            changed = true;
+          if (!marker) {
+            numberCounter = 0;
+            return;
+          }
+
+          const markerText = String(marker.textContent || "").trim();
+
+          if (/^\d+\.$/.test(markerText)) {
+            numberCounter += 1;
+            const nextText = `${numberCounter}.`;
+
+            if (marker.textContent !== nextText) {
+              marker.textContent = nextText;
+              changed = true;
+            }
+          } else {
+            numberCounter = 0;
           }
         });
 
         return changed;
+      }*/
+
+      function renumberStudyReaderNumberedLines() {
+        return false;
       }
 
       function updateStudyReaderStats() {
@@ -14167,6 +14335,55 @@ Quality Rules:
         studyHistoryLastSavedHtml = html;
       }
 
+      function normalizeStudyReaderLists(root) {
+        if (!root) return;
+
+        root.querySelectorAll("ul, ol").forEach((list) => {
+          const isOrdered = list.tagName === "OL";
+
+          const lines = Array.from(list.children)
+            .filter((child) => child.tagName === "LI")
+            .map((li, index) => {
+              const p = document.createElement("p");
+              p.className = "study-flat-list-line";
+
+              const marker = document.createElement("span");
+              marker.className = "study-flat-list-marker";
+              marker.textContent = isOrdered ? `${index + 1}.` : "•";
+
+              const textSpan = document.createElement("span");
+              textSpan.className = "study-flat-list-text";
+              textSpan.innerHTML = li.innerHTML;
+
+              p.appendChild(marker);
+              p.appendChild(textSpan);
+
+              return p;
+            });
+
+          list.replaceWith(...lines);
+        });
+
+        let numberCounter = 0;
+
+        Array.from(root.children).forEach((child) => {
+          const marker = child.querySelector?.(".study-flat-list-marker");
+          if (!marker) {
+            numberCounter = 0;
+            return;
+          }
+
+          const markerText = marker.textContent.trim();
+
+          if (/^\d+\.$/.test(markerText)) {
+            numberCounter += 1;
+            marker.textContent = `${numberCounter}.`;
+          } else {
+            numberCounter = 0;
+          }
+        });
+      }
+
       function handleStudyReaderPaste(event) {
         const input = document.getElementById("studyReaderInput");
         if (!input) return;
@@ -14179,56 +14396,218 @@ Quality Rules:
           (item) => item.kind === "file" && item.type.startsWith("image/"),
         );
 
-        if (!imageItem) return;
+        if (imageItem) {
+          event.preventDefault();
 
-        event.preventDefault();
+          pushStudyHistorySnapshot(true);
 
-        pushStudyHistorySnapshot(true);
+          const file = imageItem.getAsFile();
+          if (!file) return;
 
-        const file = imageItem.getAsFile();
-        if (!file) return;
+          const reader = new FileReader();
 
-        const reader = new FileReader();
+          reader.onload = () => {
+            const source = String(reader.result || "");
+            if (!source) return;
 
-        reader.onload = () => {
-          const source = String(reader.result || "");
-          if (!source) return;
+            const img = new Image();
 
-          const img = new Image();
+            img.onload = () => {
+              const canvas = document.createElement("canvas");
 
-          img.onload = () => {
-            const canvas = document.createElement("canvas");
+              let width = img.width;
+              let height = img.height;
 
-            let width = img.width;
-            let height = img.height;
+              const MAX_WIDTH = 1200;
 
-            const MAX_WIDTH = 1200;
+              if (width > MAX_WIDTH) {
+                height = Math.round(height * (MAX_WIDTH / width));
+                width = MAX_WIDTH;
+              }
 
-            if (width > MAX_WIDTH) {
-              height = Math.round(height * (MAX_WIDTH / width));
-              width = MAX_WIDTH;
-            }
+              canvas.width = width;
+              canvas.height = height;
 
-            canvas.width = width;
-            canvas.height = height;
+              const ctx = canvas.getContext("2d");
+              if (!ctx) return;
 
-            const ctx = canvas.getContext("2d");
-            if (!ctx) return;
+              ctx.drawImage(img, 0, 0, width, height);
 
-            ctx.drawImage(img, 0, 0, width, height);
+              const compressedBase64 = canvas.toDataURL("image/jpeg", 0.72);
 
-            const compressedBase64 = canvas.toDataURL("image/jpeg", 0.72);
+              insertImageIntoStudyReader(compressedBase64);
+              pushStudyHistorySnapshot(true);
+              queueStudyAutoSave();
+              queueStudyUiRefresh();
+            };
 
-            insertImageIntoStudyReader(compressedBase64);
-            pushStudyHistorySnapshot(true);
-            queueStudyAutoSave();
-            queueStudyUiRefresh();
+            img.src = source;
           };
 
-          img.src = source;
-        };
+          reader.readAsDataURL(file);
+          return;
+        }
 
-        reader.readAsDataURL(file);
+        const html = clipboard.getData("text/html");
+        const text = clipboard.getData("text/plain");
+
+        if (!html && !text) return;
+
+        event.preventDefault();
+        pushStudyHistorySnapshot(true);
+
+        const wrapper = document.createElement("div");
+
+        if (html) {
+          wrapper.innerHTML = html;
+        } else {
+          wrapper.innerHTML = String(text || "")
+            .split(/\n{2,}/)
+            .map((part) => `<p>${escapeHtml(part).replace(/\n/g, "<br>")}</p>`)
+            .join("");
+        }
+
+        wrapper
+          .querySelectorAll("script, style, meta, link, iframe")
+          .forEach((el) => el.remove());
+
+        wrapper.querySelectorAll("*").forEach((el) => {
+          const allowedTags = [
+            "P",
+            "DIV",
+            "BR",
+            "UL",
+            "OL",
+            "LI",
+            "STRONG",
+            "B",
+            "EM",
+            "I",
+            "U",
+            "A",
+            "H1",
+            "H2",
+            "H3",
+            "H4",
+            "H5",
+            "H6",
+            "BLOCKQUOTE",
+            "TABLE",
+            "THEAD",
+            "TBODY",
+            "TR",
+            "TH",
+            "TD",
+          ];
+
+          if (!allowedTags.includes(el.tagName)) {
+            el.replaceWith(...Array.from(el.childNodes));
+            return;
+          }
+
+          [...el.attributes].forEach((attr) => {
+            if (el.tagName === "A" && attr.name === "href") return;
+            el.removeAttribute(attr.name);
+          });
+
+          if (el.tagName === "A") {
+            el.setAttribute("target", "_blank");
+            el.setAttribute("rel", "noopener noreferrer");
+          }
+        });
+
+        wrapper.querySelectorAll("*").forEach((el) => {
+          el.removeAttribute("style");
+          el.removeAttribute("class");
+          el.removeAttribute("id");
+        });
+
+        wrapper.querySelectorAll("h1").forEach((el) => {
+          const h = document.createElement("h1");
+          h.innerHTML = el.innerHTML;
+          el.replaceWith(h);
+        });
+
+        wrapper.querySelectorAll("h2").forEach((el) => {
+          const h = document.createElement("h2");
+          h.innerHTML = el.innerHTML;
+          el.replaceWith(h);
+        });
+
+        wrapper.querySelectorAll("h3,h4,h5,h6").forEach((el) => {
+          const h = document.createElement("h3");
+          h.innerHTML = el.innerHTML;
+          el.replaceWith(h);
+        });
+
+        wrapper.querySelectorAll("p").forEach((el) => {
+          if (!el.innerHTML.trim()) {
+            el.remove();
+          }
+        });
+
+        wrapper.querySelectorAll("li").forEach((li) => {
+          li.querySelectorAll("h1,h2,h3,h4,h5,h6").forEach((heading) => {
+            const strong = document.createElement("strong");
+            strong.innerHTML = heading.innerHTML;
+            heading.replaceWith(strong);
+          });
+
+          li.querySelectorAll("p,div").forEach((block) => {
+            if (!block.innerHTML.trim()) {
+              block.remove();
+              return;
+            }
+
+            const span = document.createElement("span");
+            span.innerHTML = block.innerHTML;
+            block.replaceWith(span);
+          });
+        });
+
+        wrapper.querySelectorAll("ul, ol").forEach((list) => {
+          const isOrdered = list.tagName === "OL";
+
+          const lines = Array.from(list.children)
+            .filter((child) => child.tagName === "LI")
+            .map((li, index) => {
+              const p = document.createElement("p");
+              const cleanText = String(li.textContent || "").trim();
+              p.textContent = isOrdered
+                ? `${index + 1}. ${cleanText}`
+                : `• ${cleanText}`;
+              return p;
+            });
+
+          list.replaceWith(...lines);
+        });
+
+        wrapper.querySelectorAll("div").forEach((el) => {
+          const hasBlockChildren = el.querySelector(
+            "p,ul,ol,table,h1,h2,h3,blockquote",
+          );
+
+          if (!hasBlockChildren) {
+            const p = document.createElement("p");
+            p.innerHTML = el.innerHTML;
+            el.replaceWith(p);
+          }
+        });
+
+        const cleanedHtml = wrapper.innerHTML
+          .replace(/<b>/gi, "<strong>")
+          .replace(/<\/b>/gi, "</strong>")
+          .replace(/<i>/gi, "<em>")
+          .replace(/<\/i>/gi, "</em>")
+          .replace(/&nbsp;/gi, " ");
+
+        document.execCommand("insertHTML", false, cleanedHtml);
+
+        normalizeStudyReaderLists(input);
+
+        pushStudyHistorySnapshot(true);
+        queueStudyAutoSave();
+        queueStudyUiRefresh();
       }
 
       function insertImageIntoStudyReader(src) {
@@ -14502,10 +14881,20 @@ Quality Rules:
               ? notes.length - 1
               : -1;
 
-        activeStudyNoteId =
-          activeStudyNoteIndex >= 0
-            ? String(notes[activeStudyNoteIndex].savedAt || "")
-            : "";
+        if (activeStudyNoteIndex >= 0 && notes[activeStudyNoteIndex]) {
+          if (!notes[activeStudyNoteIndex].id) {
+            notes[activeStudyNoteIndex].id =
+              "note_" +
+              Date.now() +
+              "_" +
+              Math.random().toString(36).slice(2, 8);
+            persist();
+          }
+
+          activeStudyNoteId = String(notes[activeStudyNoteIndex].id);
+        } else {
+          activeStudyNoteId = "";
+        }
 
         if (layout) {
           layout.classList.add("study-mode");
@@ -14840,6 +15229,11 @@ Quality Rules:
 
         const trash = getTrashItems();
         const deletedAt = new Date().toISOString();
+        suppressStudyAutoSave = true;
+        if (studyAutoSaveTimer) {
+          clearTimeout(studyAutoSaveTimer);
+          studyAutoSaveTimer = null;
+        }
 
         if (activeStudyNoteIndex >= 0) {
           if (
@@ -14850,7 +15244,19 @@ Quality Rules:
             return;
           }
 
-          const note = brains[activeStudyTopic][activeStudyNoteIndex];
+          const noteIndex = brains[activeStudyTopic].findIndex(
+            (note) => String(note.id || "") === String(activeStudyNoteId || ""),
+          );
+
+          if (noteIndex < 0) {
+            toast(
+              "Could not find the opened note. Please reopen it first.",
+              "error",
+            );
+            return;
+          }
+
+          const note = brains[activeStudyTopic][noteIndex];
 
           trash.push({
             type: "note",
@@ -14862,34 +15268,34 @@ Quality Rules:
 
           saveTrashItems(trash);
 
-          brains[activeStudyTopic].splice(activeStudyNoteIndex, 1);
+          brains[activeStudyTopic].splice(noteIndex, 1);
+          activeStudyNoteIndex = noteIndex;
 
           if (!brains[activeStudyTopic].length) {
-            delete brains[activeStudyTopic];
             persist();
             refreshBrains();
-            closeStudyMode();
 
-            if (currentTopic === activeStudyTopic) {
-              setTopic("SQL Mastery");
-            }
+            activeStudyNoteIndex = -1;
+            activeStudyNoteId = "";
 
-            toast(
-              `Moved note and empty topic to Trash: ${activeStudyTopic}`,
-              "success",
-            );
+            loadStudyNote(activeStudyTopic, -1);
+
+            toast("Study note moved to Trash. Folder kept.", "success");
             return;
           }
 
           persist();
           refreshBrains();
 
-          activeStudyNoteIndex = Math.max(
+          const nextStudyNoteIndex = Math.max(
             0,
-            Math.min(activeStudyNoteIndex, brains[activeStudyTopic].length - 1),
+            Math.min(noteIndex, brains[activeStudyTopic].length - 1),
           );
 
-          loadStudyNote(activeStudyTopic, activeStudyNoteIndex);
+          activeStudyNoteIndex = nextStudyNoteIndex;
+          activeStudyNoteId = "";
+
+          loadStudyNote(activeStudyTopic, nextStudyNoteIndex);
           toast("Study note moved to Trash.", "success");
           return;
         }
@@ -14916,6 +15322,7 @@ Quality Rules:
 
           toast(`Topic moved to Trash: ${activeStudyTopic}`, "success");
         }
+        suppressStudyAutoSave = false;
       }
 
       function closeStudyMode() {
