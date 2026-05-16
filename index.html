@@ -3700,6 +3700,18 @@
         line-height: 1.62;
         padding-bottom: 18px;
       }
+      .study-reader-body {
+        overflow: hidden;
+      }
+
+      .study-reader-editor,
+      .study-reader-input {
+        min-height: 0;
+        max-height: 100%;
+        box-sizing: border-box;
+        padding-bottom: 96px !important;
+        scroll-padding-bottom: 96px;
+      }
 
       .study-reader-editor::after {
         content: "";
@@ -5867,7 +5879,8 @@
       /* Better paragraphs */
       .study-reader-input p,
       .study-reader-input div {
-        margin-bottom: 0.75em;
+        margin-bottom: 1.15em;
+        line-height: 1.72;
       }
 
       /* Better pasted lists */
@@ -5955,11 +5968,6 @@
         margin: 1em 0 0.45em;
         font-weight: 700;
         color: #173c2d;
-      }
-
-      .study-reader-input p {
-        margin: 0 0 0.9em;
-        line-height: 1.58;
       }
 
       .study-reader-input strong {
@@ -6179,9 +6187,10 @@
 
       body.study-zen-mode .study-reader-input {
         margin: 18px;
-        padding: 34px 38px;
+        padding: 34px 38px 80px;
         font-size: 1.06rem;
         line-height: 1.82;
+        min-height: calc(100% - 36px);
       }
 
       body.study-zen-mode::before {
@@ -8252,22 +8261,47 @@
         width: max-content;
         min-width: 100%;
         border-collapse: collapse;
-        table-layout: auto;
+        table-layout: fixed;
       }
 
       .study-table th,
       .study-table td {
         border: 1px solid rgba(189, 206, 194, 0.86);
         padding: 10px 12px;
-        min-width: 90px;
+
+        min-width: 0;
+        width: auto;
         min-height: 38px;
+
         vertical-align: top;
         outline: none;
-        resize: both;
-        overflow: auto;
+
+        overflow: hidden;
+
+        white-space: normal;
+        word-break: break-word;
+
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+
+      .study-table th::-webkit-scrollbar,
+      .study-table td::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+        display: none;
+      }
+
+      .study-table td {
+        resize: vertical;
       }
 
       .study-table th {
+        resize: none;
+      }
+      .study-table th {
+        position: relative;
+        padding-right: 22px;
         background: rgba(216, 170, 39, 0.14);
         color: #6f4f08;
         font-weight: 900;
@@ -8275,6 +8309,29 @@
 
       .study-table td {
         background: rgba(255, 255, 255, 0.86);
+      }
+
+      .study-table-col-resizer {
+        position: absolute;
+        top: 0;
+        right: -3px;
+        width: 8px;
+        height: 100%;
+        cursor: col-resize;
+        user-select: none;
+        touch-action: none;
+        z-index: 5;
+      }
+
+      .study-table-col-resizer::after {
+        content: "";
+        position: absolute;
+        top: 8px;
+        bottom: 8px;
+        left: 3px;
+        width: 2px;
+        border-radius: 999px;
+        background: rgba(216, 170, 39, 0.35);
       }
       .study-table-exit {
         min-height: 24px;
@@ -12842,8 +12899,11 @@ Quality Rules:
             .trim();
 
           const hasBr = block.querySelector("br");
+          const isCaretBlock =
+            document.getSelection()?.anchorNode &&
+            block.contains(document.getSelection().anchorNode);
 
-          if (!text && !hasBr) {
+          if (!text && !hasBr && !isCaretBlock) {
             block.remove();
           }
         });
@@ -12920,8 +12980,6 @@ Quality Rules:
         if (!input || studyAutoSaveBound) return;
 
         input.addEventListener("input", () => {
-          cleanupEmptyStudyFormatting();
-
           const activeHeader = document.activeElement;
 
           if (
@@ -12936,6 +12994,8 @@ Quality Rules:
               return;
             }
           }
+
+          normalizeStudyReaderLooseTextNodes(input);
 
           const didRenumber = renumberStudyReaderNumberedLines();
 
@@ -13014,51 +13074,6 @@ Quality Rules:
                 event.preventDefault();
                 removeStudyTableColumn(headerCell);
                 return;
-              }
-            }
-          }
-
-          if (event.key === "Enter" && !event.shiftKey) {
-            const selection = window.getSelection();
-
-            if (selection && selection.rangeCount > 0) {
-              const node = selection.anchorNode;
-
-              const currentBlock =
-                node?.nodeType === Node.TEXT_NODE
-                  ? node.parentElement?.closest("div, p")
-                  : node?.closest?.("div, p");
-
-              if (currentBlock && input.contains(currentBlock)) {
-                const lineText = String(currentBlock.textContent || "");
-                const match = lineText.match(/^\s*(\d+)\.\s*(.*)$/);
-
-                if (match) {
-                  event.preventDefault();
-
-                  const nextNumber = Number(match[1]) + 1;
-                  const newBlock = currentBlock.cloneNode(false);
-
-                  newBlock.innerHTML = `${nextNumber}.&nbsp;`;
-                  currentBlock.insertAdjacentElement("afterend", newBlock);
-
-                  const range = document.createRange();
-                  range.selectNodeContents(newBlock);
-                  range.collapse(false);
-
-                  selection.removeAllRanges();
-                  selection.addRange(range);
-
-                  setTimeout(() => {
-                    const didRenumber = renumberStudyReaderNumberedLines();
-
-                    pushStudyHistorySnapshot(didRenumber);
-                    queueStudyAutoSave();
-                    queueStudyUiRefresh();
-                  }, 0);
-
-                  return;
-                }
               }
             }
           }
@@ -13461,8 +13476,6 @@ Quality Rules:
           const newCell = document.createElement(isHeaderRow ? "th" : "td");
 
           newCell.contentEditable = "true";
-          newCell.style.minWidth = "90px";
-          newCell.style.minHeight = "38px";
           newCell.innerHTML = isHeaderRow ? "Header" : "<br>";
 
           row.appendChild(newCell);
@@ -13534,14 +13547,14 @@ Quality Rules:
 
         let headerCells = "";
         for (let c = 1; c <= colCount; c++) {
-          headerCells += `<th contenteditable="true" style="min-width:90px; min-height:38px;">Header ${c}</th>`;
+          headerCells += `<th contenteditable="true">Header ${c}</th>`;
         }
 
         let bodyRows = "";
         for (let r = 1; r <= rowCount; r++) {
           let cells = "";
           for (let c = 1; c <= colCount; c++) {
-            cells += `<td contenteditable="true" style="min-width:90px; min-height:38px;"><br></td>`;
+            cells += `<td contenteditable="true"><br></td>`;
           }
           bodyRows += `<tr>${cells}</tr>`;
         }
@@ -13623,6 +13636,8 @@ Quality Rules:
             if (!cell.innerHTML.trim()) cell.innerHTML = "<br>";
           });
 
+          setupStudyTableColumnWidths(table);
+
           let exit = wrap.nextElementSibling;
 
           if (!exit || !exit.classList?.contains("study-table-exit")) {
@@ -13632,6 +13647,76 @@ Quality Rules:
             exit.contentEditable = "true";
             if (!exit.innerHTML.trim()) exit.innerHTML = "<br>";
           }
+        });
+      }
+
+      function setupStudyTableColumnWidths(table) {
+        if (!table) return;
+
+        const firstRow = table.querySelector("tr");
+        if (!firstRow) return;
+
+        const columnCount = firstRow.children.length || 0;
+        if (!columnCount) return;
+
+        let colgroup = table.querySelector("colgroup");
+
+        if (!colgroup) {
+          colgroup = document.createElement("colgroup");
+          table.insertBefore(colgroup, table.firstChild);
+        }
+
+        while (colgroup.children.length < columnCount) {
+          const col = document.createElement("col");
+          col.style.width = "140px";
+          colgroup.appendChild(col);
+        }
+
+        while (colgroup.children.length > columnCount) {
+          colgroup.lastElementChild.remove();
+        }
+
+        table.querySelectorAll("thead th").forEach((th, index) => {
+          if (th.querySelector(".study-table-col-resizer")) return;
+
+          const resizer = document.createElement("span");
+          resizer.className = "study-table-col-resizer";
+          resizer.contentEditable = "false";
+          resizer.setAttribute("aria-hidden", "true");
+
+          resizer.addEventListener("mousedown", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const col = colgroup.children[index];
+            if (!col) return;
+
+            const startX = event.clientX;
+            const startWidth =
+              parseFloat(col.style.width) || th.offsetWidth || 140;
+
+            function onMouseMove(moveEvent) {
+              const nextWidth = Math.max(
+                70,
+                startWidth + moveEvent.clientX - startX,
+              );
+              col.style.width = `${nextWidth}px`;
+            }
+
+            function onMouseUp() {
+              document.removeEventListener("mousemove", onMouseMove);
+              document.removeEventListener("mouseup", onMouseUp);
+
+              pushStudyHistorySnapshot(true);
+              queueStudyAutoSave();
+              queueStudyUiRefresh();
+            }
+
+            document.addEventListener("mousemove", onMouseMove);
+            document.addEventListener("mouseup", onMouseUp);
+          });
+
+          th.appendChild(resizer);
         });
       }
 
@@ -13686,8 +13771,6 @@ Quality Rules:
           const newCell = document.createElement(isHeaderRow ? "th" : "td");
 
           newCell.contentEditable = "true";
-          newCell.style.minWidth = "90px";
-          newCell.style.minHeight = "38px";
           newCell.innerHTML = isHeaderRow ? "Header" : "<br>";
 
           row.appendChild(newCell);
@@ -13743,8 +13826,6 @@ Quality Rules:
         newRow.querySelectorAll("th, td").forEach((cell) => {
           const replacement = document.createElement("td");
           replacement.contentEditable = "true";
-          replacement.style.minWidth = "90px";
-          replacement.style.minHeight = "38px";
           replacement.innerHTML = "<br>";
           cell.replaceWith(replacement);
         });
@@ -13795,26 +13876,44 @@ Quality Rules:
         currentOl.setAttribute("start", String(prevStart + prevCount));
       }
 
+      function collapseStudySelectionToEnd(input) {
+        const selection = window.getSelection();
+        if (!input || !selection || selection.rangeCount === 0) return;
+
+        const range = selection.getRangeAt(0);
+
+        if (!input.contains(range.commonAncestorContainer)) return;
+
+        range.collapse(false);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+
       function applyStudyTextFormat(command) {
         const input = document.getElementById("studyReaderInput");
         if (!input) return;
 
-        input.focus();
-
-        if (!isSelectionInsideStudyReader()) return;
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) return;
+        if (!input.contains(selection.anchorNode)) return;
 
         pushStudyHistorySnapshot(true);
 
         document.execCommand(command, false, null);
 
+        if (
+          ["bold", "italic", "underline", "strikeThrough"].includes(command)
+        ) {
+          collapseStudySelectionToEnd(input);
+        }
+
         if (command === "insertOrderedList") {
           continueStudyOrderedListIfNeeded();
         }
 
-        cleanupEmptyStudyFormatting();
-
         pushStudyHistorySnapshot(true);
         queueStudyAutoSave();
+        queueStudyUiRefresh();
         refreshStudyFormatToolbarState();
       }
 
@@ -14850,6 +14949,28 @@ Quality Rules:
         loadStudyNote(activeStudyTopic, nextIndex);
       }
 
+      function normalizeStudyReaderLooseTextNodes(input) {
+        if (!input) return;
+
+        Array.from(input.childNodes).forEach((node) => {
+          if (node.nodeType !== Node.TEXT_NODE) return;
+
+          const text = String(node.textContent || "");
+          if (!text.trim()) {
+            node.remove();
+            return;
+          }
+
+          const p = document.createElement("p");
+          p.textContent = text;
+          node.replaceWith(p);
+        });
+
+        if (!input.innerHTML.trim()) {
+          input.innerHTML = "<p><br></p>";
+        }
+      }
+
       function loadStudyNote(topic, noteIndex = -1) {
         if (studyModeOpen && activeStudyTopic) {
           runStudyAutoSave();
@@ -14918,6 +15039,8 @@ Quality Rules:
             } else {
               input.innerHTML = linkifyStudyNoteHtml(savedStudyHtml);
             }
+
+            normalizeStudyReaderLooseTextNodes(input);
           }
 
           if (meta) {
