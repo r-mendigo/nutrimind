@@ -8711,6 +8711,65 @@
       .study-reader-input .study-flat-list-text {
         line-height: var(--study-line-spacing) !important;
       }
+      /* Study Reader image mini editor */
+      .study-note-image {
+        cursor: grab;
+      }
+
+      .study-note-image.selected {
+        outline: 3px solid rgba(216, 170, 39, 0.72) !important;
+        box-shadow:
+          0 0 0 6px rgba(216, 170, 39, 0.1),
+          0 18px 34px rgba(43, 72, 58, 0.16) !important;
+      }
+
+      .study-image-mini-toolbar,
+      .study-image-resize-handle {
+        position: fixed;
+        z-index: 5000;
+      }
+
+      .study-image-mini-toolbar {
+        display: none;
+        gap: 6px;
+        padding: 6px;
+        border-radius: 999px;
+        border: 1px solid rgba(189, 206, 194, 0.5);
+        background: rgba(255, 255, 255, 0.62);
+        box-shadow: 0 14px 30px rgba(43, 72, 58, 0.12);
+        backdrop-filter: blur(22px) saturate(145%);
+        -webkit-backdrop-filter: blur(22px) saturate(145%);
+      }
+
+      .study-image-mini-toolbar button {
+        min-width: 32px;
+        height: 30px;
+        border: none;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.18);
+        color: #174533;
+        font-weight: 900;
+        cursor: pointer;
+      }
+
+      .study-image-mini-toolbar button:hover {
+        background: rgba(255, 255, 255, 0.58);
+      }
+
+      .study-image-mini-toolbar button.danger {
+        color: #b94d5d;
+      }
+
+      .study-image-resize-handle {
+        display: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        border: 2px solid rgba(255, 255, 255, 0.92);
+        background: linear-gradient(135deg, #e4bf52, #22b35f);
+        box-shadow: 0 8px 18px rgba(43, 72, 58, 0.18);
+        cursor: nwse-resize;
+      }
     </style>
   </head>
   <body>
@@ -15482,12 +15541,209 @@ Quality Rules:
         document
           .querySelectorAll("#studyReaderInput img.selected")
           .forEach((img) => img.classList.remove("selected"));
+
+        hideStudyImageMiniTools();
       }
 
       function selectStudyNoteImage(img) {
         if (!img) return;
+
         clearSelectedStudyNoteImages();
         img.classList.add("selected");
+        img.draggable = false;
+
+        ensureStudyImageMiniTools();
+        positionStudyImageMiniTools();
+
+        img.onpointerdown = beginStudyImageDragPosition;
+      }
+      let studyImageResizeState = null;
+      let studyImageDragState = null;
+
+      function ensureStudyImageMiniTools() {
+        if (!document.getElementById("studyImageMiniToolbar")) {
+          const toolbar = document.createElement("div");
+          toolbar.id = "studyImageMiniToolbar";
+          toolbar.className = "study-image-mini-toolbar";
+          toolbar.innerHTML = `
+      <button type="button" title="Align left">L</button>
+      <button type="button" title="Center">C</button>
+      <button type="button" title="Align right">R</button>
+      <button type="button" title="Reset size">0</button>
+      <button type="button" class="danger" title="Delete">×</button>
+    `;
+
+          const buttons = toolbar.querySelectorAll("button");
+          buttons[0].onclick = () => {
+            setSelectedStudyImageFloat("left");
+            positionStudyImageMiniTools();
+          };
+          buttons[1].onclick = () => {
+            setSelectedStudyImageFloat("center");
+            positionStudyImageMiniTools();
+          };
+          buttons[2].onclick = () => {
+            setSelectedStudyImageFloat("right");
+            positionStudyImageMiniTools();
+          };
+          buttons[3].onclick = () => {
+            resetSelectedStudyNoteImageSize();
+            positionStudyImageMiniTools();
+          };
+          buttons[4].onclick = () => {
+            deleteSelectedStudyNoteImage();
+            hideStudyImageMiniTools();
+          };
+
+          toolbar.addEventListener("mousedown", (event) =>
+            event.preventDefault(),
+          );
+          document.body.appendChild(toolbar);
+        }
+
+        if (!document.getElementById("studyImageResizeHandle")) {
+          const handle = document.createElement("div");
+          handle.id = "studyImageResizeHandle";
+          handle.className = "study-image-resize-handle";
+          handle.onpointerdown = beginStudyImageResize;
+          document.body.appendChild(handle);
+        }
+      }
+
+      function hideStudyImageMiniTools() {
+        document
+          .getElementById("studyImageMiniToolbar")
+          ?.style.setProperty("display", "none");
+        document
+          .getElementById("studyImageResizeHandle")
+          ?.style.setProperty("display", "none");
+      }
+
+      function positionStudyImageMiniTools() {
+        const img = getSelectedStudyNoteImage();
+        const toolbar = document.getElementById("studyImageMiniToolbar");
+        const handle = document.getElementById("studyImageResizeHandle");
+
+        if (!img || !toolbar || !handle) return hideStudyImageMiniTools();
+
+        const rect = img.getBoundingClientRect();
+
+        toolbar.style.display = "inline-flex";
+        toolbar.style.left = `${Math.max(12, rect.left + rect.width - 178)}px`;
+        toolbar.style.top = `${Math.max(12, rect.top - 42)}px`;
+
+        handle.style.display = "block";
+        handle.style.left = `${rect.right - 9}px`;
+        handle.style.top = `${rect.bottom - 9}px`;
+      }
+
+      function beginStudyImageResize(event) {
+        const img = getSelectedStudyNoteImage();
+        if (!img) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        studyImageResizeState = {
+          img,
+          startX: event.clientX,
+          startWidth: img.getBoundingClientRect().width,
+        };
+
+        document.addEventListener("pointermove", resizeStudyImageFromPointer);
+        document.addEventListener("pointerup", endStudyImageResize, {
+          once: true,
+        });
+      }
+
+      function resizeStudyImageFromPointer(event) {
+        if (!studyImageResizeState) return;
+
+        const { img, startX, startWidth } = studyImageResizeState;
+        const nextWidth = Math.max(
+          140,
+          Math.round(startWidth + event.clientX - startX),
+        );
+
+        img.style.width = `${nextWidth}px`;
+        img.style.maxWidth = "100%";
+        img.style.height = "auto";
+
+        positionStudyImageMiniTools();
+      }
+
+      function endStudyImageResize() {
+        if (!studyImageResizeState) return;
+
+        pushStudyHistorySnapshot(true);
+        queueStudyAutoSave();
+
+        studyImageResizeState = null;
+        document.removeEventListener(
+          "pointermove",
+          resizeStudyImageFromPointer,
+        );
+      }
+
+      function beginStudyImageDragPosition(event) {
+        const img = event.currentTarget;
+        const input = document.getElementById("studyReaderInput");
+        if (!img || !input || event.target?.id === "studyImageResizeHandle")
+          return;
+
+        studyImageDragState = {
+          img,
+          startX: event.clientX,
+          startY: event.clientY,
+          moved: false,
+        };
+
+        document.addEventListener("pointermove", trackStudyImageDragPosition);
+        document.addEventListener("pointerup", endStudyImageDragPosition, {
+          once: true,
+        });
+      }
+
+      function trackStudyImageDragPosition(event) {
+        if (!studyImageDragState) return;
+
+        const dx = event.clientX - studyImageDragState.startX;
+        const dy = event.clientY - studyImageDragState.startY;
+
+        if (Math.abs(dx) + Math.abs(dy) > 16) {
+          studyImageDragState.moved = true;
+        }
+      }
+
+      function endStudyImageDragPosition(event) {
+        const state = studyImageDragState;
+        studyImageDragState = null;
+
+        document.removeEventListener(
+          "pointermove",
+          trackStudyImageDragPosition,
+        );
+
+        if (!state?.moved) {
+          positionStudyImageMiniTools();
+          return;
+        }
+
+        const input = document.getElementById("studyReaderInput");
+        const rect = input?.getBoundingClientRect();
+        if (!rect) return;
+
+        const xRatio = (event.clientX - rect.left) / rect.width;
+
+        if (xRatio < 0.33) {
+          setSelectedStudyImageFloat("left");
+        } else if (xRatio > 0.66) {
+          setSelectedStudyImageFloat("right");
+        } else {
+          setSelectedStudyImageFloat("center");
+        }
+
+        positionStudyImageMiniTools();
       }
 
       function resizeSelectedStudyNoteImage(delta) {
@@ -17232,6 +17488,9 @@ Quality Rules:
           closeEventModal();
         }
       });
+
+      window.addEventListener("scroll", positionStudyImageMiniTools, true);
+      window.addEventListener("resize", positionStudyImageMiniTools);
       function updateSidebarDashboard() {
         const dateEl = document.getElementById("sideTodayDate");
         const focusEl = document.getElementById("sideTodayFocus");
