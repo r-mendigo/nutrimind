@@ -3729,6 +3729,19 @@
         margin: 8px 0;
       }
 
+      .study-reader-editor p,
+      .study-reader-editor
+        div:not(.study-table-wrap):not(.study-table-mini-controls) {
+        margin: 0 0 10px;
+        line-height: inherit;
+      }
+
+      .study-reader-editor p:empty,
+      .study-reader-editor
+        div:not(.study-table-wrap):not(.study-table-mini-controls):empty {
+        min-height: 1.4em;
+      }
+
       .study-note-image.float-left + ul,
       .study-note-image.float-left + ol {
         margin-top: 18px;
@@ -8247,7 +8260,8 @@
         position: relative;
         width: 100%;
         max-width: 100%;
-        overflow-x: auto;
+        max-height: min(62vh, 620px);
+        overflow: auto;
 
         margin: 10px 0;
         padding: 8px 10px;
@@ -8255,6 +8269,17 @@
         border-radius: 14px;
         border: 1px solid rgba(189, 206, 194, 0.82);
         background: rgba(255, 255, 255, 0.72);
+      }
+      .study-reader-input .study-table-wrap:not(:has(table.study-table)) {
+        display: none !important;
+        min-height: 0 !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        overflow: hidden !important;
       }
 
       .study-table {
@@ -8301,6 +8326,86 @@
         font-weight: 900;
       }
 
+      .study-table thead {
+        position: sticky;
+        top: 0;
+        z-index: 15;
+      }
+
+      .study-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 16;
+
+        background: linear-gradient(
+          180deg,
+          rgba(255, 248, 226, 0.98),
+          rgba(248, 240, 213, 0.98)
+        );
+
+        box-shadow:
+          0 1px 0 rgba(189, 206, 194, 0.86),
+          0 8px 16px rgba(43, 72, 58, 0.06);
+      }
+
+      .study-table th:focus,
+      .study-table td:focus,
+      .study-table th.study-table-cell-active,
+      .study-table td.study-table-cell-active {
+        position: relative;
+        z-index: 35;
+        outline: none;
+        border-color: rgba(216, 170, 39, 0.95) !important;
+
+        background: linear-gradient(
+          180deg,
+          rgba(255, 253, 241, 0.98),
+          rgba(255, 249, 222, 0.96)
+        ) !important;
+
+        box-shadow:
+          inset 0 0 0 2px rgba(216, 170, 39, 0.72),
+          inset 0 0 18px rgba(216, 170, 39, 0.12),
+          0 0 0 2px rgba(255, 255, 255, 0.95),
+          0 0 0 5px rgba(216, 170, 39, 0.18),
+          0 12px 26px rgba(43, 72, 58, 0.12);
+
+        caret-color: #1f9b54;
+      }
+
+      .study-table th:focus,
+      .study-table th.study-table-cell-active {
+        color: #704f07;
+      }
+
+      .study-table td:focus,
+      .study-table td.study-table-cell-active {
+        color: #173c2d;
+      }
+
+      .study-table th:focus-visible,
+      .study-table td:focus-visible {
+        outline: none;
+      }
+
+      .study-table td:focus::after,
+      .study-table th:focus::after,
+      .study-table td.study-table-cell-active::after,
+      .study-table th.study-table-cell-active::after {
+        content: "";
+        position: absolute;
+        inset: -2px;
+        border: 2px solid rgba(216, 170, 39, 0.82);
+        border-radius: 4px;
+        pointer-events: none;
+      }
+
+      .study-table th::selection,
+      .study-table td::selection {
+        background: rgba(216, 170, 39, 0.28);
+        color: #173c2d;
+      }
+
       .study-table td {
         resize: vertical;
         background: rgba(255, 255, 255, 0.86);
@@ -8328,31 +8433,70 @@
         border-radius: 999px;
         background: rgba(216, 170, 39, 0.45);
       }
-      .study-table-exit {
-        min-height: 24px;
-        margin: 6px 0 10px;
+      .study-reader-input .study-table-exit {
+        min-height: 0;
+        height: 0;
+        margin: 0;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
         outline: none;
+        overflow: hidden;
+        line-height: 0;
+        caret-color: transparent;
+      }
+
+      .study-reader-input .study-table-wrap + .study-table-exit {
+        min-height: 18px;
+        height: 18px;
+        margin: 2px 0 8px;
+        overflow: visible;
+        line-height: 1.4;
         caret-color: var(--text);
       }
 
-      .study-table-exit:empty::before {
-        content: "\200B";
-      }
-      .study-table-wrap {
-        position: relative;
+      .study-reader-input .study-table-exit:empty::before,
+      .study-reader-input .study-table-exit:has(> br:only-child)::before {
+        content: "";
       }
 
       .study-table-mini-controls {
-        position: absolute;
-        right: 10px;
-        display: flex;
-        justify-content: flex-end;
+        position: sticky;
+        left: calc(100% - 118px);
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         gap: 8px;
-        padding: 0;
+
+        width: max-content;
+        min-width: 112px;
+        height: 44px;
+        padding: 5px 8px;
+
+        border-radius: 999px;
+        border: 1px solid rgba(189, 206, 194, 0.52);
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.84),
+          rgba(237, 247, 241, 0.58)
+        );
+        box-shadow:
+          0 18px 38px rgba(43, 72, 58, 0.12),
+          inset 0 1px 0 rgba(255, 255, 255, 0.86);
+
+        backdrop-filter: blur(22px) saturate(145%);
+        -webkit-backdrop-filter: blur(22px) saturate(145%);
+
         opacity: 0;
         pointer-events: none;
-        transition: opacity 0.18s ease;
-        z-index: 30;
+        transition:
+          opacity 0.18s ease,
+          transform 0.18s ease,
+          box-shadow 0.18s ease;
+        z-index: 40;
       }
 
       .study-table-wrap:hover .study-table-mini-controls,
@@ -8362,27 +8506,137 @@
       }
 
       .study-table-mini-controls.top {
-        top: 8px;
+        top: 10px;
+        margin-top: 10px;
+        margin-bottom: 34px;
       }
 
       .study-table-mini-controls.bottom {
-        bottom: 8px;
+        bottom: 10px;
+        margin-top: 10px;
       }
 
       .study-table-mini-btn {
-        border: 1px solid rgba(189, 206, 194, 0.85);
-        background: rgba(255, 255, 255, 0.96);
-        color: #174533;
+        min-width: 38px;
+        height: 32px;
+        border: none;
         border-radius: 999px;
-        padding: 7px 10px;
-        font-size: 0.78rem;
+        padding: 0 8px;
+
+        background: rgba(255, 255, 255, 0.2);
+        color: #174533;
+        font-size: 0.9rem;
         font-weight: 900;
         cursor: pointer;
-        box-shadow: 0 8px 18px rgba(43, 72, 58, 0.1);
+
+        transition:
+          transform 0.16s ease,
+          background 0.16s ease,
+          box-shadow 0.16s ease;
       }
 
       .study-table-mini-btn:hover {
-        background: rgba(216, 170, 39, 0.16);
+        background: rgba(255, 255, 255, 0.56);
+        box-shadow:
+          0 8px 18px rgba(43, 72, 58, 0.1),
+          inset 0 1px 0 rgba(255, 255, 255, 0.72);
+        transform: translateY(-1px);
+      }
+
+      .study-table-mini-btn.danger {
+        color: #b94d5d;
+      }
+
+      .study-table-mini-btn.danger:hover {
+        background: rgba(255, 255, 255, 0.52);
+        color: #b94d5d;
+      }
+      .study-table-wrap {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(189, 206, 194, 0.92) rgba(255, 255, 255, 0.42);
+      }
+
+      .study-table-wrap::-webkit-scrollbar {
+        width: 12px;
+        height: 12px;
+      }
+
+      .study-table-wrap::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.48);
+        border-radius: 999px;
+        border: 1px solid rgba(189, 206, 194, 0.38);
+      }
+
+      .study-table-wrap::-webkit-scrollbar-thumb {
+        border-radius: 999px;
+        border: 3px solid rgba(255, 255, 255, 0.66);
+        background: linear-gradient(
+          180deg,
+          rgba(216, 170, 39, 0.88),
+          rgba(34, 179, 95, 0.72)
+        );
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.42),
+          0 2px 8px rgba(43, 72, 58, 0.12);
+      }
+
+      .study-table-wrap::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(
+          180deg,
+          rgba(228, 191, 82, 0.96),
+          rgba(31, 155, 84, 0.82)
+        );
+      }
+
+      .study-table-wrap::-webkit-scrollbar-corner {
+        background: transparent;
+      }
+      /* Tighten normal writing lines inside Study Reader */
+      .study-reader-input {
+        line-height: 1.45 !important;
+      }
+
+      .study-reader-input > p,
+      .study-reader-input
+        > div:not(.study-table-wrap):not(.study-table-mini-controls),
+      .study-reader-input .study-table-exit {
+        margin-top: 0 !important;
+        margin-bottom: 6px !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        line-height: inherit !important;
+      }
+
+      .study-reader-input > p:empty,
+      .study-reader-input
+        > div:not(.study-table-wrap):not(.study-table-mini-controls):empty {
+        min-height: 1.45em !important;
+        margin-bottom: 6px !important;
+      }
+      .study-table-mini-controls {
+        background:
+          radial-gradient(
+            circle at 18% 18%,
+            rgba(34, 179, 95, 0.12),
+            transparent 34%
+          ),
+          linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.58),
+            rgba(237, 247, 241, 0.34)
+          ) !important;
+        border-color: rgba(189, 206, 194, 0.42) !important;
+        box-shadow:
+          0 14px 30px rgba(43, 72, 58, 0.08),
+          inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+      }
+
+      .study-table-mini-btn {
+        background: rgba(255, 255, 255, 0.08) !important;
+      }
+
+      .study-table-mini-btn.danger {
+        color: rgba(185, 77, 93, 0.86) !important;
       }
     </style>
   </head>
@@ -11796,6 +12050,22 @@ Quality Rules:
         const input = panel.querySelector("#bingSearchInput");
         if (input) {
           input.addEventListener("keydown", (event) => {
+            const activeWrap = getActiveStudyTableWrap();
+
+            if (
+              activeWrap &&
+              input.contains(activeWrap) &&
+              !activeWrap.querySelector("table.study-table") &&
+              ["Enter", "Backspace", "Delete"].includes(event.key)
+            ) {
+              event.preventDefault();
+              cleanupEmptyStudyTableWraps(input);
+              input.focus();
+              pushStudyHistorySnapshot(true);
+              queueStudyAutoSave();
+              queueStudyUiRefresh();
+              return;
+            }
             if (event.key === "Enter") {
               event.preventDefault();
               submitBingSearch();
@@ -12975,20 +13245,12 @@ Quality Rules:
         if (!input || studyAutoSaveBound) return;
 
         input.addEventListener("input", () => {
-          /* const activeHeader = document.activeElement;
-
-          if (
-            activeHeader &&
-            activeHeader.tagName === "TH" &&
-            activeHeader.closest(".study-table")
-          ) {
-            const text = activeHeader.textContent.replace(/\u200B/g, "").trim();
-
-            if (!text) {
-              removeStudyTableColumn(activeHeader);
-              return;
+          input.querySelectorAll(".study-table-exit").forEach((exit) => {
+            if (!isEmptyStudyTableExitLine(exit)) {
+              exit.classList.remove("study-table-exit");
+              exit.removeAttribute("contenteditable");
             }
-          }*/
+          });
 
           normalizeStudyReaderLooseTextNodes(input);
 
@@ -13055,23 +13317,48 @@ Quality Rules:
         });
 
         input.addEventListener("keydown", (event) => {
-          /* if (event.key === "Backspace" || event.key === "Delete") {
-            const headerCell = getActiveStudyTableCell?.();
+          const activeExit = event.target?.closest?.(".study-table-exit");
 
-            if (
-              headerCell &&
-              headerCell.tagName === "TH" &&
-              headerCell.closest(".study-table")
-            ) {
-              const text = headerCell.textContent.replace(/\u200B/g, "").trim();
-
-              if (!text || text.length <= 1) {
+          if (activeExit && input.contains(activeExit)) {
+            if (event.key === "Enter") {
+              if (isEmptyStudyTableExitLine(activeExit)) {
                 event.preventDefault();
-                removeStudyTableColumn(headerCell);
                 return;
               }
+
+              activeExit.classList.remove("study-table-exit");
+              activeExit.removeAttribute("contenteditable");
+              return;
             }
-          }*/
+
+            if (
+              (event.key === "Backspace" || event.key === "Delete") &&
+              isEmptyStudyTableExitLine(activeExit)
+            ) {
+              event.preventDefault();
+
+              const table =
+                activeExit.previousElementSibling?.querySelector?.(
+                  ".study-table",
+                );
+
+              activeExit.remove();
+
+              if (table) {
+                const lastCell = table.querySelector(
+                  "tbody tr:last-child td:last-child",
+                );
+                if (lastCell) focusStudyCell(lastCell);
+              } else {
+                input.focus();
+              }
+
+              pushStudyHistorySnapshot(true);
+              queueStudyAutoSave();
+              queueStudyUiRefresh();
+              return;
+            }
+          }
 
           if (event.key === "Tab") {
             event.preventDefault();
@@ -13489,6 +13776,62 @@ Quality Rules:
         exit.innerHTML = "<br>";
         return exit;
       }
+      function isEmptyStudyTableExitLine(exit) {
+        return !!(
+          exit?.classList?.contains("study-table-exit") &&
+          !String(exit.textContent || "")
+            .replace(/\u200B/g, "")
+            .trim()
+        );
+      }
+
+      function cleanupStudyTableExitLines(input) {
+        if (!input) return;
+
+        input.querySelectorAll(".study-table-exit").forEach((exit) => {
+          const prev = exit.previousElementSibling;
+
+          if (!prev?.classList?.contains("study-table-wrap")) {
+            exit.remove();
+            return;
+          }
+
+          let next = exit.nextElementSibling;
+          while (next?.classList?.contains("study-table-exit")) {
+            const duplicate = next;
+            next = next.nextElementSibling;
+            duplicate.remove();
+          }
+
+          if (isEmptyStudyTableExitLine(exit)) {
+            exit.innerHTML = "<br>";
+          }
+        });
+      }
+
+      function getActiveStudyTableWrap() {
+        const selection = window.getSelection();
+        const node = selection?.anchorNode;
+        const element =
+          node?.nodeType === Node.TEXT_NODE ? node.parentElement : node;
+
+        return element?.closest?.(".study-table-wrap") || null;
+      }
+
+      function cleanupEmptyStudyTableWraps(input) {
+        if (!input) return;
+
+        input.querySelectorAll(".study-table-wrap").forEach((wrap) => {
+          if (wrap.querySelector("table.study-table")) return;
+
+          const next = wrap.nextElementSibling;
+          if (next?.classList?.contains("study-table-exit")) {
+            next.remove();
+          }
+
+          wrap.remove();
+        });
+      }
 
       function placeCaretAtEndOfStudyBlock(block) {
         if (!block) return;
@@ -13548,9 +13891,27 @@ Quality Rules:
 
         const tableHtml = `
     <div class="study-table-wrap">
-  <div class="study-table-mini-controls top">
-    <button type="button" class="study-table-mini-btn" onclick="addStudyTableColumnFromButton(this)">＋ Col</button>
-  </div>
+  <div class="study-table-mini-controls top" contenteditable="false">
+  <button
+    type="button"
+    class="study-table-mini-btn"
+    title="Add column"
+    aria-label="Add column"
+    onclick="addStudyTableColumnFromButton(this)"
+  >
+    +C
+  </button>
+
+  <button
+    type="button"
+    class="study-table-mini-btn danger"
+    title="Delete column"
+    aria-label="Delete column"
+    onclick="deleteStudyTableColumnFromButton(this)"
+  >
+    -C
+  </button>
+</div>
   <table class="study-table">
         <thead>
           <tr>${headerCells}</tr>
@@ -13559,9 +13920,27 @@ Quality Rules:
           ${bodyRows}
         </tbody>
       </table>
-  <div class="study-table-mini-controls bottom">
-    <button type="button" class="study-table-mini-btn" onclick="addStudyTableRowFromButton(this)">＋ Row</button>
-  </div>
+  <div class="study-table-mini-controls bottom" contenteditable="false">
+  <button
+    type="button"
+    class="study-table-mini-btn"
+    title="Add row"
+    aria-label="Add row"
+    onclick="addStudyTableRowFromButton(this)"
+  >
+    +R
+  </button>
+
+  <button
+    type="button"
+    class="study-table-mini-btn danger"
+    title="Delete row"
+    aria-label="Delete row"
+    onclick="deleteStudyTableRowFromButton(this)"
+  >
+    -R
+  </button>
+</div>
 </div>
 <p class="study-table-exit" contenteditable="true"><br></p>
   `;
@@ -13596,21 +13975,63 @@ Quality Rules:
             wrap.appendChild(table);
           }
 
-          if (!wrap.querySelector(".study-table-mini-controls.top")) {
-            const topControls = document.createElement("div");
+          let topControls = wrap.querySelector(
+            ".study-table-mini-controls.top",
+          );
+
+          if (!topControls) {
+            topControls = document.createElement("div");
             topControls.className = "study-table-mini-controls top";
-            topControls.contentEditable = "false";
-            topControls.innerHTML = `<button type="button" class="study-table-mini-btn" onclick="addStudyTableColumnFromButton(this)">＋ Col</button>`;
             wrap.insertBefore(topControls, table);
           }
 
-          if (!wrap.querySelector(".study-table-mini-controls.bottom")) {
-            const bottomControls = document.createElement("div");
+          topControls.contentEditable = "false";
+          topControls.innerHTML = `
+      <button
+        type="button"
+        class="study-table-mini-btn"
+        title="Add column"
+        aria-label="Add column"
+        onclick="addStudyTableColumnFromButton(this)"
+      >+C</button>
+
+      <button
+        type="button"
+        class="study-table-mini-btn danger"
+        title="Delete column"
+        aria-label="Delete column"
+        onclick="deleteStudyTableColumnFromButton(this)"
+      >-C</button>
+    `;
+
+          let bottomControls = wrap.querySelector(
+            ".study-table-mini-controls.bottom",
+          );
+
+          if (!bottomControls) {
+            bottomControls = document.createElement("div");
             bottomControls.className = "study-table-mini-controls bottom";
-            bottomControls.contentEditable = "false";
-            bottomControls.innerHTML = `<button type="button" class="study-table-mini-btn" onclick="addStudyTableRowFromButton(this)">＋ Row</button>`;
             wrap.appendChild(bottomControls);
           }
+
+          bottomControls.contentEditable = "false";
+          bottomControls.innerHTML = `
+      <button
+        type="button"
+        class="study-table-mini-btn"
+        title="Add row"
+        aria-label="Add row"
+        onclick="addStudyTableRowFromButton(this)"
+      >+R</button>
+
+      <button
+        type="button"
+        class="study-table-mini-btn danger"
+        title="Delete row"
+        aria-label="Delete row"
+        onclick="deleteStudyTableRowFromButton(this)"
+      >-R</button>
+    `;
 
           wrap
             .querySelectorAll(".study-table-mini-controls")
@@ -13635,6 +14056,8 @@ Quality Rules:
             if (!exit.innerHTML.trim()) exit.innerHTML = "<br>";
           }
         });
+        cleanupEmptyStudyTableWraps(input);
+        cleanupStudyTableExitLines(input);
       }
 
       function setupStudyTableColumnWidths(table) {
@@ -13718,6 +14141,32 @@ Quality Rules:
           : node?.closest?.("td, th");
       }
 
+      function clearActiveStudyTableCells(input) {
+        const root = input || document.getElementById("studyReaderInput");
+        root
+          ?.querySelectorAll(".study-table-cell-active")
+          .forEach((cell) => cell.classList.remove("study-table-cell-active"));
+      }
+
+      function refreshActiveStudyTableCell() {
+        const input = document.getElementById("studyReaderInput");
+        if (!input) return;
+
+        clearActiveStudyTableCells(input);
+
+        if (!isSelectionInsideStudyReader()) return;
+
+        const activeCell = getActiveStudyTableCell();
+        if (!activeCell || !input.contains(activeCell)) return;
+
+        activeCell.classList.add("study-table-cell-active");
+
+        scrollStudyTableCellIntoView(activeCell);
+
+        const table = activeCell.closest("table.study-table");
+        if (table) lastActiveStudyTable = table;
+      }
+
       function addStudyTableRow() {
         const input = document.getElementById("studyReaderInput");
         const activeCell = getActiveStudyTableCell();
@@ -13791,9 +14240,30 @@ Quality Rules:
         cell.setAttribute("tabindex", "-1");
         cell.focus({ preventScroll: true });
 
+        scrollStudyTableCellIntoView(cell);
+        requestAnimationFrame(() => scrollStudyTableCellIntoView(cell));
+        setTimeout(() => scrollStudyTableCellIntoView(cell), 40);
+
         selectStudyCellContents(cell);
         requestAnimationFrame(() => selectStudyCellContents(cell));
         setTimeout(() => selectStudyCellContents(cell), 40);
+      }
+
+      function scrollStudyTableCellIntoView(cell) {
+        const wrap = cell?.closest?.(".study-table-wrap");
+        if (!wrap || !cell) return;
+
+        const wrapRect = wrap.getBoundingClientRect();
+        const cellRect = cell.getBoundingClientRect();
+
+        const leftGap = cellRect.left - wrapRect.left;
+        const rightGap = cellRect.right - wrapRect.right;
+
+        if (leftGap < 18) {
+          wrap.scrollLeft += leftGap - 28;
+        } else if (rightGap > -18) {
+          wrap.scrollLeft += rightGap + 28;
+        }
       }
 
       function selectStudyCellContents(cell) {
@@ -13872,6 +14342,80 @@ Quality Rules:
         if (!addColumnToSpecificStudyTable(table)) {
           addStudyTableColumn();
         }
+      }
+
+      function getColumnIndexFromActiveCell(table) {
+        const activeCell = getActiveStudyTableCell?.();
+
+        if (activeCell && table.contains(activeCell)) {
+          return Array.from(activeCell.parentElement.children).indexOf(
+            activeCell,
+          );
+        }
+
+        return Math.max(0, table.querySelector("tr")?.children.length - 1 || 0);
+      }
+
+      function deleteStudyTableColumnFromButton(button) {
+        const wrap = button.closest(".study-table-wrap");
+        const table = wrap?.querySelector("table.study-table");
+        if (!table) return;
+
+        const firstRow = table.querySelector("tr");
+        const columnCount = firstRow?.children.length || 0;
+
+        if (columnCount <= 1) {
+          alert("A table needs at least one column.");
+          return;
+        }
+
+        const columnIndex = getColumnIndexFromActiveCell(table);
+
+        table.querySelectorAll("tr").forEach((row) => {
+          row.children[columnIndex]?.remove();
+        });
+
+        const colgroup = table.querySelector("colgroup");
+        colgroup?.children[columnIndex]?.remove();
+
+        setupStudyTableColumnWidths(table);
+
+        pushStudyHistorySnapshot(true);
+        queueStudyAutoSave();
+        queueStudyUiRefresh();
+      }
+
+      function deleteStudyTableRowFromButton(button) {
+        const wrap = button.closest(".study-table-wrap");
+        const table = wrap?.querySelector("table.study-table");
+        if (!table) return;
+
+        const tbody = table.querySelector("tbody");
+        if (!tbody) return;
+
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+
+        if (rows.length <= 1) {
+          alert("A table needs at least one body row.");
+          return;
+        }
+
+        const activeCell = getActiveStudyTableCell?.();
+        const activeRow =
+          activeCell && table.contains(activeCell)
+            ? activeCell.closest("tr")
+            : null;
+
+        const rowToDelete =
+          activeRow && tbody.contains(activeRow)
+            ? activeRow
+            : rows[rows.length - 1];
+
+        rowToDelete.remove();
+
+        pushStudyHistorySnapshot(true);
+        queueStudyAutoSave();
+        queueStudyUiRefresh();
       }
 
       function continueStudyOrderedListIfNeeded() {
@@ -14234,6 +14778,8 @@ Quality Rules:
       }
 
       function refreshStudyFormatToolbarState() {
+        refreshActiveStudyTableCell();
+
         const boldBtn = document.getElementById("studyBoldBtn");
         const italicBtn = document.getElementById("studyItalicBtn");
         const underlineBtn = document.getElementById("studyUnderlineBtn");
