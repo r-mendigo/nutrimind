@@ -8638,6 +8638,48 @@
       .study-table-mini-btn.danger {
         color: rgba(185, 77, 93, 0.86) !important;
       }
+      /* Crop unused table-shell space now that the wrapper is non-editable */
+      .study-table-wrap {
+        padding: 0 10px 8px !important;
+      }
+
+      .study-table-mini-controls.top {
+        position: sticky;
+        top: 8px;
+        float: right;
+        margin-top: 8px !important;
+        margin-bottom: -44px !important;
+        transform: translateY(4px);
+      }
+
+      .study-table-wrap .study-table {
+        margin-top: 0 !important;
+      }
+
+      .study-table thead th {
+        height: 44px;
+        min-height: 44px;
+        padding-top: 8px !important;
+        padding-bottom: 8px !important;
+        vertical-align: middle !important;
+      }
+      /* Crop unused lower table-shell space while keeping row controls accessible */
+      .study-table-wrap {
+        padding-bottom: 4px !important;
+      }
+
+      .study-table-mini-controls.bottom {
+        position: sticky;
+        bottom: 8px;
+        float: right;
+        margin-top: -42px !important;
+        margin-bottom: 6px !important;
+        transform: translateY(0);
+      }
+
+      .study-table-wrap .study-table {
+        margin-bottom: 0 !important;
+      }
     </style>
   </head>
   <body>
@@ -13832,6 +13874,37 @@ Quality Rules:
           wrap.remove();
         });
       }
+      function isEmptyStudyReaderBlock(block) {
+        return !!(
+          block &&
+          ["P", "DIV"].includes(block.tagName) &&
+          !block.classList?.contains("study-table-wrap") &&
+          !block.classList?.contains("study-table-exit") &&
+          !block.querySelector?.("img, table, .study-table-wrap") &&
+          !String(block.textContent || "")
+            .replace(/\u200B/g, "")
+            .replace(/\u00A0/g, "")
+            .trim()
+        );
+      }
+
+      function cleanupEmptyBlocksAroundStudyTables(input) {
+        if (!input) return;
+
+        input.querySelectorAll(".study-table-wrap").forEach((wrap) => {
+          let next = wrap.nextElementSibling;
+
+          while (
+            next &&
+            isEmptyStudyReaderBlock(next) &&
+            !next.classList?.contains("study-table-exit")
+          ) {
+            const emptyBlock = next;
+            next = next.nextElementSibling;
+            emptyBlock.remove();
+          }
+        });
+      }
 
       function placeCaretAtEndOfStudyBlock(block) {
         if (!block) return;
@@ -13975,6 +14048,8 @@ Quality Rules:
             wrap.appendChild(table);
           }
 
+          wrap.contentEditable = "false";
+          table.contentEditable = "false";
           let topControls = wrap.querySelector(
             ".study-table-mini-controls.top",
           );
@@ -14045,6 +14120,7 @@ Quality Rules:
           });
 
           setupStudyTableColumnWidths(table);
+          cleanupStudyTableWrapShell(wrap, table);
 
           let exit = wrap.nextElementSibling;
 
@@ -14057,7 +14133,30 @@ Quality Rules:
           }
         });
         cleanupEmptyStudyTableWraps(input);
+        cleanupEmptyBlocksAroundStudyTables(input);
         cleanupStudyTableExitLines(input);
+      }
+
+      function cleanupStudyTableWrapShell(wrap, table) {
+        if (!wrap || !table) return;
+
+        const allowed = new Set([
+          table,
+          ...wrap.querySelectorAll(":scope > .study-table-mini-controls"),
+        ]);
+
+        Array.from(wrap.childNodes).forEach((node) => {
+          if (allowed.has(node)) return;
+
+          if (node.nodeType === Node.TEXT_NODE) {
+            if (!node.textContent.trim()) node.remove();
+            return;
+          }
+
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            node.remove();
+          }
+        });
       }
 
       function setupStudyTableColumnWidths(table) {
