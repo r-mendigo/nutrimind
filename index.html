@@ -8680,6 +8680,37 @@
       .study-table-wrap .study-table {
         margin-bottom: 0 !important;
       }
+      /* Wider Study Reader canvas */
+      body.study-zen-mode .study-reader-panel {
+        width: min(1280px, calc(100vw - 44px)) !important;
+      }
+
+      body.study-zen-mode .content {
+        padding-left: 18px !important;
+        padding-right: 18px !important;
+      }
+
+      .chat-layout.study-mode {
+        grid-template-columns: minmax(0, 0.56fr) minmax(760px, 1.7fr) !important;
+      }
+
+      .app.sidebar-collapsed .chat-layout.study-mode {
+        grid-template-columns: minmax(0, 0.5fr) minmax(860px, 1.85fr) !important;
+      }
+      /* Make line spacing dropdown control real editor blocks */
+      .study-reader-input {
+        --study-line-spacing: 1.45;
+        line-height: var(--study-line-spacing) !important;
+      }
+
+      .study-reader-input > p,
+      .study-reader-input
+        > div:not(.study-table-wrap):not(.study-table-mini-controls),
+      .study-reader-input li,
+      .study-reader-input .study-flat-list-line,
+      .study-reader-input .study-flat-list-text {
+        line-height: var(--study-line-spacing) !important;
+      }
     </style>
   </head>
   <body>
@@ -13717,7 +13748,8 @@ Quality Rules:
         const input = document.getElementById("studyReaderInput");
         if (!input || !value) return;
 
-        input.style.lineHeight = value;
+        input.style.setProperty("--study-line-spacing", value);
+        input.style.setProperty("line-height", value, "important");
 
         localStorage.setItem("nutrimind_study_line_spacing", value);
 
@@ -15744,7 +15776,8 @@ Quality Rules:
           localStorage.getItem("nutrimind_study_line_spacing") || "1.15";
 
         if (input) {
-          input.style.lineHeight = savedLineSpacing;
+          input.style.setProperty("--study-line-spacing", savedLineSpacing);
+          input.style.setProperty("line-height", savedLineSpacing, "important");
         }
 
         if (spacingSelect) {
